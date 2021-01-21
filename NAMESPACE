@@ -3,6 +3,8 @@
 export(get_rainfall)
 import(dplyr)
 import(ncdf4)
+import(ncdf4.helpers)
+import(raster)
 import(sf)
 import(stringr)
 importFrom(assertthat,assert_that)

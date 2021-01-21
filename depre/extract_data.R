@@ -11,16 +11,19 @@
 #'
 #'
 #' @param data_path Path to the gridded rainall data
-#' @param sptial.obj An object of type sf (either a point (or MULTIPOINT) or a polygon (or MULTIPOLYGON))
+#' @param sptial.obj An object of type \code{sf}. Either a point (or MULTIPOINT) or a polygon (or MULTIPOLYGON))
 #' @param fun A function to aggregate the data in case a polygon is passed as \code{spatial.obj}
 #' @param dts Either a single object of type \code{Date} or a vector of at least two dates
 #' @param seqq \code{logical} to create a sequence of days between two dates passed in \code{dts}
 #' @param days_back \code{integer vector} of days of antecedent raindall you want to extract
 #'
 #' @return either a dataframe (for one point and date) or a list of (lists) for multiple polygons and dates
-#' @examples 
-#' s_p = "path_to_shape"; s_p = st_read(s_p)
-#' get
+#' @examples
+#' \dontrun{
+#' path = "...."
+#' shape = st_read(path)
+#' path_nc = "...
+#' }
 
 #' @export
 get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS/",
@@ -44,7 +47,7 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
   # verify its an object of type sf
   assert_that(class(spatial.obj)[[1]] == "sf", msg="The spatial data is not of class sf")
   # assert that dates are actually dates
-  assert_that(is.date(dts), msg = "dts must be an object of type date")
+  assert_that(assertthat::is.date(dts), msg = "dts must be an object of type date")
   # integer range of dates
   assert_that(is.integer(days_back), msg = "The date range must be of type integer")
 
@@ -86,8 +89,14 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
     dts = dts
 
     # output will be only one dataframe
-    out = data.frame()
+    out = vector("list", length = length(dts))
 
+  }
+
+  # name the output
+  for (i in seq_along(out)) {
+      n = as.character(dts[[i]]) %>% str_replace_all(., "-", "")
+      names(out)[[i]] = n
   }
 
 
@@ -96,15 +105,15 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
   ##  WORK WITH NETCDF  --
   ##----------------------
   # this assumes that the structure of the rainfall data will stay the same
-
   # put the dates into a list as iterating over a vector loses class information..
   dts = as.list(dts)
 
   # for each day create a dataframe
   for (day in dts) {
 
-    # where to put the output data
-    out_data = data.frame()
+    # # where to put the output data
+    # # length of the list is the size of the spatial object
+    # out_data = vector("list", length=nrow(spatial.obj))
 
     # get the year the month and the day
     y = format(day, "%Y")
@@ -129,10 +138,15 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
     # read the precipitation values
     precip_nc = ncvar_get(ncin, nc_var)
 
-    # read the projection info
+    # read the projection info --> should be done outside the loop as it is always the same
     proj = nc.get.proj4.string(ncin, nc_var)
+
+    # read an exmaple raster and create the empty grid --> do outside the loop
+    grd = raster(path_year_month)[[1]]
+    grd[] = NA
+
     # if not equal to crs of sf object stop/reproject here!
-    crs_nc = suppressWarnings(raster(path_year_month)[[1]] %>% crs() %>% attributes() %>% .[["projargs"]])
+    crs_nc = suppressWarnings(grd %>% crs() %>% attributes() %>% .[["projargs"]])
     crs_shape = suppressWarnings(crs(shape) %>% crs() %>% attributes() %>% .[["projargs"]])
 
     # if not equal, reproject the shape...
@@ -142,9 +156,10 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
     }
 
     # extract all the values
-    extracted_vals = extracted_vals(ncin)
-
+    rasters = get_rasters(precip_nc, proj, day, days_back)
 
   }
+
+  return(out)
 
 }

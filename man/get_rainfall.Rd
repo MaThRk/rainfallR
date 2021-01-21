@@ -9,8 +9,9 @@ get_rainfall(
   spatial.obj = NULL,
   fun = NULL,
   dts = NULL,
+  nc_var = "precipitation",
   seqq = TRUE,
-  days_back = 1:2
+  days_back = 1:1
 )
 }
 \arguments{
@@ -24,7 +25,7 @@ get_rainfall(
 
 \item{days_back}{\code{integer vector} of days of antecedent raindall you want to extract}
 
-\item{sptial.obj}{An object of type sf (either a point (or MULTIPOINT) or a polygon (or MULTIPOLYGON))}
+\item{sptial.obj}{An object of type \code{sf}. Either a point (or MULTIPOINT) or a polygon (or MULTIPOLYGON))}
 }
 \value{
 either a dataframe (for one point and date) or a list of (lists) for multiple polygons and dates

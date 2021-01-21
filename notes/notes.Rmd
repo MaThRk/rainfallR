@@ -1,0 +1,42 @@
+---
+title: "Extract Rainfall data from NetCDF gridded rainfall data"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+
+---
+
+
+# What is the aim?
+
+- for a given date, extract rainfall data for point locations or polygons
+
+- The program should be able to do this for multiple days
+  
+- the programmm will return a named list
+
+- the names of the elements in the list are the dates we want to extract, e.g.
+
+- and the elements in the list are spatial dataframes (with the number of rows beeing the number of points or polygons)
+
+```{r resultexample, echo=F}
+# this is the case for a single point or a single polygon
+# One dataframe per day
+result = list("20190101" = data.frame(date=NA, t_1 = NA, t_2=NA), "20190102" = data.frame(date=NA, t_1 = NA, t_2=NA), "20190103"=data.frame(date=NA, t_1 = NA, t_2=NA))
+print(result)
+```
+
+# points
+
+# polygons
+
+- when extracting the data for polygons an aggregation function needs to be supplied
+
+
+## Multiple object (MULTIPOINT OR MULTIPOLYGON)
+
+- nothing changes for the points. Each row in the sf-object just gets the values
+
+- Same for the polygons. Just as above a function needs to be supplied in order to aggregate the polygons
