@@ -58,8 +58,16 @@ get_nc_paths = function(data_path, day, days_back){
   # if the current day has a different month than the last day back we need two paths
   if(!m == m_b){
     warning("Your first day of extraction is in another month. Pray and hope this function works")
-    return(c(path_day, last_month_path))
+    paths = list()
+    this_month = paste0(y,m)
+    last_month  = paste0(y_b, m_b)
+    paths[[this_month]] = path_day
+    paths[[last_month]] = last_month_path
+    return(paths)
   }else{
-    return(path_day)
+    paths = list()
+    this_month = paste0(y,m)
+    paths[[this_month]] = path_day
+    return(paths)
   }
 }

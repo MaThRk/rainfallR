@@ -25,7 +25,7 @@
 #' path_nc = "...
 #' }
 
-
+# data_path="\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS/"
 # path = "\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_1.shp"
 # spatial.obj = st_read(path)
 # dts = c(as.Date("2016-01-12"), as.Date("2016-01-14"))
@@ -82,7 +82,7 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
 
   # if not equal to crs of sf object stop/reproject here!
   crs_nc = suppressWarnings(grd %>% crs() %>% attributes() %>% .[["projargs"]])
-  crs_shape = suppressWarnings(crs(shape) %>% crs() %>% attributes() %>% .[["projargs"]])
+  crs_shape = suppressWarnings(crs(spatial.obj) %>% crs() %>% attributes() %>% .[["projargs"]])
 
   # if not equal, reproject the shape...
   if(!crs_nc == crs_shape){
@@ -116,38 +116,27 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
       dates_nc = get_dates_ncdf(ncin, return_date_object=T)
 
       # read the precipitation values
-      precip_nc = ncvar_get(ncin, nc_var)
+      # precip_nc = ncvar_get(ncin, nc_var)
+      #
+      # # read the projection info --> should be done outside the loop as it is always the same
+      # proj = nc.get.proj4.string(ncin, nc_var)
+      #
+      # # extract all the values
+      # rasters = get_rasters(precip_nc, grd, proj, d, days_back)
 
-      # read the projection info --> should be done outside the loop as it is always the same
-      proj = nc.get.proj4.string(ncin, nc_var)
+      raster_list = get_raster_list_one_month(d, days_back, dates_nc, paths_to_data)
 
-      # extract all the values
-      rasters = get_rasters(precip_nc, grd, proj, day, days_back)
-
-
-    }else{
+    } else{
       # we need a loop in order to extract them
       # if the back days reach into the last month..
       # for each month
-      for (m in seq_along(paths_to_data)) {
-        ncin = ncdf4::nc_open(paths_to_data[[m]])
-
-        dates_nc = get_dates_ncdf(ncin, return_date_object = T)
-
-        precip_nc = ncvar_get(ncin, nc_var)
-
-        # read the projection info --> should be done outside the loop as it is always the same
-        proj = nc.get.proj4.string(ncin, nc_var)
-
-
-
-
-      }
-
+    raster_list = get_raster_list_n_month(paths_to_data, day, days_back)
     }
 
-  }
+    # ectract the spatial data
 
+
+  }
   return(out)
 
 }
