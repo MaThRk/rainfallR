@@ -18,8 +18,10 @@ get_raster_list_n_month = function(paths_to_data, day, days_back){
 
     # month of the date to extract
     m = format(dates_to_extract[[i]], "%m")
-    y = format(dates_to_extract[[i]], "%y")
+    y = format(dates_to_extract[[i]], "%Y")
     d = format(dates_to_extract[[i]], "%d")
+
+    name = paste0(y,m,d)
 
     # check based on the month
     right_path = paths_to_data[grep(m, names(paths_to_data))]
@@ -56,6 +58,8 @@ get_raster_list_n_month = function(paths_to_data, day, days_back){
 
     # extract the date
     ras = raster_brick[[idx]]
+    names(ras) = name
+
 
     # put into the list
     raster_list[[i]] = ras

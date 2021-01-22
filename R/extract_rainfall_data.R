@@ -27,7 +27,8 @@
 
 # data_path="\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS/"
 # path = "\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_1.shp"
-# spatial.obj = st_read(path)
+# path2 = "\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_5.shp"
+# spatial.obj = st_read(path2)
 # dts = c(as.Date("2016-01-12"), as.Date("2016-01-14"))
 
 #' @export
@@ -92,7 +93,11 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
 
 
   # for each day create a dataframe
+  counter = 1
   for (day in dts) {
+
+    # create counter
+
 
     # # where to put the output data
     # # length of the list is the size of the spatial object
@@ -105,6 +110,7 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
 
     # create the path to the data for one month
     paths_to_data = get_nc_paths(data_path, day, days_back)
+    message("Accessing these NetCDF-files: ", paths_to_data)
 
     # if all the data we want comes from the same month
     if(length(paths_to_data == 1)){
@@ -115,28 +121,43 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
       # get a character string of the dates
       dates_nc = get_dates_ncdf(ncin, return_date_object=T)
 
-      # read the precipitation values
-      # precip_nc = ncvar_get(ncin, nc_var)
-      #
-      # # read the projection info --> should be done outside the loop as it is always the same
-      # proj = nc.get.proj4.string(ncin, nc_var)
-      #
-      # # extract all the values
-      # rasters = get_rasters(precip_nc, grd, proj, d, days_back)
-
-      raster_list = get_raster_list_one_month(d, days_back, dates_nc, paths_to_data)
+      raster_list = get_raster_list_one_month(day, days_back, dates_nc, paths_to_data)
 
     } else{
       # we need a loop in order to extract them
       # if the back days reach into the last month..
       # for each month
-    raster_list = get_raster_list_n_month(paths_to_data, day, days_back)
+      raster_list = get_raster_list_n_month(paths_to_data, day, days_back)
+
     }
 
     # ectract the spatial data
+    if(is.null(fun)) {
+      day_data_frame = lapply(raster_list, function(x) {
+        raster::extract(x, spatial.obj, sp = T) %>% st_as_sf()
+      })
+    } else{
+      message("using polygons and the function: ", fun)
+      day_data_frame = lapply(raster_list, function(x) {
+        raster::extract(x, spatial.obj, fun = mean, sp = T) %>% st_as_sf()
+      })
+    }
 
+
+    # make in one dataframe where each column is one date
+    b = bind_cols(day_data_frame)
+    geom = b %>% dplyr::select(matches("geom")) %>% pull(1)
+    b = b %>% dplyr::select(matches("^x")) %>%
+      rename_all(funs(stringr::str_replace_all(., pattern = "X", "")))
+    b[["geometry"]] = geom
+    b = st_as_sf(b)
+
+    # assign it to out
+    out[[counter]] = b
+    counter = counter + 1
 
   }
+
   return(out)
 
 }
