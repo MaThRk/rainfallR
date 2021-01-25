@@ -107,7 +107,7 @@ lapply(res, head)
 ```
 
 
-```{r}
+```{r, warning=F}
 res_cumulative = rainfallR::get_cumulative_rainfall(res)
 head(res_cumulative[[1]])
 ```
@@ -126,7 +126,7 @@ ggplot(res_cumulative[[2]]) +
 
 
 
-```{r leaflet, warning=F}
+```{r leaflet, warning=F, message=F}
 poly_path = "\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_5.shp"
 
 # read it with sf
