@@ -18,3 +18,7 @@ Imports:
     ncdf4,
     ncdf4.helpers,
     assertthat
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

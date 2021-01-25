@@ -16,20 +16,12 @@
 #' @param dts Either a single object of type \code{Date} or a vector of at least two dates
 #' @param seqq \code{logical} to create a sequence of days between two dates passed in \code{dts}
 #' @param days_back \code{integer vector} of days of antecedent raindall you want to extract
-#'
-#' @return either a dataframe (for one point and date) or a list of (lists) for multiple polygons and dates
-#' @examples
-#' \dontrun{
-#' path = ""
-#' shape = st_read(path)
-#' path_nc = "...
-#' }
 
 # data_path="\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS/"
 # path = "\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_1.shp"
 # path2 = "\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_5.shp"
 # spatial.obj = st_read(path2)
-# dts = c(as.Date("2016-01-12"), as.Date("2016-01-14"))
+# dts = c(as.Date("2016-01-12"), as.Date("2016-01-16"))
 
 #' @export
 get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS/",
@@ -46,6 +38,12 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
     gtype="poly"
   }  else{
     gtype="point"
+  }
+
+  # if polygon and no function to aggregate the data throw error
+  if(gtype == "poly" & is.null(fun)){
+    warning("You can't use polygons and not provide a function to aggreate the data")
+    print("Setting the aggreation automatically to: 'mean'")
   }
 
   # for creating a sequence between two dates
@@ -133,13 +131,14 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
 
     # ectract the spatial data
     if(is.null(fun)) {
+      print("Input are points, thus not using any function")
       day_data_frame = lapply(raster_list, function(x) {
         raster::extract(x, spatial.obj, sp = T) %>% st_as_sf()
       })
     } else{
-      message("using polygons and the function: ", fun)
+      message("using polygons and the function: ", fun@generic[[1]])
       day_data_frame = lapply(raster_list, function(x) {
-        raster::extract(x, spatial.obj, fun = mean, sp = T) %>% st_as_sf()
+        raster::extract(x, spatial.obj, fun = fun, sp = T) %>% st_as_sf()
       })
     }
 

@@ -1,7 +1,5 @@
 
-
-#'
-#'
+#' @export
 get_raster_list_one_month = function(day, days_back, dates_nc, paths_to_data) {
   # last day back
   min_day = (day - days_back)

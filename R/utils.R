@@ -2,15 +2,14 @@
 #'
 #' @import stringr
 #' @importFrom chron chron
-#' @impo ncdf4
+#' @import ncdf4
 
 
-
-#' get the dates from an nc object
 #'
 #' @param ncin An object of class \code{ncdf4}
 #' @param return_date_object \code{logical} If true returns a vector of
 #' \code{date}-object, else vector of characterstring
+#'
 get_dates_ncdf = function(ncin, return_date_object=TRUE){
 
   # get the DATE vars
@@ -38,7 +37,8 @@ get_dates_ncdf = function(ncin, return_date_object=TRUE){
 
 }
 
-
+#' get the paths to the nc file
+#' @export
 get_nc_paths = function(data_path, day, days_back){
 
   # day we want to extract

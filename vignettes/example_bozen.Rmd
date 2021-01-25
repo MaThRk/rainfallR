@@ -1,0 +1,94 @@
+---
+title: "Extracting data for bozen"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{example_bozen}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+- read the necessary libraries
+
+
+```{r setup, echo=T, message=FALSE, warning=FALSE}
+library(rainfallR)
+library(here)
+library(sf)
+library(dplyr)
+library(tmap)
+library(tidyverse)
+```
+
+- first we need to set some paths
+
+```{r}
+# the path to the directory of the NetCDFs which are stored for each month
+path_ncdf = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS/"
+
+# then we need a path to a spatial object (shape, geopackage...)
+path_spatial = here(... = "../../../Desktop/bolzano.gpkg")
+spatial.obj = read_sf(path_spatial)
+head(spatial.obj)
+```
+
+- check to see if we are in the right location
+
+```{r, echo=F}
+data(World)
+tmap_mode("view")
+tm_shape(spatial.obj) +
+tm_dots()
+```
+
+
+- set some more options
+
+```{r, echo=T}
+dts = c(as.Date("2016-01-12"), as.Date("2016-01-14"))
+seqq = T
+days_back = 4
+```
+
+- and get the data
+
+```{r getdata, echo=T, warning=F, message=F}
+res = get_rainfall(data_path = path_ncdf,
+                   spatial.obj = spatial.obj,
+                   dts = dts,
+                   seqq = seqq, 
+                   days_back = days_back)
+
+lapply(res, head)
+```
+
+```{r plot, echo=F}
+# get the dates back for the first date
+dates_back = names(res[[1]]) %>% as.Date(., "%Y%m%d") %>% na.omit()
+
+# put it in long format
+geom = res[[1]] %>% select(geometry)
+df_new = res[[1]] %>% 
+  st_drop_geometry() %>% 
+  pivot_longer(cols = everything(), names_to="dates", values_to="precip")
+
+df_new$x = st_coordinates(geom)[[1]]
+df_new$y = st_coordinates(geom)[[2]]
+
+df_sf = st_as_sf(df_new, coords = c("x","y"), crs=32632) %>% 
+  mutate(dates = as.Date(dates, "%Y%m%d"))
+
+ggplot(df_sf) +
+  geom_col(aes(dates, precip)) +
+  labs(x="", 
+       y = "precipitation [mm]",
+       title="Precipitation in Bolzano") +
+  theme_light()
+```
+
