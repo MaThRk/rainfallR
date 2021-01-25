@@ -96,7 +96,7 @@ ggplot(df_sf) +
 ```
 
 
-```{r}
+```{r getdata2, warning=F, message=F}
 res = get_rainfall(data_path = path_ncdf,
                    spatial.obj = spatial.obj,
                    dts = dts,
@@ -126,7 +126,7 @@ ggplot(res_cumulative[[2]]) +
 
 
 
-```{r}
+```{r leaflet, warning=F}
 poly_path = "\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_5.shp"
 
 # read it with sf
