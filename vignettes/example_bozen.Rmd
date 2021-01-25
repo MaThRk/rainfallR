@@ -23,7 +23,10 @@ library(here)
 library(sf)
 library(dplyr)
 library(tmap)
+library(mapview)
 library(tidyverse)
+library(raster)
+library(leaflet)
 ```
 
 - first we need to set some paths
@@ -73,7 +76,7 @@ lapply(res, head)
 dates_back = names(res[[1]]) %>% as.Date(., "%Y%m%d") %>% na.omit()
 
 # put it in long format
-geom = res[[1]] %>% select(geometry)
+geom = res[[1]] %>% dplyr::select(geometry)
 df_new = res[[1]] %>% 
   st_drop_geometry() %>% 
   pivot_longer(cols = everything(), names_to="dates", values_to="precip")
@@ -90,5 +93,77 @@ ggplot(df_sf) +
        y = "precipitation [mm]",
        title="Precipitation in Bolzano") +
   theme_light()
+```
+
+
+```{r}
+res = get_rainfall(data_path = path_ncdf,
+                   spatial.obj = spatial.obj,
+                   dts = dts,
+                   seqq = seqq, 
+                   days_back = days_back)
+
+lapply(res, head)
+```
+
+
+```{r}
+res_cumulative = rainfallR::get_cumulative_rainfall(res)
+head(res_cumulative[[1]])
+```
+
+
+```{r}
+max_date = max(res_cumulative[[2]]$dates)
+
+ggplot(res_cumulative[[2]]) +
+  geom_col(aes(dates, accumulated)) +
+  theme_light() +
+  labs(x = "Date",
+       y = "Rainfall [mm]",
+       title = paste0("Cumulative Rainfall in Bolzano prior to: ", max_date))
+```
+
+
+
+```{r}
+poly_path = "\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_5.shp"
+
+# read it with sf
+spatial.obj = read_sf(poly_path)
+
+# get only one landslide
+spatial.obj = spatial.obj[1,]
+
+# get the path to the nc file
+path_to_nc = rainfallR::get_nc_paths(path_ncdf, day = as.Date("2016-01-12"), days_back = 1)[[1]]
+# get the raster 
+precip_raster_stack = raster::stack(path_to_nc)
+# get the right date
+precip_raster = precip_raster_stack[[12]]
+# # crop to the shape
+# crop = raster::crop(precip_raster, spatial.obj)
+# precip_raster = raster::mask(crop, spatial.obj)
+
+# transform the 
+spatial.obj4326 = st_transform(spatial.obj, 4326)
+# transform the raster
+precip_raster = projectRaster(precip_raster, crs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+
+
+# what have we got?
+pal = colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(precip_raster),
+  na.color = "transparent")
+
+leaflet() %>% 
+  addTiles() %>% 
+  setView(lng = st_coordinates(spatial.obj4326)[,1][[1]],
+          lat = st_coordinates(spatial.obj4326)[,2][[1]],
+          zoom=15) %>% 
+  addPolygons(data = spatial.obj4326, group="shape") %>%
+  addRasterImage(precip_raster, group = "precip", colors=pal) %>% 
+  addLegend(pal=pal, values=values(precip_raster)) %>% 
+  addLayersControl(overlayGroups = c("shape", "precip")) %>% 
+  hideGroup("precip")
 ```
 
