@@ -1,7 +1,7 @@
 #' Extract rainfall data
 #'
 #' @importFrom raster raster extract brick
-#' @importFrom  dplyr select rename_all mutate
+#' @importFrom  dplyr select rename_all mutate bind_cols
 #' @importFrom  ncdf4 nc_open
 #' @import ncdf4.helpers
 #' @importFrom sf st_geometry_type st_transform st_as_sf st_drop_geometry
@@ -77,6 +77,10 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
 
   # example path
   ex_path = paste0(data_path, y, "/", "DAILYPCP_", y, formatC(m, flag = 0, width = 2), ".nc")
+  # if not path exists --> there is no nc file for this path
+  if(!file.exists(ex_path)){
+    stop("No file foud. Maybe you used days that are not available...")
+  }
   # example raster
   grd = raster(ex_path)[[1]]
   grd[] = NA
@@ -146,7 +150,7 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
 
 
     # make in one dataframe where each column is one date
-    b = bind_cols(day_data_frame)
+    b = dplyr::bind_cols(day_data_frame)
     geom = b %>% dplyr::select(matches("geom")) %>% pull(1)
     b = b %>% dplyr::select(matches("^x")) %>%
       dplyr::rename_all(funs(stringr::str_replace_all(., pattern = "X", "")))
