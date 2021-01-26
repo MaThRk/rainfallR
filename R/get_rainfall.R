@@ -1,7 +1,7 @@
 #' Extract rainfall data
 #'
 #' @importFrom raster raster extract brick
-#' @importFrom  dplyr select rename_all mutate bind_cols
+#' @importFrom  dplyr select rename_all mutate bind_cols pull
 #' @importFrom  ncdf4 nc_open
 #' @import ncdf4.helpers
 #' @importFrom sf st_geometry_type st_transform st_as_sf st_drop_geometry
