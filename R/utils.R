@@ -3,13 +3,11 @@
 #' @importFrom  stringr str_replace_all
 #' @importFrom chron chron
 #' @importFrom  ncdf4 ncvar_get ncatt_get
-
-
 #'
 #' @param ncin An object of class \code{ncdf4}
 #' @param return_date_object \code{logical} If true returns a vector of
 #' \code{date}-object, else vector of characterstring
-#'
+#' @export
 get_dates_ncdf = function(ncin, return_date_object=TRUE){
 
   # get the DATE vars
