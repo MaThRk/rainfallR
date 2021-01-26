@@ -46,6 +46,9 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
   }
 
   # for creating a sequence between two dates
+  if(length(dts) == 1){
+    seqq = FALSE
+  }
   if (seqq) {
     dts = seq(dts[[1]], dts[[2]], by = "day")
   }
