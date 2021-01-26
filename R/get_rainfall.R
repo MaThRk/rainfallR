@@ -1,7 +1,7 @@
 #' Extract rainfall data
 #'
 #' @importFrom raster raster extract brick
-#' @importFrom  dplyr select rename_all mutate bind_cols pull
+#' @importFrom  dplyr select rename_with mutate bind_cols pull
 #' @importFrom  ncdf4 nc_open
 #' @import ncdf4.helpers
 #' @importFrom sf st_geometry_type st_transform st_as_sf st_drop_geometry
@@ -154,7 +154,7 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
     b = dplyr::bind_cols(day_data_frame)
     geom = b %>% dplyr::select(matches("geom")) %>% pull(1)
     b = b %>% dplyr::select(matches("^x")) %>%
-      dplyr::rename_all(funs(stringr::str_replace_all(., pattern = "X", "")))
+      dplyr::rename_with(., ~stringr::str_replace_all(., pattern = "X", ""))
     b[["geometry"]] = geom
     b = st_as_sf(b)
 

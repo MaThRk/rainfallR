@@ -1,6 +1,6 @@
 #' Some helper functions
 #'
-#' @importFrom  stringr str_replace
+#' @importFrom  stringr str_replace_all
 #' @importFrom chron chron
 #' @importFrom  ncdf4 ncvar_get ncatt_get
 #'
