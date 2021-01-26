@@ -36,7 +36,7 @@ library(leaflet)
 path_ncdf = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS/"
 
 # then we need a path to a spatial object (shape, geopackage...)
-path_spatial = here(... = "../../../Desktop/bolzano.gpkg")
+path_spatial = bozen # should be included in the package
 spatial.obj = read_sf(path_spatial)
 head(spatial.obj)
 ```

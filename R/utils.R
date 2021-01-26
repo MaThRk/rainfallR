@@ -1,8 +1,8 @@
 #' Some helper functions
 #'
-#' @import stringr
+#' @importFrom  stringr str_replace_all
 #' @importFrom chron chron
-#' @import ncdf4
+#' @importFrom  ncdf4 ncvar_get ncatt_get
 
 
 #'
