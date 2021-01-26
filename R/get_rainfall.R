@@ -144,6 +144,7 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
     } else{
       message("using polygons and the function: ", fun@generic[[1]])
       day_data_frame = lapply(raster_list, function(x) {
+        print(paste0("Extracting data for: ", names(x)))
         raster::extract(x, spatial.obj, fun = fun, sp = T) %>% st_as_sf()
       })
     }

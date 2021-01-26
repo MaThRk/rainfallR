@@ -7,6 +7,7 @@ get_raster_list_one_month = function(day, days_back, dates_nc, paths_to_data) {
   dates_to_extract = seq(min_day, day, by = "day")
 
   # read the brick once
+  message(paste0("Connecting to: "), paths_to_data[[1]])
   raster_brick = brick(paths_to_data[[1]])
 
   # create the output list
