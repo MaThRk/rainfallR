@@ -1,6 +1,6 @@
 
 #' @export
-get_cumulative_rainfall = function(res, cumsum=T){
+make_cumulative_rainfall = function(res, cumsum=T){
 
   # if there are more than one points or polygons
   if(nrow(res[[1]]) == 1){
