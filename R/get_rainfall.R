@@ -1,6 +1,6 @@
 #' Extract rainfall data
 #'
-#' @importFrom raster raster extract brick
+#' @importFrom raster raster extract brick crs
 #' @importFrom  dplyr select rename_with mutate bind_cols pull
 #' @importFrom  ncdf4 nc_open
 #' @import ncdf4.helpers
@@ -139,12 +139,15 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
     if(is.null(fun)) {
       print("Input are points, thus not using any function")
       day_data_frame = lapply(raster_list, function(x) {
+        d = names(x) %>% substr(., start=2, stop=nchar(.)) %>% as.Date(., "%Y%m%d")
+        print(paste0("Extracting data for: ", d))
         raster::extract(x, spatial.obj, sp = T) %>% st_as_sf()
       })
     } else{
-      message("using polygons and the function: ", fun@generic[[1]])
+      # message("using polygons and the function: ", fun@generic[[1]])
       day_data_frame = lapply(raster_list, function(x) {
-        print(paste0("Extracting data for: ", names(x)))
+        d = names(x) %>% substr(., start=2, stop=nchar(.)) %>% as.Date(., "%Y%m%d")
+        print(paste0("Extracting data for: ", d))
         raster::extract(x, spatial.obj, fun = fun, sp = T) %>% st_as_sf()
       })
     }
