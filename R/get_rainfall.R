@@ -100,9 +100,6 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
   counter = 1
   for (day in dts) {
 
-    # create counter
-
-
     # # where to put the output data
     # # length of the list is the size of the spatial object
     # out_data = vector("list", length=nrow(spatial.obj))
