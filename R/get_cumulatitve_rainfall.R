@@ -4,7 +4,7 @@
 #'
 #' @param res an object as retured from `get_rainfall`
 #'
-#' @return a list of `dataframes` for each date with the cumulative amount for each day as column and the dates as another column.
+#' @return a list of `dataframes` for each date with the cumulative amount for each day as **list-column** and each date as single column
 #'
 #' @export
 get_cumulative_rainfall = function(res, cumsum=T){
@@ -58,10 +58,10 @@ get_cumulative_rainfall = function(res, cumsum=T){
       day = day %>% st_drop_geometry()
 
       # get the dates
-      dates = names(day) %>% as.Date("%Y%m%d")
+      dates = grep(names(day), pattern = "\\d{8}", value = T) %>% as.Date("%Y%m%d")
 
       # how many days in total are we observing (days_back + 1)
-      l = dim(day)[[2]]
+      l = dim(day)[[2]] - 1 # minus one for the iffi column
 
       # this is the list that eventually will be the column in the dataframe
       acc_list = vector("list", length = nrow(day))
@@ -70,12 +70,17 @@ get_cumulative_rainfall = function(res, cumsum=T){
       for (row in 1:nrow(day)) {
 
         # for each polygon (row) create a vector of accumulated rainfall
-        acc_vector = vector(length = l)
+        acc_vector = rep(0,l)
 
         # for each col minus the geometry
         for (col in 1:l) {
           precip = day[row,col]
-          acc_vector[[col]] = round(sum(acc_vector) + precip, 2)
+          if(col == 1){
+            acc_vector[[col]] = precip
+          } else{
+            acc_vector[[col]] = acc_vector[[col-1]] + precip
+          }
+
         }
 
         # name the vector

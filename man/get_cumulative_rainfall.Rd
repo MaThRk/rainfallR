@@ -10,7 +10,7 @@ get_cumulative_rainfall(res, cumsum = T)
 \item{res}{an object as retured from `get_rainfall`}
 }
 \value{
-a list of `dataframes` for each date with the cumulative amount for each day as column and the dates as another column.
+a list of `dataframes` for each date with the cumulative amount for each day as **list-column** and each date as single column
 }
 \description{
 Reshape the dataframe and create cumulative count column
