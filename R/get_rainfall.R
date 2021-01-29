@@ -111,10 +111,11 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
 
     # create the path to the data for one month
     paths_to_data = get_nc_paths(data_path, day, days_back)
-    message("Accessing these NetCDF-files: ", paths_to_data)
+    # message("Accessing these NetCDF-files: ", paths_to_data)
 
     # if all the data we want comes from the same month
-    if(length(paths_to_data == 1)){
+    if(length(paths_to_data) == 1){
+      print("Only one month")
 
       # open the file
       ncin = ncdf4::nc_open(paths_to_data[[1]])
@@ -128,7 +129,9 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
       # we need a loop in order to extract them
       # if the back days reach into the last month..
       # for each month
+
       raster_list = get_raster_list_n_month(paths_to_data, day, days_back)
+
 
     }
 
