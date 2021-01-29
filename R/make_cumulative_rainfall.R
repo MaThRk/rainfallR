@@ -13,8 +13,6 @@ make_cumulative_rainfall = function(res, cumsum=T){
   # if there are more than one points or polygons
   if(nrow(res[[1]]) == 1){
 
-    cat("Extracting data for a single geometry")
-
     # the output list
     out = vector("list", length=length(res))
     names(out) = names(res)
@@ -29,7 +27,7 @@ make_cumulative_rainfall = function(res, cumsum=T){
 
       # get the geometry column
       if(iffi){
-        geom = df %>% select(iffi)
+        geom = df %>% dplyr::select(iffi)
       }else{
         geom = st_geometry(df)
       }
@@ -51,7 +49,10 @@ make_cumulative_rainfall = function(res, cumsum=T){
       # calculate the cumulated sum
       df_long = df_long %>%
         mutate(cumsum = cumsum(precip),
-               date = as.Date(date, "%Y%m%d"))
+               date = as.Date(date, "%Y%m%d")) %>%
+
+        # add a column for the days_back (1 = the day we specified)
+        mutate(focus_days = (1:nrow(.)))
 
       out[[i]] = df_long
     }
@@ -74,13 +75,12 @@ make_cumulative_rainfall = function(res, cumsum=T){
       df_long = df_long %>%
         group_by(iffi) %>%
         mutate(cumsum = cumsum(precip),
-               date = as.Date(date, "%Y%m%d"))
+               date = as.Date(date, "%Y%m%d")) %>%
+        mutate(focus_days = (1:nrow(.)))
 
       out[[i]] = df_long
     }
 
   }
-
   return(out)
-
 }

@@ -1,10 +1,14 @@
 
 #' @export
 get_raster_list_one_month = function(day, days_back, dates_nc, paths_to_data) {
+
+
+
   # last day back
   min_day = (day - days_back)
   # the dates to extract in Date format
   dates_to_extract = seq(min_day, day, by = "day")
+
 
   # read the brick once
   message(paste0("Connecting to: "), paths_to_data[[1]])

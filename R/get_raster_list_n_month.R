@@ -15,7 +15,6 @@ get_raster_list_n_month = function(paths_to_data, day, days_back){
   changed = T
   for (i in seq_along(dates_to_extract)) {
 
-
     # month of the date to extract
     m = format(dates_to_extract[[i]], "%m")
     y = format(dates_to_extract[[i]], "%Y")
@@ -51,10 +50,10 @@ get_raster_list_n_month = function(paths_to_data, day, days_back){
         changed = TRUE
       }
     } else{
-      print("Reached last day")
+      message("Reached last day")
     }
 
-    message(paste0("reading the data for date: "), c(y,m,d), i)
+    message(paste0("reading the data for date: "), c(y,m,d))
 
     # extract the date
     ras = raster_brick[[idx]]

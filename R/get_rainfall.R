@@ -100,6 +100,12 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
   counter = 1
   for (day in dts) {
 
+    # print a super informative message
+    n = length(dts)
+    str = paste0(i, "/", n)
+    dashes = paste0(replicate(40, "-"), collapse = "")
+    print(paste("------", str, dashes))
+
     # # where to put the output data
     # # length of the list is the size of the spatial object
     # out_data = vector("list", length=nrow(spatial.obj))
@@ -115,7 +121,7 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
 
     # if all the data we want comes from the same month
     if(length(paths_to_data) == 1){
-      print("Only one month")
+      print("All data from one month")
 
       # open the file
       ncin = ncdf4::nc_open(paths_to_data[[1]])
@@ -126,6 +132,8 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
       raster_list = get_raster_list_one_month(day, days_back, dates_nc, paths_to_data)
 
     } else{
+      print("Data from at least two month")
+
       # we need a loop in order to extract them
       # if the back days reach into the last month..
       # for each month
@@ -137,7 +145,7 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
 
     # ectract the spatial data
     if(is.null(fun)) {
-      print("Input are points, thus not using any function")
+      # print("Input are points, thus not using any function")
       day_data_frame = lapply(raster_list, function(x) {
         d = names(x) %>% substr(., start=2, stop=nchar(.)) %>% as.Date(., "%Y%m%d")
         print(paste0("Extracting data for: ", d))
