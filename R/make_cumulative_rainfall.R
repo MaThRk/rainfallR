@@ -25,18 +25,23 @@ make_cumulative_rainfall = function(res, cumsum=T){
       df = res[[i]]
 
       # get the geometry column
-      geom = df %>% st_geometry()
+      geom = df %>% select(iffi)
 
-      df_long = df %>%
-        st_drop_geometry() %>%
-        pivot_longer(cols = everything(), names_to="dates", values_to="precip") %>%
-        mutate(dates = as.Date(dates, "%Y%m%d")) %>%
-        # get the cumulative count for the days
-        mutate(accumulated = cumsum(precip)) %>%
-        mutate(geom = geom) %>%
-        st_as_sf()
+      # make one df without geometry
+      day = df %>% st_drop_geometry()
 
-      # put back in the output list
+      # put the dates and the precip in one column
+      df_long = day %>% pivot_longer(!iffi, names_to="date", values_to="precip")
+
+      # merge the iffi and the geom back
+      df_long = merge(geom, df_long, by="iffi")
+
+      # calculate the cumulated sum
+      df_long = df_long %>%
+        group_by(iffi) %>%
+        mutate(cumsum = cumsum(precip),
+               date = as.Date(date, "%Y%m%d"))
+
       out[[i]] = df_long
     }
   }else{
@@ -54,13 +59,11 @@ make_cumulative_rainfall = function(res, cumsum=T){
       # match the geom_back
       df_long = merge(df_long, geom, by="iffi")
 
-      # calculate the accumulated precip
-      df_long = df_long
-
       # calculate the cumulative sum
       df_long = df_long %>%
         group_by(iffi) %>%
-        mutate(cumsum = cumsum(precip))
+        mutate(cumsum = cumsum(precip),
+               date = as.Date(date, "%Y%m%d"))
 
       out[[i]] = df_long
     }
