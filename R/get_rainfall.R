@@ -19,11 +19,11 @@
 # data_path="\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS/"
 # path = "\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_1.shp"
 # path2 = "\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_5.shp"
-# spatial.obj = st_read(path2)
+# spatial.obj = st_read(path)
 # dts = c(as.Date("2016-01-12"), as.Date("2016-01-16"))
 
 #' @export
-get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS/",
+get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/",
                         spatial.obj = NULL,
                         fun = NULL,
                         dts = NULL,
