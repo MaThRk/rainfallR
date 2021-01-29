@@ -153,12 +153,23 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
     # make in one dataframe where each column is one date
     b = dplyr::bind_cols(day_data_frame)
     geom = b %>% dplyr::select(matches("geom")) %>% pull(1)
-    iffi_kodex = b %>% dplyr::select(matches("PIFF_ID")) %>% pull(1)
-    b = b %>% dplyr::select(matches("^x")) %>%
-      dplyr::rename_with(., ~stringr::str_replace_all(., pattern = "X", ""))
-    b[["geometry"]] = geom
-    b[["iffi"]] = iffi_kodex
-    b = st_as_sf(b)
+
+    # if we have a spatial object with iffi-kodex
+    if("PIFF_ID" %in% names(spatial.obj)){
+      iffi_kodex = b %>% dplyr::select(matches("PIFF_ID")) %>% pull(1)
+      b = b %>% dplyr::select(matches("^x")) %>%
+        dplyr::rename_with(., ~stringr::str_replace_all(., pattern = "X", ""))
+      b[["geometry"]] = geom
+      b[["iffi"]] = iffi_kodex
+      b = st_as_sf(b)
+
+    }else{
+      b = b %>% dplyr::select(matches("^x")) %>%
+        dplyr::rename_with(., ~stringr::str_replace_all(., pattern = "X", ""))
+      b[["geometry"]] = geom
+      b = st_as_sf(b)
+    }
+
 
     # assign it to out
     out[[counter]] = b
