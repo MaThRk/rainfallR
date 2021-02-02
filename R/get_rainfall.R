@@ -104,11 +104,7 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
     n = length(dts)
     str = paste0(i, "/", n)
     dashes = paste0(replicate(40, "-"), collapse = "")
-    print(paste("------", str, dashes))
-
-    # # where to put the output data
-    # # length of the list is the size of the spatial object
-    # out_data = vector("list", length=nrow(spatial.obj))
+    cat(paste(str, dashes), "\n")
 
     # get the year the month and the day
     y = format(day, "%Y")
@@ -121,7 +117,7 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
 
     # if all the data we want comes from the same month
     if(length(paths_to_data) == 1){
-      print("All data from one month")
+      cat("Read data from one month for", days_back + 1, "days", "\n\n")
 
       # open the file
       ncin = ncdf4::nc_open(paths_to_data[[1]])
@@ -132,15 +128,13 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
       raster_list = get_raster_list_one_month(day, days_back, dates_nc, paths_to_data)
 
     } else{
-      print("Data from at least two month")
+      cat("Read data from at least two month for", days_back + 1, "days", "\n\n")
 
       # we need a loop in order to extract them
       # if the back days reach into the last month..
       # for each month
-
+      # opening the file and getting the dates is done for ach NetCDF connection within the funtion
       raster_list = get_raster_list_n_month(paths_to_data, day, days_back)
-
-
     }
 
     # ectract the spatial data
