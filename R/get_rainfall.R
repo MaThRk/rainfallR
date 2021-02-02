@@ -100,11 +100,11 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
   counter = 1
   for (day in dts) {
 
-    # print a super informative message
-    n = length(dts)
-    str = paste0(i, "/", n)
-    dashes = paste0(replicate(40, "-"), collapse = "")
-    cat(paste(str, dashes), "\n")
+    # # print a super informative message
+    # n = length(dts)
+    # str = paste0(i, "/", n)
+    # dashes = paste0(replicate(40, "-"), collapse = "")
+    # cat(paste(str, dashes), "\n")
 
     # get the year the month and the day
     y = format(day, "%Y")
