@@ -125,6 +125,7 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
       # get a character string of the dates
       dates_nc = get_dates_ncdf(ncin, return_date_object=T)
 
+      # get the necessasry rasters. Each raster in one element in the list
       raster_list = get_raster_list_one_month(day, days_back, dates_nc, paths_to_data)
 
     } else{
@@ -134,10 +135,14 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
       # if the back days reach into the last month..
       # for each month
       # opening the file and getting the dates is done for ach NetCDF connection within the funtion
+
+      # we also get a list of rasters
       raster_list = get_raster_list_n_month(paths_to_data, day, days_back)
     }
 
     # ectract the spatial data
+    # This is the part that needs to be parallelized!!
+
     if(is.null(fun)) {
       # print("Input are points, thus not using any function")
       day_data_frame = lapply(raster_list, function(x) {
@@ -153,7 +158,6 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
         raster::extract(x, spatial.obj, fun = fun, sp = T) %>% st_as_sf()
       })
     }
-
 
     # make in one dataframe where each column is one date
     b = dplyr::bind_cols(day_data_frame)
