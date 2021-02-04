@@ -147,14 +147,14 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
       # print("Input are points, thus not using any function")
       day_data_frame = lapply(raster_list, function(x) {
         d = names(x) %>% substr(., start=2, stop=nchar(.)) %>% as.Date(., "%Y%m%d")
-        print(paste0("Extracting data for: ", d))
+        print(paste0("Extracting data from raster for: ", d))
         raster::extract(x, spatial.obj, sp = T) %>% st_as_sf()
       })
     } else{
       # message("using polygons and the function: ", fun@generic[[1]])
       day_data_frame = lapply(raster_list, function(x) {
         d = names(x) %>% substr(., start=2, stop=nchar(.)) %>% as.Date(., "%Y%m%d")
-        print(paste0("Extracting data for: ", d))
+        print(paste0("Extracting data from raster for: ", d))
         raster::extract(x, spatial.obj, fun = fun, sp = T) %>% st_as_sf()
       })
     }

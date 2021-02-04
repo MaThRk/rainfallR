@@ -37,7 +37,7 @@ get_raster_list_one_month = function(day, days_back, dates_nc, paths_to_data) {
     cat(paste("------------", str, "(", as.Date(name, "%Y%m%d"), ")", dashes,"\n"))
 
     # print message for raster extraction
-    message(paste0("  Extracting the raster for date: "), c(y,m,d))
+    message(paste0("  Getting the raster for date: "), c(y,m,d))
 
     # the index (the day) for extracting the right raster
     idx = format(dates_to_extract[[i]], "%d") %>% as.integer()

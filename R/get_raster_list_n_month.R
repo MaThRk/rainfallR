@@ -74,7 +74,7 @@ get_raster_list_n_month = function(paths_to_data, day, days_back){
     }
 
     # print message for raster extraction
-    message(paste0("   Extracting the raster for date: "), c(y,m,d))
+    message(paste0("   Getting the raster for date: "), c(y,m,d))
 
     # extract the date
     ras = raster_brick[[idx]]
