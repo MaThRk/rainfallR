@@ -33,11 +33,10 @@ library(leaflet)
 
 ```{r}
 # the path to the directory of the NetCDFs which are stored for each month
-path_ncdf = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS/"
+path_ncdf = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"
 
 # then we need a path to a spatial object (shape, geopackage...)
-path_spatial = bozen # should be included in the package
-spatial.obj = read_sf(path_spatial)
+spatial.obj = bozen # should be included in the package
 head(spatial.obj)
 ```
 
@@ -51,15 +50,21 @@ tm_dots()
 ```
 
 
-- set some more options
+> set some more options
+
+  + **`dts=c(as.Date("2016-01-12"), as.Date("2016-01-14"))`**: The dates we want the data for
+  + **`seqq=TRUE`**: We want all the dates inbetween. So set seqq (sequence) to true
+  + **`days_back=4`**: For each date we want to have the rainfall for four days prior to the date we are considering
 
 ```{r, echo=T}
 dts = c(as.Date("2016-01-12"), as.Date("2016-01-14"))
-seqq = T
+seqq = T 
 days_back = 4
 ```
 
-- and get the data
+> get the rainfall data
+
+- what we will get back is a list of three `sf`-dataframes. One for each day of consideration
 
 ```{r getdata, echo=T, warning=F, message=F}
 res = get_rainfall(data_path = path_ncdf,
@@ -67,103 +72,175 @@ res = get_rainfall(data_path = path_ncdf,
                    dts = dts,
                    seqq = seqq, 
                    days_back = days_back)
-
-lapply(res, head)
-```
-
-```{r plot, echo=F}
-# get the dates back for the first date
-dates_back = names(res[[1]]) %>% as.Date(., "%Y%m%d") %>% na.omit()
-
-# put it in long format
-geom = res[[1]] %>% dplyr::select(geometry)
-df_new = res[[1]] %>% 
-  st_drop_geometry() %>% 
-  pivot_longer(cols = everything(), names_to="dates", values_to="precip")
-
-df_new$x = st_coordinates(geom)[[1]]
-df_new$y = st_coordinates(geom)[[2]]
-
-df_sf = st_as_sf(df_new, coords = c("x","y"), crs=32632) %>% 
-  mutate(dates = as.Date(dates, "%Y%m%d"))
-
-ggplot(df_sf) +
-  geom_col(aes(dates, precip)) +
-  labs(x="", 
-       y = "precipitation [mm]",
-       title="Precipitation in Bolzano") +
-  theme_light()
 ```
 
 
-```{r getdata2, warning=F, message=F}
-res = get_rainfall(data_path = path_ncdf,
-                   spatial.obj = spatial.obj,
+- os one can see, the `days_back`, so the antecedent days are not stored in one column, but each day prior to the day of consideration is an own column. 
+
+- This is not the best way to store the data
+
+- we want to bring the data in "long"-format and additionally calculate the cumulative antecedent rainfall
+
+
+```{r longformat}
+res_long = rainfallR::make_cumulative_rainfall(res)
+```
+
+
+- now we have a list with 3 (one for each date) "long" dataframes and an additional column for the comulative rainfall
+
+- if we would have more than one point, they would have an id an be stored as rows
+
+```{r, message=F}
+library(purrr)
+# lapply(res_long, head, n=2)
+map(res_long, ~head(.x, n=2))
+```
+
+
+## simulate the extration for two points
+
+```{r makepoint}
+# create a random point right next to bolzano
+bozen2 = bozen 
+
+x = st_coordinates(bozen)[,1] + 0.1
+y = st_coordinates(bozen)[,2] + 0.1
+#modify the x and y coordinates of the new point
+bozen2 = data.frame(x,y) %>% st_as_sf(coords=c(1,2), crs=st_crs(bozen)) 
+# bind them together
+bozen2 = rbind(bozen, bozen2)
+```
+
+- where did the second point land?
+
+```{r}
+data(World)
+tmap_mode("view")
+tm_shape(bozen2) +
+tm_dots()
+```
+
+
+
+```{r res2, warning=F, message=F, warning=F}
+res2 = get_rainfall(data_path = path_ncdf,
+                   spatial.obj = bozen2,
                    dts = dts,
                    seqq = seqq, 
                    days_back = days_back)
-
-lapply(res, head)
 ```
-
-
-```{r, warning=F}
-res_cumulative = rainfallR::get_cumulative_rainfall(res)
-head(res_cumulative[[1]])
-```
-
+- the two points appear as two lines in the output
 
 ```{r}
-max_date = max(res_cumulative[[2]]$dates)
+res2
+```
 
-ggplot(res_cumulative[[2]]) +
-  geom_col(aes(dates, accumulated)) +
-  theme_light() +
-  labs(x = "Date",
-       y = "Rainfall [mm]",
-       title = paste0("Cumulative Rainfall in Bolzano prior to: ", max_date))
+
+- bring it again in long format 
+- In order to seperate the points and group by the spatial object, an id-column is now created
+
+```{r id}
+res2_long = rainfallR::make_cumulative_rainfall(res2)
 ```
 
 
 
-```{r leaflet, warning=F, message=F}
-poly_path = "\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_5.shp"
+- we can now plot the data for the one-point and the two(n)-point situation
 
-# read it with sf
-spatial.obj = read_sf(poly_path)
+- **I think it is a rather unusual situation that one wants data for more than one date under consideration. Thus, the creation of the dataframe here below would not be necessary**
 
-# get only one landslide
-spatial.obj = spatial.obj[1,]
+```{r gg1, echo=F}
 
-# get the path to the nc file
-path_to_nc = rainfallR::get_nc_paths(path_ncdf, day = as.Date("2016-01-12"), days_back = 1)[[1]]
-# get the raster 
-precip_raster_stack = raster::stack(path_to_nc)
-# get the right date
-precip_raster = precip_raster_stack[[12]]
-# # crop to the shape
-# crop = raster::crop(precip_raster, spatial.obj)
-# precip_raster = raster::mask(crop, spatial.obj)
+# bind all the dates together and make the name a column to identify
 
-# transform the 
-spatial.obj4326 = st_transform(spatial.obj, 4326)
-# transform the raster
-precip_raster = projectRaster(precip_raster, crs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+# initalizes an empty df
+df_long = res_long[[1]]
+df_long$date_consid = names(res_long)[[1]]
 
+for (day in seq_along(res_long)) {
+  
+  # skip the first one
+  if(day!=1){
+    df = res_long[[day]]
+    df$date_consid = names(res_long)[[day]]
+    df_long = rbind(df_long, df)
+  }
+  
+}
+
+ggplot(df_long) +
+  geom_col(aes(x=date, y=cumsum)) +
+  facet_wrap(~date_consid) +
+  theme_light() +
+  labs(y="Cumulative Antecedent Rainfall in Bozen")
+  
+```
+
+- do it for the two points
+
+```{r}
+# bind all the dates together and make the name a column to identify
+
+# initalizes an empty df
+df_long2 = res2_long[[1]]
+df_long2$date_consid = names(res2_long)[[1]]
+
+for (day in seq_along(res2_long)) {
+  
+  # skip the first one
+  if(day!=1){
+    df = res2_long[[day]]
+    df$date_consid = names(res2_long)[[day]]
+    df_long2 = rbind(df_long2, df)
+  }
+  
+}
+
+ggplot(df_long2) +
+  geom_col(aes(x=date, y=cumsum, fill=as.factor(id)), position="dodge") +
+  facet_wrap(~date_consid) +
+  theme_light() +
+  labs(y="Cumulative Antecedent Rainfall in Bozen")
+
+```
+
+
+## get the unterlying rasters to confirm if this makes sense
+
+```{r readraster, warning=F}
+# make the path to the raster on the eurac server
+path_raster = rainfallR::get_nc_paths(data_path = path_ncdf, day = dts[[1]], days_back = 5)
+
+# select the 12th, 13th and 14th day
+days = c(12,13,14)
+raster_brick = raster::brick(path_raster)
+selected_raster = subset(raster_brick, days)
+
+# transform the stack and the polygon
+selected_raster = projectRaster(selected_raster, crs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+bozen2 = st_transform(bozen2, 4326)
 
 # what have we got?
-pal = colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(precip_raster),
+pal = colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(selected_raster[[1]]),
   na.color = "transparent")
+
+bz_sp = as(bozen2, Class="Spatial")
+
+groups_rasters = seq(dts[[1]], dts[[2]], by="day") %>% sapply(., as.character)
+p1 = selected_raster[[1]]
+p2 = selected_raster[[2]]
+p3 = selected_raster[[3]]
 
 leaflet() %>% 
   addTiles() %>% 
-  setView(lng = st_coordinates(spatial.obj4326)[,1][[1]],
-          lat = st_coordinates(spatial.obj4326)[,2][[1]],
-          zoom=15) %>% 
-  addPolygons(data = spatial.obj4326, group="shape") %>%
-  addRasterImage(precip_raster, group = "precip", colors=pal) %>% 
-  addLegend(pal=pal, values=values(precip_raster)) %>% 
-  addLayersControl(overlayGroups = c("shape", "precip")) %>% 
-  hideGroup("precip")
+  addCircles(data=bozen2, group = "shape") %>% 
+  addRasterImage(p1, group=groups_rasters[[1]], colors=pal) %>% 
+  addRasterImage(p2, group=groups_rasters[[2]], colors=pal) %>% 
+  addRasterImage(p3, group=groups_rasters[[3]], colors=pal) %>% 
+  addLayersControl(overlayGroups = c("shape", groups_rasters))
+
+
 ```
+
 

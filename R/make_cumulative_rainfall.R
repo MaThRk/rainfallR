@@ -59,6 +59,8 @@ make_cumulative_rainfall = function(res, cumsum=T){
   }else{
 
     out = vector("list", length = length(res))
+    # set the names
+    names(out) = names(res)
 
     # for each date
     for (i in seq_along(res)) {
@@ -70,7 +72,7 @@ make_cumulative_rainfall = function(res, cumsum=T){
       iffi = ifelse("iffi" %in% names(df), TRUE, FALSE)
       # if there is no iffi-identifier we need another unique identifier per row
       # add a unique id
-      if(!iffi) df[["id"]] = 1:nrow(day)
+      if(!iffi) df[["id"]] = 1:nrow(df)
 
 
       # get the geometry column

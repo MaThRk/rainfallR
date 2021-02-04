@@ -20,7 +20,6 @@ get_raster_list_one_month = function(day, days_back, dates_nc, paths_to_data) {
   names(raster_list) = dates_to_extract %>% as.Date()
 
   # get the rasters and put them into a list
-  print(paste0("Extraxting ", days_back, " dates prior to: ", day))
   for (i in seq_along(dates_to_extract)) {
 
     # year, month, day for the name of the raster

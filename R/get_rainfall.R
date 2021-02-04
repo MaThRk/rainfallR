@@ -116,7 +116,7 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
 
     # if all the data we want comes from the same month
     if(length(paths_to_data) == 1){
-      cat("Read data from one month for", days_back + 1, "days", "\n\n")
+      cat("\nGet the", days_back + 1, "rasters for ", as.character(day), "\n")
 
       # open the file
       ncin = ncdf4::nc_open(paths_to_data[[1]])
@@ -145,6 +145,12 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
         raster::extract(x, spatial.obj, sp = T) %>% st_as_sf()
       })
     } else{
+
+      # if fun is not null but data are points --> does not work...
+      if(!gtype == "poly"){
+        stop("You have some function defined but want data for points. \n Set: 'fun=NULL'")
+      }
+
       # message("using polygons and the function: ", fun@generic[[1]])
       extracted_days_list = lapply(raster_list, function(x){
         d = names(x) %>% substr(., start=2, stop=nchar(.)) %>% as.Date(., "%Y%m%d")
@@ -158,10 +164,6 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
         return(res)
       })
     }
-
-
-
-
 
     # make in one dataframe where each column is one date
     b = dplyr::bind_cols(extracted_days_list)
