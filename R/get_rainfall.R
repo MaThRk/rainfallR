@@ -161,9 +161,13 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
         # make id column to merge after extraction
         spatial.obj$id = 1:nrow(spatial.obj)
         cols = names(spatial.obj)
-        ex = exactextractr::exact_extract(x, spatial.obj, "mean", append_cols = cols)
+        ex = exactextractr::exact_extract(x, spatial.obj, "mean", append_cols = c("id"))
+        # this is no good
+        # renaming the mean column to the same format raster::extract returns it x...
+        new_name = paste0("x", str_replace_all(d, "-", ""))
+        ex = ex %>% rename(!!new_name := mean)
         # merge back the spatial info
-        res = merge(ex, spatial.obj, by="id") %>% st_as_sf()
+        res = merge(ex, spatial.obj, by="id", ) %>% st_as_sf()
         return(res)
       })
     }

@@ -24,6 +24,11 @@ knitr::opts_chunk$set(
 library(tidyverse)
 library(iffitoR)
 library(sf)
+library(forcats)
+library(glue)
+library(purrr)
+library(stringr)
+library(crayon) # for some colours
 library(raster)
 ```
 
@@ -48,4 +53,169 @@ if(os == "Linux"){
 ```
 
 
-Lets see how long it takes to extract rainfall data for all 
+# What have we got
+
+- Lets understand a bit about the data that we got
+
+- The slope units not only cover South Tyrol, but also the trentino Region. So lets mask it
+
+- We can use the `iffitoR::get_shape_southtyrol`-function in order to get the outline of South Tyrol
+
+```{r}
+# get vector of South Tyrol
+st = iffitoR::get_shape_southtyrol() 
+st = st %>% st_union()
+ggplot() +
+  geom_sf(data=st) +
+  theme_minimal()
+```
+
+- Now we get the vector data for the slope units
+
+```{r}
+su = st_read(su_path)
+# and verify directly if they are in the same crs
+st_crs(su) == st_crs(st)
+```
+- As they are not in the same crs, lets reproject the ouline of South Tyrol. The differnce, to my knowledge lies in the different geodetic reference systems they use (ETRS89 in the case of South Tyrol and GRS 80 for the slope units).
+
+```{r reprok, warning=F}
+st_reproj = st_transform(st,st_crs(su))
+st_crs(st_reproj) == st_crs(su)
+```
+
+- Now we can compare the geograhic extent of both (but first we aggregate the slope units quickly)
+
+```{r compare, cache=T, warning=F, cache=T}
+su_agg = su_reproj %>% st_union()
+
+ggplot() +
+  geom_sf(data = su_agg) +
+  geom_sf(data = st_reproj, fill="blue") +
+  theme_light()
+```
+
+
+## Clip the slopunits to South Tyrol
+
+
+- In order to save some computing time we clip the extent of the slope units to the extent of South Tyrol
+
+
+```{r}
+su = st_crop(su, st_reproj)
+# are the two bounding boxes equal?
+st_bbox(su) == st_bbox(st_reproj) # for some reason the xmax is not the same
+```
+- How many slope untis are left now?
+
+```{r dimsu}
+dim(su)
+```
+# Get the rainfall for the slope Units
+
+```{r}
+glimpse(su)
+```
+
+
+```{r}
+# get the translational slides
+slides = landsld %>% 
+  filter(str_detect(second_level, "translational")) %>% 
+  filter(date_info == "day") %>% 
+  filter(year.int >= 1980) %>% 
+  mutate(.id = 1:nrow(.)) %>% 
+  st_transform(st_crs(su)) 
+
+
+# assign each slope unit an id
+su$id = 1:nrow(su)
+
+# apply spatial join
+joined = st_join(su, slides)
+# how many slides per points
+slides_per_poly =  joined %>%
+  count(id, sort = T)
+
+# which are the slides that happened in the max slope units
+max_slides = joined[joined$id == 3242, ]
+
+# assign to each su true or false value if it has or has no landslides
+
+for (row in 1:nrow(su)) {
+  
+  # get the original id from the slope units
+  id_su = su[row, ][["id"]]
+  
+  # select all the possible (minimum 1) rows from the joined table
+  joined_selected = joined %>% 
+    filter(id == id_su)
+  
+  # check if the slope unit in the joined table has a value in the .id column from the points
+  slide_dates_per_su = rep(NA, nrow(joined_selected))
+ 
+  # check how many points fall in the slope unit for the seleted id 
+  for (point in 1:nrow(joined_selected)) {
+    # if there is a value in the .id-column (so there is a point), get the 
+    if (!is.na(joined_selected[point, ]$.id)) {
+      date = joined_selected[point, ]$date
+      slide_dates_per_su[[point]] = date
+    }
+  }
+  
+  # convert back to datetime object 
+  slide_dates_per_su = as.Date.numeric(slide_dates_per_su, origin="1970-01-01")
+  
+  su$slide_dates[[row]] = slide_dates_per_su
+
+}
+
+# make the binary classification
+su = su %>% 
+  mutate(
+    slide = if_else(!is.na(slide_dates), TRUE, FALSE)
+  )
+```
+
+- Now we have all the dates of all slides that happened within each polygon
+
+# Extract the rainfall data for each su with landslides for each day
+
+- we only are interested in the rainfall of the slope units that actually experienced landslides. Therefore we loop over all the slope units and only take the ones with slides.
+
+- Then we look in the dates column and extract the rainfall for each of the date for that slope unit
+
+
+```{r}
+
+for (row in 1:nrow(su)) {
+  
+  # if there actually happened a slide 
+ if (su[row,]$slide) {
+    
+   dates = su[row,]$slide_dates[[1]]
+    
+   ## get the rainfall data for that slope unit
+   spatial.obj = su[row, ]
+   days_back = 5
+   
+   # get the rainfall for each data a landslide happened in that slope unit
+   for (day in seq_along(dates)) {
+     
+     res = rainfallR::get_rainfall(data_path = path_ncdf
+                                   ,fun = mean
+                                   ,spatial.obj = spatial.obj
+                                   ,dts = day
+                                   ,days_back = days_back)
+     
+     res = make_cumulative_rainfall(res, days_back = days_back)
+     
+   }
+   
+   
+ } 
+}
+```
+
+
