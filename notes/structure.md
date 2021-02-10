@@ -1,0 +1,7 @@
+PREC_GRIDS
+├── 1980
+│   ├── DAILYPCP_198001.nc
+│   ├── DAILYPCP_198002.nc
+│   ├── DAILYPCP_198003.nc
+│   ├── DAILYPCP_198004.nc
+
