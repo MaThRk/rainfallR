@@ -47,7 +47,7 @@ day = as.Date("2009-01-20")
 
 - For the point data the package uses `raster::extract` and for the extraction and aggregation the packge uses `exactextractr::exact_extract`
 
-- See [this vignette for more info](docs/articles/extract_landslide_rainfall.html)
+- See [this vignette for more info](https://robinkohrs.github.io/rainfallR/articles/extract_landslide_rainfall.html)
 
 ***
 
