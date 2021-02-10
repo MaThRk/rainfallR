@@ -5,7 +5,7 @@
 \title{Extract rainfall data}
 \usage{
 get_rainfall(
-  data_path = "\\\\\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS/",
+  data_path = "\\\\\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/",
   spatial.obj = NULL,
   fun = NULL,
   dts = NULL,

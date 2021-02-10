@@ -8,7 +8,7 @@
 #'
 #' @export
 
-make_cumulative_rainfall = function(res, cumsum=T){
+make_cumulative_rainfall = function(res, days_back, cumsum=T){
 
   # if there are more than one points or polygons
   if(nrow(res[[1]]) == 1){
@@ -22,29 +22,26 @@ make_cumulative_rainfall = function(res, cumsum=T){
 
       df = res[[i]]
 
-      # iffi in names
-      iffi = ifelse("iffi" %in% names(df), TRUE, FALSE)
+      # make one column with the date under consideration (probably the day of the slide)
+      df[["date_consid"]] = names(out)[[1]]
+      # give each slide an id
+      df[["id"]] = 1:nrow(df)
 
       # get the geometry column
-      if(iffi){
-        geom = df %>% dplyr::select(iffi)
-      }else{
-        geom = st_geometry(df)
-      }
-
+      geom = df %>% dplyr::select(date_consid)
 
       # make one df without geometry
-      day = df %>% st_drop_geometry()
+      df_no_geom = df %>% st_drop_geometry()
+
+      # columns to considerate
+      cols_dates =  grep("\\d{8}", names(df_no_geom), value=T)
+      cols_others = names(df_no_geom)[!names(df_no_geom) %in% cols_dates]
 
       # put the dates and the precip in one column
-      if(iffi){
-        df_long = day %>% pivot_longer(!iffi, names_to="date", values_to="precip")
-      }else{
-        df_long = day %>% pivot_longer(everything(), names_to="date", values_to="precip")
-      }
+      df_long = df_no_geom %>% pivot_longer(-cols_others, names_to="date", values_to="precip", names_repair="minimal")
 
-      # merge the iffi and the geom back
-      if(iffi) df_long = merge(geom, df_long, by="iffi")
+      # merge the geom back (can be by date_consid or id as they are the same in case of only one landslide)
+      df_long = merge(geom, df_long, by="date_consid")
 
       # calculate the cumulated sum
       df_long = df_long %>%
@@ -65,66 +62,47 @@ make_cumulative_rainfall = function(res, cumsum=T){
     # for each date
     for (i in seq_along(res)) {
 
-      # make one dataframe
       df = res[[i]]
 
-      # iffi in names
-      iffi = ifelse("iffi" %in% names(df), TRUE, FALSE)
-      # if there is no iffi-identifier we need another unique identifier per row
-      # add a unique id
-      if(!iffi) df[["id"]] = 1:nrow(df)
+      # make the date of consideration a columns
+      df[["date_consid"]] = names(out)[[1]]
+      # give each slide (each row) a unique identifier
+      df[["id"]] = 1:nrow(df)
 
+      # get the geometry column and the id column to later merge back the geometry uniquely
+      geom = df %>% dplyr::select(id)
 
-      # get the geometry column
-      if(iffi){
-        geom = df %>% dplyr::select(iffi)
-      }else{
-        geom = df %>% dplyr::select(id)
-      }
+      # make one df without geometry
+      df_no_geom = df %>% st_drop_geometry()
 
-      # a df without geom
-      day = df %>% st_drop_geometry()
-
+      # columns to considerate
+      cols_dates =  grep("\\d{8}", names(df_no_geom), value=T)
+      cols_others = names(df_no_geom)[!names(df_no_geom) %in% cols_dates]
 
       # put the dates and the precip in one column
-      if(iffi){
-        df_long = day %>% pivot_longer(!iffi, names_to="date", values_to="precip")
-      }else{
-        df_long = day %>% pivot_longer(!id, names_to="date", values_to="precip")
-      }
+      df_long = df_no_geom %>% pivot_longer(-cols_others, names_to="date", values_to="precip", names_repair="minimal")
 
-      # merge the iffi and the geom back
-      if(iffi){
-        df_long = merge(geom, df_long, by="iffi")
-      } else{
-        df_long = merge(geom, df_long, by="id")
-      }
+      # merge the geom back by id as differnt rows mean different slides mean different geoms
+      df_long = merge(geom, df_long, by="id")
 
       # calculate the cumulative sum per geom
       # we need to group by some idetifying variable
       # this can either be the iffi, or another unique id per sldide
 
-      if(iffi){
-        df_long = df_long %>%
-          group_by(iffi) %>%
-          mutate(cumsum = cumsum(precip),
-                 date = as.Date(date, "%Y%m%d"))
+      df_long = df_long %>%
+        group_by(id) %>%
+        mutate(cumsum = cumsum(precip),
+               date = as.Date(date, "%Y%m%d"))
 
-        # get an incresing index per group
-        df_long$days_before_event = with(df_long, ave(seq_along(iffi), iffi, FUN = seq_along))
+      # get an incresing index per group
+      df_long = df_long %>%
+        group_by(id) %>%
+        mutate(days_before_event = seq(days_back+1, 1))
 
-        out[[i]] = df_long
-      }else{
-        df_long = df_long %>%
-          group_by(id) %>%
-          mutate(cumsum = cumsum(precip),
-                 date = as.Date(date, "%Y%m%d"))
+        # this is WRONG ORDER
+        # mutate(days_before_event = row_number())
 
-        # get an incresing index per group
-        df_long$days_before_event = with(df_long, ave(seq_along(id), id, FUN = seq_along))
-
-        out[[i]] = df_long
-      }
+      out[[i]] = df_long
 
     }
 

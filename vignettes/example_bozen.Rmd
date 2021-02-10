@@ -83,7 +83,7 @@ res = get_rainfall(data_path = path_ncdf,
 
 
 ```{r longformat}
-res_long = rainfallR::make_cumulative_rainfall(res)
+res_long = rainfallR::make_cumulative_rainfall(res, days_back = days_back)
 ```
 
 
@@ -141,7 +141,7 @@ res2
 - In order to seperate the points and group by the spatial object, an id-column is now created
 
 ```{r id}
-res2_long = rainfallR::make_cumulative_rainfall(res2)
+res2_long = rainfallR::make_cumulative_rainfall(res2, days_back = days_back)
 ```
 
 
@@ -228,6 +228,7 @@ pal = colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(selected_raster[[1
 bz_sp = as(bozen2, Class="Spatial")
 
 groups_rasters = seq(dts[[1]], dts[[2]], by="day") %>% sapply(., as.character)
+
 p1 = selected_raster[[1]]
 p2 = selected_raster[[2]]
 p3 = selected_raster[[3]]

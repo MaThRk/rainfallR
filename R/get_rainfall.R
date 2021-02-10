@@ -137,6 +137,8 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
     }
 
     # ectract the spatial data
+
+    # if the spatial data are points
     if(is.null(fun)) {
       # print("Input are points, thus not using any function")
       extracted_days_list = lapply(raster_list, function(x) {
@@ -145,7 +147,6 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
         raster::extract(x, spatial.obj, sp = T) %>% st_as_sf()
       })
     } else{
-
       # if fun is not null but data are points --> does not work...
       if(!gtype == "poly"){
         stop("You have some function defined but want data for points. \n Set: 'fun=NULL'")
@@ -166,24 +167,33 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
     }
 
     # make in one dataframe where each column is one date
+
+    # get more columns we want
+    cols_dont_want = str_subset(names(extracted_days_list[[1]]), "\\d{8}")
+    df_to_append = extracted_days_list[[1]] %>% st_drop_geometry() %>%
+      select(-cols_dont_want)
+
+    # probaly would have been better to bind the rows
     b = dplyr::bind_cols(extracted_days_list)
     geom = b %>% dplyr::select(matches("geom")) %>% pull(1)
 
     # if we have a spatial object with iffi-kodex
-    if("PIFF_ID" %in% names(spatial.obj)){
-      iffi_kodex = b %>% dplyr::select(matches("PIFF_ID")) %>% pull(1)
+#    if("PIFF_ID" %in% names(spatial.obj)){
+#      iffi_kodex = b %>% dplyr::select(matches("PIFF_ID")) %>% pull(1)
+#      b = b %>% dplyr::select(matches("^x")) %>%
+#        dplyr::rename_with(., ~stringr::str_replace_all(., pattern = "X", ""))
+#      b[["geometry"]] = geom
+#      b[["iffi"]] = iffi_kodex
+#      b = st_as_sf(b)
+#
+#    }else{
+      # get the precip columns and rename them
       b = b %>% dplyr::select(matches("^x")) %>%
         dplyr::rename_with(., ~stringr::str_replace_all(., pattern = "X", ""))
       b[["geometry"]] = geom
-      b[["iffi"]] = iffi_kodex
       b = st_as_sf(b)
-
-    }else{
-      b = b %>% dplyr::select(matches("^x")) %>%
-        dplyr::rename_with(., ~stringr::str_replace_all(., pattern = "X", ""))
-      b[["geometry"]] = geom
-      b = st_as_sf(b)
-    }
+      b = bind_cols(b, df_to_append)
+#    }
 
 
     # assign it to out

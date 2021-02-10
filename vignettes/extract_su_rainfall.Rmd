@@ -1,0 +1,51 @@
+---
+title: "Extract rainfall data for the slope units"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{testslopunits}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Load the packages
+
+```{r pkgs, message=F}
+library(tidyverse)
+library(iffitoR)
+library(sf)
+library(raster)
+```
+
+
+# Get the slope units 
+
+- In order to find the slope units on the hard drive in differs between the Linux and the Microsoft path 
+
+```{r}
+# which os to automatically set the paths
+os = Sys.info()["sysname"]
+
+if(os == "Linux"){
+  path_ncdf = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/"
+  su_path = "/mnt/CEPH_PROJECTS/Proslide/Envir_data/SlopeUnits/su_opt_16_TAA/su_16_TAA.shp"
+}else if(os == "Windows"){
+  path_ncdf = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"
+  su_path = "\\\\projectdata.eurac.edu/projects/Proslide/Envir_data/SlopeUnits/su_opt_16_TAA/su_16_TAA.shp"
+}else{
+  stop(call. = F, "what the hell are you working on...")
+}
+```
+
+
+Lets see how long it takes to extract rainfall data for all 

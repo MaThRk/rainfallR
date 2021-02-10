@@ -4,7 +4,7 @@
 \alias{make_cumulative_rainfall}
 \title{Reshape the dataframe and create cumulative count column}
 \usage{
-make_cumulative_rainfall(res, cumsum = T)
+make_cumulative_rainfall(res, days_back, cumsum = T)
 }
 \arguments{
 \item{res}{an object as retured from `get_rainfall`}

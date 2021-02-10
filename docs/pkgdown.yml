@@ -1,8 +1,0 @@
-pandoc: 2.7.3
-pkgdown: 1.6.1
-pkgdown_sha: ~
-articles:
-  example_bozen: example_bozen.html
-  extract_sample_raster: extract_sample_raster.html
-last_built: 2021-01-26T09:02Z
-
