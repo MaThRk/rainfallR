@@ -245,6 +245,8 @@ for (i in seq_along(slides_same_day)) {
   days_back =7 
   seqq = FALSE # we only consider one day per slides (not considering the days back)
 
+  # this returns a list with one element
+  # if the dts-argument would have more than one data this list would have more arguments
   rf = invisible(rainfallR::get_rainfall(
     spatial.obj = spatial.obj,
     dts = dts,
@@ -314,12 +316,21 @@ for (i in seq_along(out_simple_list)) {
 ```{r}
 ggplot(out_unique_slide) +
   geom_line(aes(x = days_before_event, y = cumsum, group=id, col=second_level)) +
-  scale_x_reverse()
+  scale_x_reverse() +
+  labs(col="",
+       x = "Days before event",
+       y = "Cumulative rainfall [mm/day]",
+       title = "Cumulative Rainfall at slides-points") +
+  theme_light()
 ```
+
+
+## Landslides with little antecedent rainfall
+
 
 # Create a little animation
 
-```{r, fig.width=10}
+```{r, fig.width=10, warning=F, message=F}
 # create an upcounting couter
 out_unique_slide %>% 
   group_by(id) %>% 

@@ -81,10 +81,57 @@
 <div id="rainfallr" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#rainfallr" class="anchor"></a>rainfallR</h1></div>
+<div id="main-functionalities" class="section level2">
+<h2 class="hasAnchor">
+<a href="#main-functionalities" class="anchor"></a>Main Functionalities</h2>
 <hr>
-<p>This package is intended to help a little bit in the extraction of the rainfall data from multiple NetCDF files stored in the right location</p>
+<div id="get-access-to-single-netcdfs" class="section level3">
+<h3 class="hasAnchor">
+<a href="#get-access-to-single-netcdfs" class="anchor"></a>Get access to single NetCDFs</h3>
+<p>This package is intended to help a little bit in the extraction of the rainfall data from multiple NetCDF files stored in the right location.</p>
+<p>In order for this to work, the data needs to be organisd in a specific structure, that is more or less like this:</p>
+<pre><code>PREC_GRIDS
+├── 1980
+│   ├── DAILYPCP_198001.nc
+│   ├── DAILYPCP_198002.nc
+│   ├── DAILYPCP_198003.nc
+│   ├── DAILYPCP_198004.nc</code></pre>
+<ul>
+<li>This means that the root-folder here is <code>PREC_GRID</code>
+<ul>
+<li>One level below are folders for all the years
+<ul>
+<li>and on the bottom-most level there are all the NetCDFs with the data for one month</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>one can easily get the path to one raster with the function <code>get_nc_path</code>
+</li>
+</ul>
+<pre><code>data_path = "absolute_or_relative_path_to/PREC_GRIDs"
+days_back = 1
+day = as.Date("2009-01-20")
+# will return:
+
+# $`200901`
+#[1] "absolute_or_relative_path_to/PREC_GRIDs2009/DAILYPCP_200901.nc"</code></pre>
+<hr>
+</div>
+<div id="extract-data-of-netcdfs-for-vector-data" class="section level3">
+<h3 class="hasAnchor">
+<a href="#extract-data-of-netcdfs-for-vector-data" class="anchor"></a>Extract data of NetCDFs for Vector data</h3>
+<ul>
+<li><p>If one is interested in extracting the rainfall-pixel-data that is intersecting with vector data one can use the function <code>rainfallR::ge_rainfall()</code></p></li>
+<li><p>For the extraction of *points** no aggreation is performed and the pixel value of the raster is extracted</p></li>
+<li><p>For *polygons** one can theoretically choose (at the moment only the mean) between multiple aggregation functions</p></li>
+<li><p>For the point data the package uses <code><a href="https://rdrr.io/pkg/raster/man/extract.html">raster::extract</a></code> and for the extraction and aggregation the packge uses <code><a href="https://isciences.gitlab.io/exactextractr/reference/exact_extract.html">exactextractr::exact_extract</a></code></p></li>
+<li><p>See <a href="https://robinkohrs.github.io/rainfallR/articles/extract_landslide_rainfall.html">this vignette for more info</a></p></li>
+</ul>
 <hr>
 <p><img src="reference/figures/readmeplot.png"></p>
+</div>
+</div>
 </div>
   </div>
 
