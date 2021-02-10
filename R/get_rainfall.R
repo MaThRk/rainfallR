@@ -95,15 +95,13 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
   }
 
 
-  # for each day create a dataframe
-  counter = 1
-  for (day in dts) {
 
-    # # print a super informative message
-    # n = length(dts)
-    # str = paste0(i, "/", n)
-    # dashes = paste0(replicate(40, "-"), collapse = "")
-    # cat(paste(str, dashes), "\n")
+# For each day of consideration create one df -----------------------------
+
+  # forgot to use seq_along
+  counter = 1
+
+  for (day in dts) {
 
     # get the year the month and the day
     y = format(day, "%Y")
@@ -112,7 +110,9 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
 
     # create the path to the data for one month
     paths_to_data = get_nc_paths(data_path, day, days_back)
-    # message("Accessing these NetCDF-files: ", paths_to_data)
+
+
+# get the necessary rasters -----------------------------------------------
 
     # if all the data we want comes from the same month
     if(length(paths_to_data) == 1){
@@ -136,7 +136,9 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
       raster_list = get_raster_list_n_month(paths_to_data, day, days_back)
     }
 
-    # ectract the spatial data
+
+# extract raster data for vector data -------------------------------------
+
 
     # if the spatial data are points
     if(is.null(fun)) {
@@ -166,6 +168,9 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
       })
     }
 
+
+# build one dataframe -----------------------------------------------------
+
     # make in one dataframe where each column is one date
 
     # get more columns we want
@@ -177,24 +182,20 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
     b = dplyr::bind_cols(extracted_days_list)
     geom = b %>% dplyr::select(matches("geom")) %>% pull(1)
 
-    # if we have a spatial object with iffi-kodex
-#    if("PIFF_ID" %in% names(spatial.obj)){
-#      iffi_kodex = b %>% dplyr::select(matches("PIFF_ID")) %>% pull(1)
-#      b = b %>% dplyr::select(matches("^x")) %>%
-#        dplyr::rename_with(., ~stringr::str_replace_all(., pattern = "X", ""))
-#      b[["geometry"]] = geom
-#      b[["iffi"]] = iffi_kodex
-#      b = st_as_sf(b)
-#
-#    }else{
-      # get the precip columns and rename them
-      b = b %>% dplyr::select(matches("^x")) %>%
-        dplyr::rename_with(., ~stringr::str_replace_all(., pattern = "X", ""))
-      b[["geometry"]] = geom
-      b = st_as_sf(b)
-      b = bind_cols(b, df_to_append)
-#    }
 
+    # get the precip columns and rename them
+    b = b %>% dplyr::select(matches("^x")) %>%
+      dplyr::rename_with(., ~ stringr::str_replace_all(., pattern = "X", ""))
+
+    # put back the geometry
+    b[["geometry"]] = geom
+    # make in an object of type sf
+    b = st_as_sf(b)
+    # bind back the other columns from the orignal spatial dataframe
+    b = bind_cols(b, df_to_append)
+
+
+# put the dataframe in the output list ------------------------------------
 
     # assign it to out
     out[[counter]] = b
