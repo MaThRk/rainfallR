@@ -150,7 +150,7 @@ res2_long = rainfallR::make_cumulative_rainfall(res2, days_back = days_back)
 
 - **I think it is a rather unusual situation that one wants data for more than one date under consideration. Thus, the creation of the dataframe here below would not be necessary**
 
-```{r gg1, echo=F}
+```{r gg1, echo=F, fig.width=8}
 
 # bind all the dates together and make the name a column to identify
 
@@ -179,7 +179,7 @@ ggplot(df_long) +
 
 - do it for the two points
 
-```{r}
+```{r, fig.width=8}
 # bind all the dates together and make the name a column to identify
 
 # initalizes an empty df
@@ -208,7 +208,7 @@ ggplot(df_long2) +
 
 ## get the unterlying rasters to confirm if this makes sense
 
-```{r readraster, warning=F}
+```{r readraster, warning=F, fig.width=8}
 # make the path to the raster on the eurac server
 path_raster = rainfallR::get_nc_paths(data_path = path_ncdf, day = dts[[1]], days_back = 5)
 

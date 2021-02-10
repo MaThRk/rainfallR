@@ -6,4 +6,4 @@ This package is intended to help a little bit in the extraction of the rainfall 
 
 ***
 
-![](data/readmeplot.png)
+![](man/readmeplot.png)
