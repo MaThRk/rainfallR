@@ -43,6 +43,7 @@ path_ncdf = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"
 library(rainfallR)
 library(ggrepel)
 library(gganimate)
+library(RODBC)
 library(dplyr)
 library(ggplot2)
 library(iffitoR) # load some sample landslide data that comes with the package
@@ -99,9 +100,7 @@ iffi_points = make_shapefile(
     )
   )
 )
-  
 }
-
 ```
 
 - lets have a little look at what we got back?
@@ -197,7 +196,6 @@ m = max(n_slides_per_day)
 # when did it happen
 n_slides_per_day[n_slides_per_day == m]
 ```
-- on the 21st of July there were 9 slides that happended
 
 ## get the rainfall data
 
@@ -286,7 +284,7 @@ head(out_long_dfs[[1]])
 
 
 ```{r extractfirst, message=F}
-# so we exrtact the first (and only) element of each list
+# so we extract the first (and only) element of each list
 out_simple_list = map(out_long_dfs, ~.x[[1]])
 
 ### create unique id for each slide

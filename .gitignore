@@ -8,3 +8,4 @@ Meta
 local*
 todo
 *.rds
+plots/

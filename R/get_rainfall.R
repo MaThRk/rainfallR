@@ -112,7 +112,7 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
     paths_to_data = get_nc_paths(data_path, day, days_back)
 
 
-# get the necessary rasters -----------------------------------------------
+    # get the necessary rasters -----------------------------------------------
 
     # if all the data we want comes from the same month
     if(length(paths_to_data) == 1){

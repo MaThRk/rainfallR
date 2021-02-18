@@ -22,6 +22,8 @@ knitr::opts_chunk$set(
 
 ```{r pkgs, message=F}
 library(tidyverse)
+library(here)
+library(gganimate)
 library(iffitoR)
 library(sf)
 library(forcats)
@@ -77,7 +79,7 @@ su = st_read(su_path)
 # and verify directly if they are in the same crs
 st_crs(su) == st_crs(st)
 ```
-- As they are not in the same crs, lets reproject the ouline of South Tyrol. The differnce, to my knowledge lies in the different geodetic reference systems they use (ETRS89 in the case of South Tyrol and GRS 80 for the slope units).
+- As they are not in the same crs, lets reproject the ouline of South Tyrol. The difference, to my knowledge lies in the different geodetic reference systems they use (ETRS89 in the case of South Tyrol and GRS 80 for the slope units).
 
 ```{r reprok, warning=F}
 st_reproj = st_transform(st,st_crs(su))
@@ -87,7 +89,7 @@ st_crs(st_reproj) == st_crs(su)
 - Now we can compare the geograhic extent of both (but first we aggregate the slope units quickly)
 
 ```{r compare, cache=T, warning=F, cache=T}
-su_agg = su_reproj %>% st_union()
+su_agg = su %>% st_union()
 
 ggplot() +
   geom_sf(data = su_agg) +
@@ -125,32 +127,37 @@ slides = landsld %>%
   filter(str_detect(second_level, "translational")) %>% 
   filter(date_info == "day") %>% 
   filter(year.int >= 1980) %>% 
-  mutate(.id = 1:nrow(.)) %>% 
+  mutate(.id = 1:nrow(.)) %>% # give each slide a unique id
   st_transform(st_crs(su)) 
 
 
 # assign each slope unit an id
-su$id = 1:nrow(su)
+su$su_id = 1:nrow(su) 
 
 # apply spatial join
+# this can have more rows than the original su dataframe
+# each su will appear that many times as they have points in them
 joined = st_join(su, slides)
 # how many slides per points
 slides_per_poly =  joined %>%
-  count(id, sort = T)
+  count(su_id, sort = T)
 
 # which are the slides that happened in the max slope units
-max_slides = joined[joined$id == 3242, ]
+max_slides = joined[joined$su_id == 3243, ]
 
 # assign to each su true or false value if it has or has no landslides
-
 for (row in 1:nrow(su)) {
   
   # get the original id from the slope units
-  id_su = su[row, ][["id"]]
+  id_su = su[row, ][["su_id"]]
   
   # select all the possible (minimum 1) rows from the joined table
   joined_selected = joined %>% 
-    filter(id == id_su)
+    filter(su_id == id_su)
+  
+  # we only want the the rainfall per Slop Unit. And are not directly interested in the single landslides polygons. So if
+  # there are more than one landslide in one su on the same day, we only take one
+  joined_selected = joined_selected %>% dplyr::distinct(date, .keep_all=T)
   
   # check if the slope unit in the joined table has a value in the .id column from the points
   slide_dates_per_su = rep(NA, nrow(joined_selected))
@@ -176,6 +183,23 @@ su = su %>%
   mutate(
     slide = if_else(!is.na(slide_dates), TRUE, FALSE)
   )
+
+# this is just to thest if each slope unit only has unique days
+a = su$slide_dates
+duplicates = 0
+b = sapply(a, function(x){
+  l = length(x); 
+  l_u = length(unique(x))
+  if(l > 1){
+    if(l != l_u){
+      print("duplicates days per slide...")
+      duplicates = duplicates + 1
+    }
+  }
+})
+if(duplicates == 0){
+    print("No Duplicates")
+  } 
 ```
 
 - Now we have all the dates of all slides that happened within each polygon
@@ -189,33 +213,116 @@ su = su %>%
 
 ```{r}
 
+# make a list for each slope unit that as least had one slide
+n_su_with_slides = length = length(which(su$slide))
+su_rainfall = vector("list", length=n_su_with_slides)
+
+# the names of the list are the IDs of the Slope Units
+idx = which(su$slide)
+ids = su[idx,]$su_id
+names(su_rainfall) = ids
+
+# a counter for the print messages
+counter = 1
+
 for (row in 1:nrow(su)) {
   
   # if there actually happened a slide 
+  # this will run as many times as the list elements are in su_rainfall
+  
  if (su[row,]$slide) {
+   
+   n = n_su_with_slides
+   str = paste0(counter, "/", n)
+   dashes = paste0(replicate(20, "-"), collapse = "")
+   cat(yellow$bold$underline("\n------------", str, dashes, "\n\n"))
+  
+   
+   
+   # get the current id of the slope unit
+   current_id = su[row, ]$su_id
     
    dates = su[row,]$slide_dates[[1]]
     
-   ## get the rainfall data for that slope unit
+   ## get the rainfall data for that slope unit the first day
    spatial.obj = su[row, ]
    days_back = 5
    
+   # in case a slope unit experienced more than one slide on morethan one date we need an inner list
+   inner_su_list = vector("list", length=length(dates))
+   
    # get the rainfall for each data a landslide happened in that slope unit
+   # as we are just getting one date this loop will only run once
    for (day in seq_along(dates)) {
+     
+     d = dates[[day]]
      
      res = rainfallR::get_rainfall(data_path = path_ncdf
                                    ,fun = mean
                                    ,spatial.obj = spatial.obj
-                                   ,dts = day
+                                   ,dts = d
                                    ,days_back = days_back)
      
-     res = make_cumulative_rainfall(res, days_back = days_back)
+     # again: THIS ALWAYS RETURNS A LIST BUT AS WE ONLY SUPPLY ONE DTS; SELECT THE FIRST ONE
+     res = rainfallR::make_cumulative_rainfall(res, days_back = days_back) %>% .[[1]]
      
+     # add the rainfall of that event to the list of all events for that slides
+     inner_su_list[[day]] = res
    }
    
-   
+   # add this to the outer list 
+  su_rainfall[[counter]] = inner_su_list
+  
+  # increment the counter
+  counter = counter + 1
+  
  } 
 }
 ```
+
+- We can now stack all the dataframes on top pf each other (although maybe not being best practice...) because each slope unit is uniquely identifiable through its ID
+
+```{r}
+# bind each inner list of dataframes into one dataframe
+one_df_each_su = lapply(su_rainfall, bind_rows)
+
+# now create one big dataframe
+one_df_all_su = bind_rows(one_df_each_su)
+```
+
+
+# Plotting
+
+- We can now plot the antecedent rainfall for all the slope units that experienced landslides
+
+- It would be interesting to extract the rainfall for slope units that did not see any landslide (but for which date)
+
+```{r anim}
+anim_su = one_df_all_su %>%
+  group_by(su_id, date_consid) %>%
+  mutate(time_anim = row_number()) %>%
+  ggplot() +
+  geom_path(mapping = aes(x = days_before_event, y = cumsum, group = su_id, col=cumsum),
+            alpha = .2, size=1.6) +
+ geom_point(aes(x=last(days_before_event), y=cumsum, group=su_id, col=cumsum)) +
+  scale_x_reverse() +
+  scale_color_viridis_c() +
+  labs(
+    x = "Days before the translational Slide",
+    y = "Cumulative Rainfall [mm]",
+    title = "Cumulative Rainfall before a Translational Slide",
+    subtitle = "(on slope unit level)"
+  ) +
+  theme_minimal() +
+  transition_reveal(time_anim)
+
+print(anim_su)
+
+# save the animation
+anim_save(here("plots/anims/anim_polar_antecedent_rainfall_SlopeUnits.gif"), animation=anim_su)
+```
+
+
+
 
 

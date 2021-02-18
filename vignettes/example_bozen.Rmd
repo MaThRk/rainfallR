@@ -227,7 +227,13 @@ pal = colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(selected_raster[[1
 
 bz_sp = as(bozen2, Class="Spatial")
 
-groups_rasters = seq(dts[[1]], dts[[2]], by="day") %>% sapply(., as.character)
+groups_rasters = seq(dts[[1]], dts[[2]], by="day") %>% sapply(., function(x){
+  x = str_replace_all(x, "-", "")
+  paste0("x", x) 
+})
+
+names(selected_raster) = groups_rasters
+
 
 p1 = selected_raster[[1]]
 p2 = selected_raster[[2]]
@@ -236,12 +242,10 @@ p3 = selected_raster[[3]]
 leaflet() %>% 
   addTiles() %>% 
   addCircles(data=bozen2, group = "shape") %>% 
-  addRasterImage(p1, group=groups_rasters[[1]], colors=pal) %>% 
+  addRasterImage(p1, group=n[[1]], colors=pal) %>% 
   addRasterImage(p2, group=groups_rasters[[2]], colors=pal) %>% 
   addRasterImage(p3, group=groups_rasters[[3]], colors=pal) %>% 
   addLayersControl(overlayGroups = c("shape", groups_rasters))
-
-
 ```
 
 

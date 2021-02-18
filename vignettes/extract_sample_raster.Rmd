@@ -1,0 +1,93 @@
+---
+title: "Work with NetCDF data in R"
+output: rmarkdown::html_vignette
+author: Robin
+date: " `r Sys.Date()` "
+vignette: >
+  %\VignetteIndexEntry{extract_sample_raster}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, message=F, warning=F}
+library(rainfallR)
+library(iffitoR)
+library(tidyverse)
+library(scales)
+library(stars)
+library(ncdf4)
+```
+
+
+# Create the paths to the NetCDF
+
+- First, we set some paths. This assumes that the data is available in exactly the format described on the startpage of the vignette
+
+```{r}
+# the path to the netcdf das
+path_data = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"
+
+# set the day you want the data
+day = as.Date("2016-08-16")
+
+# days back
+days_back = 2
+```
+
+- now we can generate the path(s) to the NetCDF-files
+
+```{r}
+# this will return a list of paths. One for each month of data that we need
+paths = rainfallR::get_nc_paths(path_data, day, days_back)
+```
+
+# Load the NetCdf and inspect the data
+
+```{r, echo=F}
+# open the data as ncdf4 object
+ncin = ncdf4::nc_open(paths[[1]])
+
+# read it into a stars object
+ncin_stars = read_ncdf(paths[[1]])
+```
+
+- now we can inspect the data a bit and see that the data has three dimensions and one attributes
+
+```{r}
+ncin_stars
+```
+
+- we can also access them programatically
+
+```{r, message=F}
+# get the dimensions
+dimensions = st_dimensions(ncin_stars)
+
+# get the values of the only attribute
+# this is a 3d-array 
+values = ncin_stars$precipitation
+```
+
+# Get the data for one day
+
+- we need to index the fourth index in order to subset the dates
+
+```{r}
+# get the 16th day
+single_day = ncin_stars[,,,16]
+st_dimensions(single_day)
+```
+
+- and then we can plot it
+
+```{r}
+plot(single_day, main="Precipation on the 16th of August 2016")
+```
+
