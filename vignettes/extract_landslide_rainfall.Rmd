@@ -330,7 +330,7 @@ ggplot(out_unique_slide) +
 
 ```{r, fig.width=10, warning=F, message=F}
 # create an upcounting couter
-out_unique_slide %>% 
+anim_slides = out_unique_slide %>% 
   group_by(id) %>% 
   filter(!is.na(area)) %>% 
   mutate(time_anim = row_number()) %>% 
