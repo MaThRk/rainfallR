@@ -17,7 +17,7 @@ get_rainfall(
 \arguments{
 \item{data_path}{Path to the gridded rainall data}
 
-\item{fun}{A function to aggregate the data in case a polygon is passed as \code{spatial.obj}}
+\item{fun}{A function to aggregate the data in case a polygon is passed as \code{spatial.obj}. Has to be a character}
 
 \item{dts}{Either a single object of type \code{Date} or a vector of at least two dates}
 

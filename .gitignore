@@ -9,3 +9,4 @@ local*
 todo
 *.rds
 plots/
+depre*
