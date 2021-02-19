@@ -256,8 +256,10 @@ for (i in seq_along(slides_same_day)) {
   
 }
 
+res1 = dplyr::bind_rows(out)
+
 end = Sys.time()
-took=end-start
+took1=end-start
 ```
 
 - So the extraction took: `r took` minutes
@@ -280,14 +282,13 @@ names(out) = names(slides_same_day)
 
 # measure the time
 start = Sys.time()
-
-
 registerDoParallel(8)
-
-foreach(i = 1:length(slides_same_day), 
+res = foreach(i = 1:length(slides_same_day), 
         .combine=rbind,
         .packages = c("rainfallR",
-                      "magrittr")) %dopar%{
+                      "magrittr",
+                      "stringr",
+                      "dplyr")) %dopar%{
   
   # get the date of the slides
   # this is one of the inputs to the function
@@ -309,44 +310,8 @@ foreach(i = 1:length(slides_same_day),
     days_back = days_back
   )
 }
-
-
-
-# iterate over the spatial object
-for (i in seq_along(slides_same_day)) {
-  
-  # print some informative message
-  n = length(slides_same_day)
-  str = paste0(i, "/", n)
-  dashes = paste0(replicate(20, "-"), collapse = "")
-  cat(yellow$bold$underline("\n------------", str, dashes, "\n\n"))
-  
-  # get the date of the slides
-  # this is one of the inputs to the function
-  date = names(slides_same_day)[[i]] %>% as.Date(., "%Y%m%d")
-
-  # the spatial object
-  # another input
-  spatial.obj = slides_same_day[[i]]
-
-  # some other arguments
-  days_back =7 
-
-  # this returns a list with one element
-  # if the dts-argument would have more than one data this list would have more arguments
-  rf = rainfallR::ex_rainfall(
-    spatial.obj = spatial.obj,
-    fun = NULL,
-    date = date,
-    days_back = days_back
-  )
-  
-  out[[i]] = rf
-  
-}
-
 end = Sys.time()
-took=end-start
+took2=end-start
 
 ```
 
