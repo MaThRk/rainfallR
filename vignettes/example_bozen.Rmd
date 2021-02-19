@@ -221,9 +221,14 @@ selected_raster = subset(raster_brick, days)
 selected_raster = projectRaster(selected_raster, crs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
 bozen2 = st_transform(bozen2, 4326)
 
-# what have we got?
-pal = colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(selected_raster[[1]]),
+# set up the color palettes for each raster
+pal1 = colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(selected_raster[[1]]),
   na.color = "transparent")
+pal2 = colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(selected_raster[[2]]),
+  na.color = "transparent")
+pal3 = colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(selected_raster[[3]]),
+  na.color = "transparent")
+
 
 bz_sp = as(bozen2, Class="Spatial")
 
@@ -234,7 +239,6 @@ groups_rasters = seq(dts[[1]], dts[[2]], by="day") %>% sapply(., function(x){
 
 names(selected_raster) = groups_rasters
 
-
 p1 = selected_raster[[1]]
 p2 = selected_raster[[2]]
 p3 = selected_raster[[3]]
@@ -242,10 +246,10 @@ p3 = selected_raster[[3]]
 leaflet() %>% 
   addTiles() %>% 
   addCircles(data=bozen2, group = "shape") %>% 
-  addRasterImage(p1, group=n[[1]], colors=pal) %>% 
-  addRasterImage(p2, group=groups_rasters[[2]], colors=pal) %>% 
-  addRasterImage(p3, group=groups_rasters[[3]], colors=pal) %>% 
-  addLayersControl(overlayGroups = c("shape", groups_rasters))
+  addRasterImage(p1, group=names(selected_raster)[[1]], colors=pal1) %>% 
+  addRasterImage(p2, group=names(selected_raster)[[2]], colors=pal2) %>% 
+  addRasterImage(p3, group=names(selected_raster)[[3]], colors=pal3) %>% 
+  addLayersControl(overlayGroups = c("shape", names(selected_raster)))
 ```
 
 

@@ -1,0 +1,109 @@
+---
+title: "ExamplePolygonExtraction"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ExamplePolygonExtraction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Intro
+
+- This is  a small example that shows how to extract rainfall data for vector-polygons. 
+
+- First we need to load the packages and set some paths
+
+
+```{r pkgs, message=F, warning=F}
+library(rainfallR)
+library(stars)
+library(ncdf4)
+library(tidyverse)
+library(scales)
+library(raster)
+library(sf)
+```
+
+- Now we can set some paths
+
+- We will use the gridded rainfall data and a manually created polygon
+
+```{r}
+# the path to the data
+path_data = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"
+
+# path to the slop units
+su_path = "\\\\projectdata.eurac.edu/projects/Proslide/Envir_data/SlopeUnits/su_opt_16_TAA/su_16_TAA.shp"
+```
+
+- Next we set some parameters in order to extract the data from the `rainfallR::get_rainfall`-function
+
+```{r}
+# set some parameters for the rainfallR
+day = as.Date("2016-08-16")
+
+# get the day as integer
+day_int = format(day, "%d")
+
+# we only want one raster to get the bounding box in order to draw s shape
+days_back = 1
+
+# create the path to the NetCDF
+path_ncdf = rainfallR::get_nc_paths(path_data, day, days_back) %>% .[[1]]
+
+# read in one raster
+r = read_ncdf(path_ncdf) 
+
+# extract one raster
+r = r[,,,16]
+```
+
+- Now that we have one raster, let's create a shape
+
+```{r}
+set.seed(2)
+
+# read in the slope units and select a random one
+su = read_sf(su_path)
+
+# select a random one
+su = su %>% slice(sample(1:nrow(su), 1))
+```
+
+
+# Extract the rainfall for one date for that polygon
+
+- We now have:
+
+  * the path to the NetCdfs
+  * a spatial vector object
+  * a date we want to extract the rainfall data
+
+- We can now query the rainfall data as a table with the `rainfallR`-package
+
+```{r getrainfall, message=F, warning=F}
+rainfall = rainfallR::get_rainfall(
+  spatial.obj = su,
+  dts = day,
+  fun = "mean",
+  days_back = 1
+)
+
+# what have we got?
+print(rainfall)
+```
+
+
+- Now lets transform it into long format and get the cumulative sum j
+
+```{r cumsum}
+rainfall_cumsum = rainfallR::make_cumulative_rainfall(rainfall)
+```
+

@@ -60,6 +60,9 @@
       <a href="../articles/extract_landslide_rainfall.html">Extract Rainfalldata for landslides</a>
     </li>
     <li>
+      <a href="../articles/extract_sample_raster.html">Work with NetCDF data in R</a>
+    </li>
+    <li>
       <a href="../articles/extract_su_rainfall.html">Extract rainfall data for the slope units</a>
     </li>
   </ul>
@@ -111,6 +114,7 @@
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">rainfallR</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://github.com/slowkow/ggrepel">ggrepel</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://gganimate.com">gganimate</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">RODBC</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">iffitoR</span><span class="op">)</span> <span class="co"># load some sample landslide data that comes with the package</span>
@@ -169,7 +173,6 @@
     <span class="op">)</span>
   <span class="op">)</span>
 <span class="op">)</span>
-  
 <span class="op">}</span></code></pre></div>
 <ul>
 <li>lets have a little look at what we got back?</li>
@@ -212,8 +215,11 @@
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  date_info (chr) - (eiher 'year', 'month', 'day' or 'no date')</span>
 <span class="co">#&gt;  year.int (integer)</span>
-<span class="co">#&gt;  month.int (integer)</span>
-<span class="co">#&gt;  day.int (integer)</span>
+<span class="co">#&gt;  date (the day as date-object)</span>
+<span class="co">#&gt;  doy (numeric day of the year)</span>
+<span class="co">#&gt;  month.int (integer of the month)</span>
+<span class="co">#&gt;  week (yyyyww e.g. 200201 for the first week in 2002)</span>
+<span class="co">#&gt;  day.int (integer of the day in the month)</span>
 <span class="co">#&gt;  year.posix (date) (object of class date, referenced to the 1st of January of the year)</span>
 <span class="co">#&gt;                       first_level                    second_level year_present</span>
 <span class="co">#&gt; 1                         complex                         complex         TRUE</span>
@@ -239,7 +245,7 @@
 <ul>
 <li>next we filter the data a little more in order to only get the translational sldides that have information about the da of occurence and happened after 1980</li>
 </ul>
-<pre><code>#&gt; [1] 209  17</code></pre>
+<pre><code>#&gt; [1] 209  19</code></pre>
 </div>
 </div>
 <div id="get-the-rainfall-data" class="section level1">
@@ -291,9 +297,6 @@
 <span class="va">n_slides_per_day</span><span class="op">[</span><span class="va">n_slides_per_day</span> <span class="op">==</span> <span class="va">m</span><span class="op">]</span>
 <span class="co">#&gt; 20080711 </span>
 <span class="co">#&gt;       16</span></code></pre></div>
-<ul>
-<li>on the 21st of July there were 9 slides that happended</li>
-</ul>
 </div>
 <div id="get-the-rainfall-data-1" class="section level2">
 <h2 class="hasAnchor">
@@ -338,6 +341,8 @@
   <span class="va">days_back</span> <span class="op">=</span><span class="fl">7</span> 
   <span class="va">seqq</span> <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># we only consider one day per slides (not considering the days back)</span>
 
+  <span class="co"># this returns a list with one element</span>
+  <span class="co"># if the dts-argument would have more than one data this list would have more arguments</span>
   <span class="va">rf</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span><span class="op">(</span><span class="fu">rainfallR</span><span class="fu">::</span><span class="fu"><a href="../reference/get_rainfall.html">get_rainfall</a></span><span class="op">(</span>
     spatial.obj <span class="op">=</span> <span class="va">spatial.obj</span>,
     dts <span class="op">=</span> <span class="va">dts</span>,
@@ -353,7 +358,7 @@
 <span class="va">end</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">took</span><span class="op">=</span><span class="va">end</span><span class="op">-</span><span class="va">start</span></code></pre></div>
 <ul>
-<li><p>So the extraction took: 1.18041823307673 minutes</p></li>
+<li><p>So the extraction took: 1.19343151648839 minutes</p></li>
 <li><p>First we bring each element of the result-list (which are also lists) in a long format. This means, if there would be more dates in the parameter <code>dts</code>, there would be more dataframes in the most inner list that would be converted to long format. Here it is only one.</p></li>
 </ul>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -364,43 +369,43 @@
 <span class="co"># column with the dates before the event</span>
 <span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html">head</a></span><span class="op">(</span><span class="va">out_long_dfs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>
 <span class="co">#&gt; $`20140211`</span>
-<span class="co">#&gt; Simple feature collection with 16 features and 22 fields</span>
+<span class="co">#&gt; Simple feature collection with 16 features and 24 fields</span>
 <span class="co">#&gt; geometry type:  POINT</span>
 <span class="co">#&gt; dimension:      XY</span>
 <span class="co">#&gt; bbox:           xmin: 671300.8 ymin: 5123189 xmax: 697736.7 ymax: 5169464</span>
 <span class="co">#&gt; CRS:            +proj=utm +zone=32 +ellps=WGS84 +units=m +no_defs</span>
-<span class="co">#&gt; # A tibble: 16 x 23</span>
+<span class="co">#&gt; # A tibble: 16 x 25</span>
 <span class="co">#&gt; # Groups:   id [2]</span>
 <span class="co">#&gt;       id PIFF_ID  area tipologia nome_movimento nome_causa first_level</span>
 <span class="co">#&gt;  * &lt;int&gt;   &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;     &lt;chr&gt;          &lt;chr&gt;      &lt;chr&gt;      </span>
-<span class="co">#&gt;  1     1  6.03e4     0 translat~ rotational     &lt;NA&gt;       translatio~</span>
-<span class="co">#&gt;  2     1  6.03e4     0 translat~ rotational     &lt;NA&gt;       translatio~</span>
-<span class="co">#&gt;  3     1  6.03e4     0 translat~ rotational     &lt;NA&gt;       translatio~</span>
-<span class="co">#&gt;  4     1  6.03e4     0 translat~ rotational     &lt;NA&gt;       translatio~</span>
-<span class="co">#&gt;  5     1  6.03e4     0 translat~ rotational     &lt;NA&gt;       translatio~</span>
-<span class="co">#&gt;  6     1  6.03e4     0 translat~ rotational     &lt;NA&gt;       translatio~</span>
-<span class="co">#&gt;  7     1  6.03e4     0 translat~ rotational     &lt;NA&gt;       translatio~</span>
-<span class="co">#&gt;  8     1  6.03e4     0 translat~ rotational     &lt;NA&gt;       translatio~</span>
-<span class="co">#&gt;  9     2  4.27e7   646 translat~ translational  precipita~ translatio~</span>
-<span class="co">#&gt; 10     2  4.27e7   646 translat~ translational  precipita~ translatio~</span>
-<span class="co">#&gt; 11     2  4.27e7   646 translat~ translational  precipita~ translatio~</span>
-<span class="co">#&gt; 12     2  4.27e7   646 translat~ translational  precipita~ translatio~</span>
-<span class="co">#&gt; 13     2  4.27e7   646 translat~ translational  precipita~ translatio~</span>
-<span class="co">#&gt; 14     2  4.27e7   646 translat~ translational  precipita~ translatio~</span>
-<span class="co">#&gt; 15     2  4.27e7   646 translat~ translational  precipita~ translatio~</span>
-<span class="co">#&gt; 16     2  4.27e7   646 translat~ translational  precipita~ translatio~</span>
-<span class="co">#&gt; # ... with 16 more variables: second_level &lt;chr&gt;, year_present &lt;lgl&gt;,</span>
+<span class="co">#&gt;  1     1  6.03e4     0 translat~ rotational sl~ &lt;NA&gt;       translatio~</span>
+<span class="co">#&gt;  2     1  6.03e4     0 translat~ rotational sl~ &lt;NA&gt;       translatio~</span>
+<span class="co">#&gt;  3     1  6.03e4     0 translat~ rotational sl~ &lt;NA&gt;       translatio~</span>
+<span class="co">#&gt;  4     1  6.03e4     0 translat~ rotational sl~ &lt;NA&gt;       translatio~</span>
+<span class="co">#&gt;  5     1  6.03e4     0 translat~ rotational sl~ &lt;NA&gt;       translatio~</span>
+<span class="co">#&gt;  6     1  6.03e4     0 translat~ rotational sl~ &lt;NA&gt;       translatio~</span>
+<span class="co">#&gt;  7     1  6.03e4     0 translat~ rotational sl~ &lt;NA&gt;       translatio~</span>
+<span class="co">#&gt;  8     1  6.03e4     0 translat~ rotational sl~ &lt;NA&gt;       translatio~</span>
+<span class="co">#&gt;  9     2  4.27e7   646 translat~ translational~ precipita~ translatio~</span>
+<span class="co">#&gt; 10     2  4.27e7   646 translat~ translational~ precipita~ translatio~</span>
+<span class="co">#&gt; 11     2  4.27e7   646 translat~ translational~ precipita~ translatio~</span>
+<span class="co">#&gt; 12     2  4.27e7   646 translat~ translational~ precipita~ translatio~</span>
+<span class="co">#&gt; 13     2  4.27e7   646 translat~ translational~ precipita~ translatio~</span>
+<span class="co">#&gt; 14     2  4.27e7   646 translat~ translational~ precipita~ translatio~</span>
+<span class="co">#&gt; 15     2  4.27e7   646 translat~ translational~ precipita~ translatio~</span>
+<span class="co">#&gt; 16     2  4.27e7   646 translat~ translational~ precipita~ translatio~</span>
+<span class="co">#&gt; # ... with 18 more variables: second_level &lt;chr&gt;, year_present &lt;lgl&gt;,</span>
 <span class="co">#&gt; #   month_present &lt;lgl&gt;, day_present &lt;lgl&gt;, date_info &lt;chr&gt;, date &lt;date&gt;,</span>
-<span class="co">#&gt; #   year.int &lt;int&gt;, month.int &lt;int&gt;, day.int &lt;int&gt;, year.posix &lt;date&gt;,</span>
-<span class="co">#&gt; #   date_consid &lt;chr&gt;, date.1 &lt;chr&gt;, precip &lt;dbl&gt;, geometry &lt;POINT [m]&gt;,</span>
-<span class="co">#&gt; #   cumsum &lt;dbl&gt;, days_before_event &lt;int&gt;</span></code></pre></div>
+<span class="co">#&gt; #   year.int &lt;int&gt;, month.int &lt;int&gt;, week &lt;int&gt;, day.int &lt;int&gt;, doy &lt;dbl&gt;,</span>
+<span class="co">#&gt; #   year.posix &lt;date&gt;, date_consid &lt;chr&gt;, date.1 &lt;chr&gt;, precip &lt;dbl&gt;,</span>
+<span class="co">#&gt; #   geometry &lt;POINT [m]&gt;, cumsum &lt;dbl&gt;, days_before_event &lt;int&gt;</span></code></pre></div>
 <ul>
 <li><p>As we can see each the output still is a list of lists. Each inner list could potentially have many dataframes (one for each date in the parameter <code>dts</code>). As we only consider one date here, it is a list of lists where each inner list only has one dataframe.</p></li>
 <li><p>We thus can extract for each element of the inner list the first argument</p></li>
 <li><p>In case we would not have the iffi-index for each slide we would need some way to uniquely distinguish the slides as each list element can potentially have more than one slide (look at the IDs). We will do this by iterating over the list and change the unique id in each dataframe to an entirely unique id in the list</p></li>
 </ul>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># so we exrtact the first (and only) element of each list</span>
+<code class="sourceCode R"><span class="co"># so we extract the first (and only) element of each list</span>
 <span class="va">out_simple_list</span> <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span><span class="va">out_long_dfs</span>, <span class="op">~</span><span class="va">.x</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>
 
 <span class="co">### create unique id for each slide</span>
@@ -430,15 +435,24 @@
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">out_unique_slide</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">days_before_event</span>, y <span class="op">=</span> <span class="va">cumsum</span>, group<span class="op">=</span><span class="va">id</span>, col<span class="op">=</span><span class="va">second_level</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_x_reverse</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_x_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>col<span class="op">=</span><span class="st">""</span>,
+       x <span class="op">=</span> <span class="st">"Days before event"</span>,
+       y <span class="op">=</span> <span class="st">"Cumulative rainfall [mm/day]"</span>,
+       title <span class="op">=</span> <span class="st">"Cumulative Rainfall at slides-points"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_light</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="extract_landslide_rainfall_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
+<div id="landslides-with-little-antecedent-rainfall" class="section level2">
+<h2 class="hasAnchor">
+<a href="#landslides-with-little-antecedent-rainfall" class="anchor"></a>Landslides with little antecedent rainfall</h2>
+</div>
 </div>
 <div id="create-a-little-animation" class="section level1">
 <h1 class="hasAnchor">
 <a href="#create-a-little-animation" class="anchor"></a>Create a little animation</h1>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># create an upcounting couter</span>
-<span class="va">out_unique_slide</span> <span class="op">%&gt;%</span> 
+<span class="va">anim_slides</span> <span class="op">=</span> <span class="va">out_unique_slide</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">area</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>time_anim <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/ranking.html">row_number</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -456,7 +470,6 @@
        y <span class="op">=</span> <span class="st">"Cumulative Rainfall per day [mm]"</span>,
        size <span class="op">=</span> <span class="st">"log 10 area "</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://gganimate.com/reference/transition_reveal.html">transition_reveal</a></span><span class="op">(</span><span class="va">time_anim</span><span class="op">)</span></code></pre></div>
-<p><img src="extract_landslide_rainfall_files/figure-html/unnamed-chunk-7-1.gif"><!-- --></p>
 </div>
   </div>
 
@@ -471,7 +484,7 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by The package maintainer.</p>
+  <p>Developed by .</p>
 </div>
 
 <div class="pkgdown">

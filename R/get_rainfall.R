@@ -10,7 +10,7 @@
 #'
 #' @param data_path Path to the gridded rainall data
 #' @param sptial.obj An object of type \code{sf}. Either a point (or MULTIPOINT) or a polygon (or MULTIPOLYGON))
-#' @param fun A function to aggregate the data in case a polygon is passed as \code{spatial.obj}
+#' @param fun A function to aggregate the data in case a polygon is passed as \code{spatial.obj}. Has to be a character
 #' @param dts Either a single object of type \code{Date} or a vector of at least two dates
 #' @param seqq \code{logical} to create a sequence of days between two dates passed in \code{dts}
 #' @param days_back \code{integer vector} of days of antecedent raindall you want to extract
@@ -42,6 +42,11 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
   if(gtype == "poly" & is.null(fun)){
     warning("You can't use polygons and not provide a function to aggreate the data")
     print("Setting the aggreation automatically to: 'mean'")
+  }
+
+  # if the funtion is not of type character
+  if (!is.character(fun)) {
+    stop("The function-argument must be a character")
   }
 
   # for creating a sequence between two dates
@@ -161,10 +166,10 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
         # make id column to merge after extraction
         spatial.obj$id = 1:nrow(spatial.obj)
         cols = names(spatial.obj)
-        ex = exactextractr::exact_extract(x, spatial.obj, "mean", append_cols = c("id"))
+        ex = exactextractr::exact_extract(x, spatial.obj, fun, append_cols = c("id"))
         # this is no good
         # renaming the mean column to the same format raster::extract returns it x...
-        new_name = paste0("x", str_replace_all(d, "-", ""))
+        new_name = paste0("x", str_replace_all(d, "-", "")) %>% paste0(., fun)
         ex = ex %>% rename(!!new_name := mean)
         # merge back the spatial info
         res = merge(ex, spatial.obj, by="id", ) %>% st_as_sf()

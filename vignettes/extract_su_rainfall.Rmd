@@ -142,8 +142,9 @@ joined = st_join(su, slides)
 slides_per_poly =  joined %>%
   count(su_id, sort = T)
 
+
 # which are the slides that happened in the max slope units
-max_slides = joined[joined$su_id == 3243, ]
+max_slides = joined[joined$su_id == 3242, ]
 
 # assign to each su true or false value if it has or has no landslides
 for (row in 1:nrow(su)) {

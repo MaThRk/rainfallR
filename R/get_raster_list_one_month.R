@@ -1,6 +1,6 @@
 
 #' @export
-get_raster_list_one_month = function(day, days_back, dates_nc, paths_to_data) {
+get_raster_list_one_month = function(day, days_back, dates_nc, paths_to_data, surpressWarnings=TRUE) {
 
   # last day back
   min_day = (day - days_back)
@@ -10,8 +10,14 @@ get_raster_list_one_month = function(day, days_back, dates_nc, paths_to_data) {
   # read the brick once
   ncdf_file = paths_to_data[[1]] %>% str_split(., "/") %>% .[[1]] %>% .[[length(.)]]
   message(paste0("Connecting to: "), ncdf_file)
+
   # reading it as one raster-brick
-  raster_brick = brick(paths_to_data[[1]])
+  # supress warnings as this always generates some warnings that I have no clue what they are
+  if (surpressWarnings) {
+    raster_brick =  suppressWarnings(brick(paths_to_data[[1]]))
+  } else{
+    raster_brick =  brick(paths_to_data[[1]])
+  }
 
   # create the output list
   raster_list = vector("list", length = length(dates_to_extract))
