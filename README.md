@@ -9,8 +9,10 @@
 
 ```r
 # the paths to the public and private ssh-key
-pubic = "C://PATH/TO/PUBLIC/id_rsa.pub",
+public = "C://PATH/TO/PUBLIC/id_rsa.pub",
 private = "C://PATH/TO/PRIVATE/id_rsa"
+
+creds = git2r::cread_ssh_key(public, private)
 
 # install it using devtools
 devtools::install_git("git@gitlab.inf.unibz.it:proslide/rainfallR.git",
