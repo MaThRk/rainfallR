@@ -168,10 +168,10 @@ ex_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PR
 
 # build one dataframe -----------------------------------------------------
 
-  # each objec in the list has data for different dates
+  # each object in the list has data for different dates
 
   # get the geometry of the spatial object(s)
-  # same for each of the list objects
+  # same for each of the list objects as the list objects are the dates
   geom = extracted_days_list[[1]] %>% select(id)
 
   # the colums with the actual values

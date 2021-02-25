@@ -45,8 +45,11 @@ get_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/P
   }
 
   # if the funtion is not of type character
-  if (!is.character(fun)) {
-    stop("The function-argument must be a character")
+  if (!is.null(fun)) {
+    if (!is.character(fun)) {
+      stop("The function-argument must be a character")
+    }
+
   }
 
   # for creating a sequence between two dates

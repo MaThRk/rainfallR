@@ -23,6 +23,7 @@
    # for each function now create one long df
    out_list = vector("list", length=length(fun))
 
+   # for each aggreation function
    for (i in seq_along(fun)) {
 
       # get the colums (days) for only that function
@@ -39,7 +40,7 @@
       # merge back the cols all same
       res = merge(df_long, cols_all_same, by="id")
 
-      # seperathe the measurement column
+      # seperate the the measurement column
       res = res %>%
         tidyr::extract(col=measurement, into=c("date", "fun"), regex="(\\d{8})_([[:alnum:]]+)") %>%
         mutate(
@@ -47,10 +48,16 @@
         )
 
       # calculate the cumulative sum
-      cumsum_colname = paste0("cumsum_", fun[[i]])
+      # cumsum_colname = paste0("cumsum_", fun[[i]])
+      # res = res %>%
+      #   group_by(id) %>%
+      #   mutate(!!cumsum_colname := cumsum(precip))
+
+      # as we already have a fun-column we only need one cumusm-column for
+      # all functions in order to define one row uniquely
       res = res %>%
-        group_by(id) %>%
-        mutate(!!cumsum_colname := cumsum(precip))
+         group_by(id) %>%
+         mutate(cumsum = cumsum(precip))
 
       out_list[[i]] = res
 
@@ -60,6 +67,7 @@
 # stack the different functions -------------------------------------------
 
    cumsum_all_funs = dplyr::bind_rows(out_list)
+   return(cumsum_all_funs)
 
 
     }else{
