@@ -1,0 +1,352 @@
+---
+title: "New extact rainfall Slope Units"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{new_extract_su_rainfall}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Load the packages
+
+```{r pkgs, message=F}
+library(tidyverse)
+library(rainfallR)
+library(here)
+library(gganimate)
+library(iffitoR)
+library(sf)
+library(forcats)
+library(glue)
+library(purrr)
+library(stringr)
+library(crayon) 
+library(raster)
+```
+
+
+# Get the slope units 
+
+- In order to find the slope units on the hard drive in differs between the Linux and the Microsoft path 
+
+```{r}
+# which os to automatically set the paths
+os = Sys.info()["sysname"]
+
+if(os == "Linux"){
+  path_ncdf = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/"
+  su_path = "/mnt/CEPH_PROJECTS/Proslide/Envir_data/SlopeUnits/su_opt_16_TAA/su_16_TAA.shp"
+}else if(os == "Windows"){
+  path_ncdf = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"
+  su_path = "\\\\projectdata.eurac.edu/projects/Proslide/Envir_data/SlopeUnits/su_opt_16_TAA/su_16_TAA.shp"
+}else{
+  stop(call. = F, "what the hell are you working on...")
+}
+```
+
+
+
+# What have we got
+
+- Lets understand a bit about the data that we got
+
+- The slope units not only cover South Tyrol, but also the trentino Region. So lets mask it
+
+- We can use the `iffitoR::get_shape_southtyrol`-function in order to get the outline of South Tyrol
+
+```{r}
+# get vector of South Tyrol
+st = iffitoR::get_shape_southtyrol() 
+st = st %>% st_union()
+ggplot() +
+  geom_sf(data=st) +
+  theme_minimal()
+```
+
+
+- Now we get the vector data for the slope units
+
+```{r}
+su = st_read(su_path)
+# and verify directly if they are in the same crs
+st_crs(su) == st_crs(st)
+```
+
+- As they are not in the same crs, lets reproject the ouline of South Tyrol. The difference, to my knowledge lies in the different geodetic reference systems they use (ETRS89 in the case of South Tyrol and GRS 80 for the slope units).
+
+```{r reprok, warning=F}
+st_reproj = st_transform(st,st_crs(su))
+st_crs(st_reproj) == st_crs(su)
+```
+
+
+## Clip the slopunits to South Tyrol
+
+
+- In order to save some computing time we clip the extent of the slope units to the extent of South Tyrol
+
+
+```{r}
+su = st_crop(su, st_reproj)
+# are the two bounding boxes equal?
+st_bbox(su) == st_bbox(st_reproj) # for some reason the xmax is not the same
+```
+- How many slope untis are left now?
+
+```{r dimsu}
+dim(su)
+```
+
+
+# Get the rainfall for the slope units
+
+# Get the rainfall for the slope Units
+
+```{r}
+glimpse(su)
+```
+
+
+```{r}
+# get the translational slides
+slides = landsld %>% 
+  filter(str_detect(second_level, "translational|rotational|fast")) %>% 
+  filter(date_info == "day") %>% 
+  filter(year.int >= 1980) %>% 
+  mutate(.id = 1:nrow(.)) %>% # give each slide a unique id
+  st_transform(st_crs(su)) 
+
+
+# assign each slope unit an id
+su$su_id = 1:nrow(su) 
+
+# apply spatial join
+# this can have more rows than the original su dataframe
+# each su will appear that many times as they have points in them
+joined = st_join(su, slides)
+# how many slides per points
+slides_per_poly =  joined %>%
+  count(su_id, sort = T)
+
+
+# which are the slides that happened in the max slope units
+max_slides = joined[joined$su_id == 3242, ]
+
+# assign to each su true or false value if it has or has no landslides
+for (row in 1:nrow(su)) {
+  
+  # get the original id from the slope units
+  id_su = su[row, ][["su_id"]]
+  
+  # select all the possible (minimum 1) rows from the joined table
+  joined_selected = joined %>% 
+    filter(su_id == id_su)
+  
+  # we only want the the rainfall per Slope Unit. And are not directly interested in the single landslides polygons. So if there are more than one landslide in one su on the same day, we only take one
+  joined_selected = joined_selected %>% dplyr::distinct(date, .keep_all=T)
+  
+  # check if the slope unit in the joined table has a value in the .id column from the points
+  slide_dates_per_su = rep(NA, nrow(joined_selected))
+ 
+  # check how many points fall in the slope unit for the selected id 
+  for (point in 1:nrow(joined_selected)) {
+    # if there is a value in the .id-column (so there is a point), get the 
+    if (!is.na(joined_selected[point, ]$.id)) {
+      date = joined_selected[point, ]$date
+      slide_dates_per_su[[point]] = date
+    }
+  }
+  
+  # convert back to datetime object 
+  slide_dates_per_su = as.Date.numeric(slide_dates_per_su, origin="1970-01-01")
+  
+  su$slide_dates[[row]] = slide_dates_per_su
+
+}
+
+# make the binary classification
+su = su %>% 
+  mutate(
+    slide = if_else(!is.na(slide_dates), TRUE, FALSE)
+  )
+
+# this is just to thest if each slope unit only has unique days
+a = su$slide_dates
+duplicates = 0
+b = sapply(a, function(x){
+  l = length(x); 
+  l_u = length(unique(x))
+  if(l > 1){
+    if(l != l_u){
+      print("duplicates days per slide...")
+      duplicates = duplicates + 1
+    }
+  }
+})
+if(duplicates == 0){
+    print("No Duplicates")
+  } 
+```
+- Now we have all the dates of all slides that happened within each polygon
+
+# Extract the rainfall data for each su with landslides for each day
+
+- we only are interested in the rainfall of the slope units that actually experienced landslides. Therefore we loop over all the slope units and only take the ones with slides.
+
+- Then we look in the dates column and extract the rainfall for each of the date for that slope unit
+
+
+```{r extractinsequence, eval=F}
+
+# make a list for each slope unit that as least had one slide
+n_su_with_slides = length(which(su$slide))
+su_rainfall = vector("list", length=n_su_with_slides)
+
+# the names of the list are the IDs of the Slope Units
+idx = which(su$slide)
+ids = su[idx,]$su_id
+names(su_rainfall) = ids
+
+# a counter for the print messages
+counter = 1
+start = Sys.time()
+for (row in 1:nrow(su)) {
+  
+  # if there actually happened a slide 
+  # this will run as many times as the list elements are in su_rainfall
+  
+ if (su[row,]$slide) {
+   
+   n = n_su_with_slides
+   str = paste0(counter, "/", n)
+   dashes = paste0(replicate(20, "-"), collapse = "")
+   cat(yellow$bold$underline("\n------------", str, dashes, "\n\n"))
+  
+   
+   
+   # get the current id of the slope unit
+   current_id = su[row, ]$su_id
+    
+   dates = su[row,]$slide_dates[[1]]
+    
+   ## get the rainfall data for that slope unit the first day
+   spatial.obj = su[row, ]
+   days_back = 5
+   
+   # in case a slope unit experienced more than one slide we need an inner list
+   inner_su_list = vector("list", length=length(dates))
+   
+   # get the rainfall for each data a landslide happened in that slope unit
+   # as we are just getting one date this loop will only run once
+   for (day in seq_along(dates)) {
+     
+     d = dates[[day]]
+     
+     res = rainfallR::ex_rainfall(data_path = path_ncdf, spatial.obj = spatial.obj, fun = "mean",date = d, days_back = days_back )
+     
+     # add the rainfall of that event to the list of all events for that slope unit
+     inner_su_list[[day]] = res
+   }
+   
+   # add this to the outer list 
+  su_rainfall[[counter]] = inner_su_list
+  
+  # increment the counter
+  counter = counter + 1
+  
+ } 
+}
+end = Sys.time()
+took1 = end-start
+
+```
+
+
+# Lets do it in parallel
+
+```{r extractinparallel}
+
+library(foreach)
+library(doParallel)
+
+# make a list for each slope unit that as least had one slide
+n_su_with_slides = length(which(su$slide))
+su_rainfall = vector("list", length=n_su_with_slides)
+
+# the names of the list are the IDs of the Slope Units
+idx = which(su$slide)
+ids = su[idx,]$su_id
+names(su_rainfall) = ids
+
+# a counter for the print messages
+counter = 1
+
+# use eight cores
+registerDoParallel(8)
+
+start = Sys.time()
+
+res = foreach(
+  i = 1:nrow(su),
+  .combine = rbind,
+  .packages = c("rainfallR",
+                "dplyr",
+                "magrittr",
+                "stringr")
+) %dopar%{
+  # if there actually happened a slide
+  # this will run as many times as the list elements are in su_rainfall
+  
+  if (su[row, ]$slide) {
+   
+  
+  
+  # get the current id of the slope unit
+  current_id = su[row,]$su_id
+  
+  dates = su[row, ]$slide_dates[[1]]
+  
+  ## get the rainfall data for that slope unit the first day
+  spatial.obj = su[row,]
+  days_back = 5
+  
+  # in case a slope unit experienced more than one slide we need an inner list
+  inner_su_list = vector("list", length = length(dates))
+  
+  # get the rainfall for each data a landslide happened in that slope unit
+  # as we are just getting one date this loop will only run once
+  for (day in seq_along(dates)) {
+    d = dates[[day]]
+    
+    r = rainfallR::ex_rainfall(
+      data_path = path_ncdf,
+      spatial.obj = spatial.obj,
+      fun = "mean",
+      date = d,
+      days_back = days_back
+    )
+    
+    # add the rainfall of that event to the list of all events for that slope unit
+    inner_su_list[[day]] = r
+  }
+  
+  # add this to the outer list
+  inner_su_list
+  
+  # increment the counter
+  counter = counter + 1
+  }
+  
+}
+end = sys.time()
+took2 = end-start
+
+```
+

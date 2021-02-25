@@ -17,6 +17,9 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+
+day_for_dir = Sys.Date() %>% str_replace_all(., "-", "") %>% as.character()
 ```
 
 # Set some paths
@@ -41,10 +44,12 @@ path_ncdf = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"
 ```{r libs, message=F, warning=F}
 # load some libraries
 library(rainfallR)
+library(here)
 library(ggrepel)
 library(gganimate)
 library(RODBC)
 library(dplyr)
+library(scales)
 library(ggplot2)
 library(iffitoR) # load some sample landslide data that comes with the package
 library(sf)
@@ -154,7 +159,7 @@ if (os == "Windows") {
 
 - We want to extract the rainfall data for each of the `r dim(iffi_translational)[[1]]` points
 
-- We not only want the rainfall at the day of occurence, but also the 7 days before the actualy event happended
+- We not only want the rainfall at the day of occurrence, but also the 7 days before the actualy event happended
 
 - As we have one raster per day and one raster covers the entire province of South Tyrol, we will make a list of all the events that happened on the same day. This will prevent us of extracting the same raster twice
 
@@ -164,11 +169,12 @@ if (os == "Windows") {
 # now lets use the data that comes already preprocessed with the iffitoR package
 # we need to filter the right slides as we did above for the data queried from the databse
 landsld = landsld %>%
-  filter(str_detect(second_level, "translational|rotational")) %>%
+  filter(str_detect(second_level, "translational|rotational|fast")) %>%
   filter(date_info == "day") %>%
   filter(year.int >= 1980) 
 
 # create the list for the events on the same day
+# each list element is an object of class sf. The number of rows determines the events on that day
 slides_same_day = list()
 
 for (row in 1:nrow(landsld)) {
@@ -214,7 +220,7 @@ n_slides_per_day[n_slides_per_day == m]
 ```{r extractrainfallslides, message=FALSE, warning=FALSE, cache=TRUE, results="hide"}
 
 # lets only take a smaller subset
-slides_same_day = slides_same_day[1:20]
+slides_same_day = slides_same_day
 
 # for each day get the rainfall at the slide location
 out = vector("list", length=length(slides_same_day))
@@ -240,7 +246,7 @@ for (i in seq_along(slides_same_day)) {
   # another input
   spatial.obj = slides_same_day[[i]]
 
-  # some other arguments
+  # how many days looking back?
   days_back =7 
 
   # this returns a list with one element
@@ -262,7 +268,7 @@ end = Sys.time()
 took1=end-start
 ```
 
-- So the extraction took: `r took` minutes
+- So the extraction in sequence for all dates took: `r took1` minutes
 
 
 # Can we do this in parallel?
@@ -274,7 +280,7 @@ library(parallel)
 
 
 # lets only take a smaller subset
-slides_same_day = slides_same_day[1:20]
+slides_same_day = slides_same_day
 
 # for each day get the rainfall at the slide location
 out = vector("list", length=length(slides_same_day))
@@ -305,7 +311,7 @@ res = foreach(i = 1:length(slides_same_day),
   # if the dts-argument would have more than one data this list would have more arguments
   rf = rainfallR::ex_rainfall(
     spatial.obj = spatial.obj,
-    fun = NULL,
+    fun = NULL, # as we are using points
     date = date,
     days_back = days_back
   )
@@ -316,81 +322,252 @@ took2=end-start
 ```
 
 
+- The extraction in parallel took `r took2` minutes.
+
+# Inspect what we got
 
 
-
-- As we can see each the output still is a list of lists. Each inner list could potentially have many dataframes (one for each date in the parameter `dts`). As we only consider one date here, it is a list of lists where each inner list only has one dataframe.
-
-- We thus can extract for each element of the inner list the first argument 
-
-- In case we would not have the iffi-index for each slide we would need some way to uniquely distinguish the slides as each list element can potentially have more than one slide (look at the IDs). We will do this by iterating over the list and change the unique id in each dataframe to an entirely unique id in the list
-
-
-```{r extractfirst, message=F}
-# so we extract the first (and only) element of each list
-out_simple_list = map(out_long_dfs, ~.x[[1]])
-
-### create unique id for each slide
-# get the first and already create the new id
-out_unique_slide = out_simple_list[[1]] %>% 
-  mutate(id = paste0(1, "_", id))
-
-# loop over the others and use the counter variable as additional identifier
-for (i in seq_along(out_simple_list)) {
-  # dont do it for the first one
-  if(!i==1){
-    df = out_simple_list[[i]] %>% 
-      mutate(id = paste0(i, "_", id))
-    out_unique_slide = rbind(out_unique_slide, df)
-      
-  }
-}
-```
- 
-
-# Plot the data
-
-- As we have this new id we can now plot each slide or by the iffi-kodex or by the id
-
-- Now we can proceed to plot the data in order to better understand it and at the same time also perform a first validation of the data
+## Cumulative antecedent rainfall
 
 ```{r}
-ggplot(out_unique_slide) +
-  geom_line(aes(x = days_before_event, y = cumsum, group=id, col=second_level)) +
+gg = ggplot(res) +
+  geom_path(
+    mapping = aes(x=days_before_event, cumsum, group=PIFF_ID, col=second_level),
+    alpha=.5) +
+  scale_colour_manual(name="Movement type", values = c("black", "purple", "green")) +
+  guides(colour = guide_legend(override.aes = list(alpha=1))) +
+  theme_light() +
   scale_x_reverse() +
-  labs(col="",
-       x = "Days before event",
-       y = "Cumulative rainfall [mm/day]",
-       title = "Cumulative Rainfall at slides-points") +
-  theme_light()
+  labs(
+    y = "Cumulative rainfann [mm]",
+    x = "Days before event",
+    title = "Amount of antecedent rainfall [mm]"
+  )
+
+file = here(paste0("plots/", day_for_dir, "/antecent_rainfall_different_second_level.png"))
+ggsave(filename = file, plot = gg) 
+
 ```
 
+## Single rainfall days before event
+
+```{r}
+
+l = c("mean_daily_precip" = "Mean Daily Precipiation" , "mean_cumulative_precip" = "Mean Cumulative Precipitation")
+
+res %>%
+  group_by(second_level, days_before_event) %>%
+  summarise(mean_daily_precip = mean(precip),
+            mean_cumulative_precip = mean(cumsum)) %>%
+  pivot_longer(cols = contains("mean"),
+               values_to = "value",
+               names_to = "dimension") %>%
+  ggplot() +
+  geom_path(mapping = aes(x = days_before_event, y = value, col = second_level)) +
+  scale_colour_manual(name = "Type of Movement", values = c("fast flow-type" = "purple", "translational slide" = "black", "rotational slide" =  "green")) +
+  scale_x_reverse() + 
+  facet_wrap(~dimension, labeller = as_labeller(l)) +
+  theme_light() +
+  labs(
+    x = "Days before Event",
+    y = "Precipitation [mm]"
+  ) +
+  theme(
+    strip.text.x = element_text(color="black"),
+    strip.background = element_rect(fill="white")
+  )
+  
+file = here(paste0("plots/", day_for_dir, "/mean_rainfall_per_type.png"))
+ggsave(file)
+```
+
+
+
+# Difference in amount of rainfall between start and end 
+
+- In the above graphic it's hard to see the evolution of one path
+
+
+```{r}
+res %>% 
+  group_by(PIFF_ID) %>% 
+  mutate(
+    diff = last(cumsum) - first(cumsum)
+  ) %>% 
+  ungroup() %>% 
+  mutate(
+    sd = 2 * sd(diff),
+    outlier = ifelse(diff > sd, TRUE, FALSE) 
+  ) %>% 
+  ggplot() +
+  geom_path(
+    mapping = aes(x=days_before_event, y = cumsum, group=PIFF_ID, col = diff,
+                  alpha = diff)
+  ) +
+  scale_colour_continuous(
+    name="Absolute Difference in precipitation between last and first day", 
+    low = "white", 
+    high="red")  +
+  guides(alpha = FALSE) +
+  scale_x_reverse() +
+  theme_minimal() +
+  labs(
+    x = "Days before Event",
+    y = "cumulative precipitation [mm]",
+    title = "Precipitation [mm] before an graviational mass movement",
+    subtitle = "(translational and rotational movements)"
+  ) +
+  theme(
+    legend.position = "bottom"
+  )
+
+ggsave("../../../presentations/internship_resume/plots/plots/precipitation_all_trans_and_rotational_movements.png", width = 12, height = 8)
+
+```
 
 ## Landslides with little antecedent rainfall
 
-
-# Create a little animation
-
-```{r, fig.width=10, warning=F, message=F}
-# create an upcounting couter
-anim_slides = out_unique_slide %>% 
-  group_by(id) %>% 
-  filter(!is.na(area)) %>% 
-  mutate(time_anim = row_number()) %>% 
-  mutate(area = log10(area)) %>% 
-ggplot(., aes(x=days_before_event, y=cumsum, group=id, col=second_level), lwd=2) +
-  geom_line() +
-  geom_point(aes(size=area)) +
+```{r}
+res %>% 
+  group_by(PIFF_ID) %>% 
+  mutate(
+    diff = last(cumsum) - first(cumsum)
+  ) %>% 
+  ungroup() %>% 
+  mutate(
+    sd = 2 * sd(diff),
+    outlier = ifelse(diff > sd, TRUE, FALSE) 
+  ) %>% 
+  ggplot() +
+  geom_path(
+    mapping = aes(x=days_before_event, y = cumsum, group=PIFF_ID, col = diff,
+                  alpha = diff)
+  ) +
+  scale_colour_continuous(
+    name="Absolute Difference in precipitation between last and first day", 
+    low = "red", 
+    high="white")  +
+  guides(alpha = FALSE) +
   scale_x_reverse() +
-  geom_segment(aes(xend=0, yend=cumsum), linetype=2, colour="grey") +
-  geom_text(aes(x = -0.3, label=PIFF_ID)) +
-  theme_light() +
-  labs(title="Cumulative Rainfall before Landslides",
-       subtitle = "at point location",
-       x = "Days before Slide", 
-       y = "Cumulative Rainfall per day [mm]",
-       size = "log 10 area ") +
-  transition_reveal(time_anim)
+  theme_minimal() +
+  labs(
+    x = "Days before Event",
+    y = "cumulative precipitation [mm]",
+    title = "Precipitation [mm] before an graviational mass movement",
+    subtitle = "(translational and rotational movements)"
+  ) +
+  theme(
+    legend.position = "bottom"
+  ) 
+
+ggsave("../../../presentations/internship_resume/plots/plots/precipitation_all_trans_and_rotational_movements_reverse.png", width = 12, height = 8)
+
+
 ```
+
+
+
+# Do it for all types of movements
+
+```{r allmovementssevendays}
+# now lets use the data that comes already preprocessed with the iffitoR package
+# we need to filter the right slides as we did above for the data queried from the databse
+rm(list = c("landsld"))
+landsld = landsld %>%
+  filter(date_info == "day") %>%
+  filter(year.int >= 1980) 
+
+slides_same_day = list()
+
+for (row in 1:nrow(landsld)) {
+  # get the day of the event
+  dts = landsld[row,][["date"]]
+  dts_chr = as.character(dts) %>% str_replace_all(., "-", "")
+
+  # add this spatial object to the list with the name being the day
+  if(dts_chr %in% names(slides_same_day)){
+    slides_same_day[[dts_chr]] = rbind(slides_same_day[[dts_chr]], landsld[row,])
+  } else{
+    slides_same_day[[dts_chr]] = landsld[row, ]
+  }
+}
+
+# which was the day with the most movements overall
+m = sapply(slides_same_day, nrow)
+which.max(m)
+
+
+# for each day get the rainfall at the slide location
+
+# measure the time
+start = Sys.time()
+registerDoParallel(10)
+res = foreach(i = 1:length(slides_same_day), 
+        .combine=rbind,
+        .packages = c("rainfallR",
+                      "magrittr",
+                      "stringr",
+                      "dplyr")) %dopar%{
+  
+  # get the date of the slides
+  # this is one of the inputs to the function
+  date = names(slides_same_day)[[i]] %>% as.Date(., "%Y%m%d")
+
+  # the spatial object
+  # another input
+  spatial.obj = slides_same_day[[i]]
+
+  # some other arguments
+  days_back =7 
+
+  # this returns a list with one element
+  # if the dts-argument would have more than one data this list would have more arguments
+  rf = rainfallR::ex_rainfall(
+    spatial.obj = spatial.obj,
+    fun = NULL,
+    date = date,
+    days_back = days_back
+  )
+}
+end = Sys.time()
+took3=end-start
+
+
+```
+
+```{r}
+res %>% 
+  st_drop_geometry() %>% 
+  filter(!is.na(cumsum)) %>% 
+  group_by(PIFF_ID) %>% 
+  mutate(
+    diff = last(cumsum) - first(cumsum)
+  ) %>% 
+  ungroup() %>% 
+  group_by(second_level) %>% 
+  mutate(n = n(),
+    second_level = glue("{second_level} ({n / 8} )")) %>% 
+  summarise(mean_diff = mean(diff)) %>% 
+  ungroup() %>% 
+  mutate(
+    second_level = fct_reorder(second_level, mean_diff)
+  ) %>% 
+  ggplot() +
+  geom_col(aes(x = mean_diff, y=second_level),
+           fill="black") +
+  labs(
+    x = "Rainfall [mm]",
+    y = "",
+    title = "Mean cumulative rainfall in the 7 days before the movement",
+    subtitle = "classified in the second level (# of events)"
+  ) +
+  theme_minimal()
+
+
+ggsave("../../../presentations/internship_resume/plots/plots/rainfall_second_level_seven_days_before_movement.png", width = 12, 
+       height=8)  
+```
+
+## do it for two days
 
 

@@ -55,6 +55,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="articles/ExamplePolygonExtraction.html">ExamplePolygonExtraction</a>
+    </li>
+    <li>
       <a href="articles/example_bozen.html">Extracting data for bozen</a>
     </li>
     <li>
@@ -65,6 +68,9 @@
     </li>
     <li>
       <a href="articles/extract_su_rainfall.html">Extract rainfall data for the slope units</a>
+    </li>
+    <li>
+      <a href="articles/new_extract_landslide_rainfall.html">New Extract Rainfalldata for landslides</a>
     </li>
   </ul>
 </li>
@@ -84,6 +90,13 @@
 <div id="rainfallr" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#rainfallr" class="anchor"></a>rainfallR</h1></div>
+<div id="installation" class="section level2">
+<h2 class="hasAnchor">
+<a href="#installation" class="anchor"></a>Installation</h2>
+<p><strong>gitlab</strong></p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"></code></pre></div>
+</div>
 <div id="main-functionalities" class="section level2">
 <h2 class="hasAnchor">
 <a href="#main-functionalities" class="anchor"></a>Main Functionalities</h2>
@@ -100,7 +113,7 @@
 │   ├── DAILYPCP_198003.nc
 │   ├── DAILYPCP_198004.nc</code></pre>
 <ul>
-<li>This means that the root-folder here is <code>PREC_GRID</code>
+<li>This means that the root-folder here is <code>PREC_GRIDS</code>
 <ul>
 <li>One level below are folders for all the years
 <ul>
@@ -112,27 +125,43 @@
 <li>one can easily get the path to one raster with the function <code>get_nc_path</code>
 </li>
 </ul>
-<pre><code>data_path = "absolute_or_relative_path_to/PREC_GRIDs"
-days_back = 1
-day = as.Date("2009-01-20")
-# will return:
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">data_path</span> <span class="op">=</span> <span class="st">"absolute_or_relative_path_to/PREC_GRIDs"</span>
+<span class="va">days_back</span> <span class="op">=</span> <span class="fl">1</span>
+<span class="va">day</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="st">"2009-01-20"</span><span class="op">)</span>
+<span class="co"># will return:</span>
 
-# $`200901`
-#[1] "absolute_or_relative_path_to/PREC_GRIDs2009/DAILYPCP_200901.nc"</code></pre>
+<span class="co"># $`200901`</span>
+<span class="co">#[1] "absolute_or_relative_path_to/PREC_GRIDs2009/DAILYPCP_200901.nc"</span></code></pre></div>
 <hr>
 </div>
 <div id="extract-data-of-netcdfs-for-vector-data" class="section level3">
 <h3 class="hasAnchor">
 <a href="#extract-data-of-netcdfs-for-vector-data" class="anchor"></a>Extract data of NetCDFs for Vector data</h3>
 <ul>
-<li><p>If one is interested in extracting the rainfall-pixel-data that is intersecting with vector data one can use the function <code>rainfallR::ge_rainfall()</code></p></li>
+<li>If one is interested in extracting the gridded rainfall-data that is intersecting with vector data one can use the function <code><a href="reference/get_rainfall.html">rainfallR::get_rainfall()</a></code>
+</li>
+</ul>
+<div id="update-22022021" class="section level4">
+<h4 class="hasAnchor">
+<a href="#update-22022021" class="anchor"></a>UPDATE (22.02.2021)</h4>
+<ul>
+<li><p>It’s better to use the function <code><a href="reference/ex_rainfall.html">rainfallR::ex_rainfall()</a></code> as the code within the function is clearer and the possibility exists to potentially pass multiple aggreagation-funtions when polygon data is used for the extraction</p></li>
 <li><p>For the extraction of *points** no aggreation is performed and the pixel value of the raster is extracted</p></li>
 <li><p>For *polygons** one can theoretically choose (at the moment only the mean) between multiple aggregation functions</p></li>
-<li><p>For the point data the package uses <code><a href="https://rdrr.io/pkg/raster/man/extract.html">raster::extract</a></code> and for the extraction and aggregation the packge uses <code><a href="https://isciences.gitlab.io/exactextractr/reference/exact_extract.html">exactextractr::exact_extract</a></code></p></li>
-<li><p>See <a href="https://robinkohrs.github.io/rainfallR/articles/extract_landslide_rainfall.html">this vignette for more info</a></p></li>
+<li><p>For the point data the package uses <code><a href="https://rdrr.io/pkg/raster/man/extract.html">raster::extract</a></code> and for the extraction and aggregation the package uses <code><a href="https://isciences.gitlab.io/exactextractr/reference/exact_extract.html">exactextractr::exact_extract</a></code></p></li>
+</ul>
+</div>
+<div id="more-help" class="section level4">
+<h4 class="hasAnchor">
+<a href="#more-help" class="anchor"></a>More help</h4>
+<ul>
+<li>See <a href="https://robinkohrs.github.io/rainfallR/articles/extract_landslide_rainfall.html">this vignette for more info</a>
+</li>
 </ul>
 <hr>
 <p><img src="reference/figures/readmeplot.png"></p>
+</div>
 </div>
 </div>
 </div>

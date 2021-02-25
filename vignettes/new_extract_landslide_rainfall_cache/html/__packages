@@ -1,0 +1,16 @@
+base
+rainfallR
+ggplot2
+ggrepel
+gganimate
+RODBC
+dplyr
+iffitoR
+sf
+sp
+raster
+forcats
+glue
+purrr
+stringr
+crayon

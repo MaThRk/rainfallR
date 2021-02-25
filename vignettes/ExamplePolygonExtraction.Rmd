@@ -58,7 +58,7 @@ days_back = 1
 # create the path to the NetCDF
 path_ncdf = rainfallR::get_nc_paths(path_data, day, days_back) %>% .[[1]]
 
-# read in one raster
+# read in one raster with stars
 r = read_ncdf(path_ncdf) 
 
 # extract one raster
@@ -89,11 +89,11 @@ su = su %>% slice(sample(1:nrow(su), 1))
 - We can now query the rainfall data as a table with the `rainfallR`-package
 
 ```{r getrainfall, message=F, warning=F}
-rainfall = rainfallR::get_rainfall(
+rainfall = rainfallR::ex_rainfall(
   spatial.obj = su,
-  dts = day,
-  fun = "mean",
-  days_back = 1
+  date = day,
+  fun = c("mean", "max"),
+  days_back = 3
 )
 
 # what have we got?

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Some helper functions — get_dates_ncdf • rainfallR</title>
+<title>Will calculate the cumulative sum of the measurements over time — make_cumsum • rainfallR</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Some helper functions — get_dates_ncdf" />
-<meta property="og:description" content="Some helper functions" />
+<meta property="og:title" content="Will calculate the cumulative sum of the measurements over time — make_cumsum" />
+<meta property="og:description" content="Will calculate the cumulative sum of the measurements over time" />
 
 
 
@@ -130,30 +130,17 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Some helper functions</h1>
+    <h1>Will calculate the cumulative sum of the measurements over time</h1>
     
-    <div class="hidden name"><code>get_dates_ncdf.Rd</code></div>
+    <div class="hidden name"><code>make_cumsum.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Some helper functions</p>
+    <p>Will calculate the cumulative sum of the measurements over time</p>
     </div>
 
-    <pre class="usage"><span class='fu'>get_dates_ncdf</span><span class='op'>(</span><span class='va'>ncin</span>, return_date_object <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>make_cumsum</span><span class='op'>(</span><span class='va'>df_wide</span>, <span class='va'>fun</span>, <span class='va'>days_back</span><span class='op'>)</span></pre>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>ncin</th>
-      <td><p>An object of class <code>ncdf4</code></p></td>
-    </tr>
-    <tr>
-      <th>return_date_object</th>
-      <td><p><code>logical</code> If true returns a vector of
-<code>date</code>-object, else vector of characterstring</p></td>
-    </tr>
-    </table>
 
 
   </div>
