@@ -28,11 +28,13 @@
       # get the colums (days) for only that function
       # and add the id. Should be valid to do that here
       df = cols_vals %>% select(contains(fun[[i]])) %>%
-        mutate(id = 1:nrow(.),
-               days_before_even = nrow(.):1)
+        mutate(id = 1:nrow(.))
 
       # reshape it
-      df_long = df %>% pivot_longer(cols=-id, values_to = "precip", names_to = "measurement")
+      df_long = df %>% pivot_longer(cols=-id, values_to = "precip", names_to = "measurement") %>%
+         mutate(
+            days_before_event = seq(days_back + 1, 1)
+         )
 
       # merge back the cols all same
       res = merge(df_long, cols_all_same, by="id")

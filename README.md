@@ -1,5 +1,12 @@
 # rainfallR
 
+## Installation
+
+**gitlab**
+
+```r
+
+```
 ## Main Functionalities
 
 ***
