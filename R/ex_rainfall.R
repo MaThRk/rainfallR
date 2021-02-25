@@ -176,7 +176,7 @@ ex_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PR
 
   # the colums with the actual values
   cols_with_vals = lapply(extracted_days_list, function(x) {
-    str_subset(names(x), "\\d{8}|id")
+    str_subset(names(x), "\\d{8}|\\bid\\b")
   })
 
   # the dataframe to append at the end
