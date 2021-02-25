@@ -49,11 +49,18 @@ day = as.Date("2009-01-20")
 
 - If one is interested in extracting the gridded rainfall-data that is intersecting with vector data one can use the function `rainfallR::get_rainfall()`
 
+#### UPDATE (22.02.2021)
+
+- It's better to use the function `rainfallR::ex_rainfall()` as the code within the function is clearer and the possibility exists to potentially pass multiple aggreagation-funtions when polygon data is used for the extraction
+
 - For the extraction of *points** no aggreation is performed and the pixel value of the raster is extracted
 
 - For *polygons** one can theoretically choose (at the moment only the mean) between multiple aggregation functions
 
 - For the point data the package uses `raster::extract` and for the extraction and aggregation the package uses `exactextractr::exact_extract`
+
+
+#### More help
 
 - See [this vignette for more info](https://robinkohrs.github.io/rainfallR/articles/extract_landslide_rainfall.html)
 
