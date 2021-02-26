@@ -568,6 +568,5 @@ ggsave("../../../presentations/internship_resume/plots/plots/rainfall_second_lev
        height=8)  
 ```
 
-## do it for two days
 
 
