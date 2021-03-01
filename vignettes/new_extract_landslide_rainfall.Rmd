@@ -414,7 +414,7 @@ res %>%
   labs(
     x = "Days before Event",
     y = "cumulative precipitation [mm]",
-    title = "Precipitation [mm] before an graviational mass movement",
+    title = "Precipitation [mm] before a graviational mass movement",
     subtitle = "(translational and rotational movements)"
   ) +
   theme(
