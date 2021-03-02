@@ -125,10 +125,9 @@ dim(su)
 
 
 ```{r slidessameday}
+landsld = landsld %>% filter(str_detect(second_level, "translational|rotational"))
 su_points_in_poly = rainfallR::slide_dates_in_polygon(poly = su_path
-                                                      ,iffi10 = landsld
-                                                      ,second_level_regex = NULL
-                                                      ,min_year = 2000)
+                                                      ,iffi10 = landsld)
 ```
 
 - Now we have all the dates of all slides that happened within each polygon of su
@@ -136,7 +135,7 @@ su_points_in_poly = rainfallR::slide_dates_in_polygon(poly = su_path
 - One interesting question would be to ask what the day and slope unit was that saw most movements?
 
 
-```{r}
+```{r mostslidesinpoly}
 su_points_in_poly %>% 
   dplyr::select(c(poly_id, date, month.int, second_level, slides_per_poly_date)) %>%  
   arrange(desc(slides_per_poly_date)) %>% 
@@ -152,177 +151,34 @@ su_points_in_poly %>%
 
 - Then we look in the dates column and extract the rainfall for each of the date for that slope unit
 
-- We could do this in sequence
+- We could do this in sequence, but lets do it in parallel as the extraction of the rainfall for each slope unit are independent tasks
 
+# Use the results from the new `slide_dates_in_polygon`-function
 
-```{r extractinsequence, eval=F}
+- The function `get_rainfall_for_polygons` iterates over the dataframe returned by `slides_dates_in_polygon`
 
-# make a list for each slope unit that as least had one slide
-n_su_with_slides = length(which(su$slide))
-su_rainfall = vector("list", length=n_su_with_slides)
+- This is done in parallel as each row is one spatial object and is idependent of the others
 
-# the names of the list are the IDs of the Slope Units
-idx = which(su$slide)
-ids = su[idx,]$su_id
-names(su_rainfall) = ids
+- In the end they are just stacked up to build one big dataframe
 
-# a counter for the print messages
-counter = 1
-start = Sys.time()
-for (row in 1:nrow(su)) {
-  
-  
-  # if there actually happened a slide 
-  # this will run as many times as the list elements are in su_rainfall
-  
- if (su[row,]$slide) {
-   
-   n = n_su_with_slides
-   str = paste0(counter, "/", n)
-   dashes = paste0(replicate(20, "-"), collapse = "")
-   cat(yellow$bold$underline("\n------------", str, dashes, "\n\n"))
-  
-   
-   
-   # get the current id of the slope unit
-   current_id = su[row, ]$su_id
-    
-   dates = su[row,]$slide_dates[[1]]
-    
-   ## get the rainfall data for that slope unit the first day
-   spatial.obj = su[row, ]
-   days_back = 5
-   
-   # in case a slope unit experienced more than one slide we need an inner list
-   inner_su_df = data.frame()
-   
-   # get the rainfall for each data a landslide happened in that slope unit
-   # as we are just getting one date this loop will only run once
-   for (day in seq_along(dates)) {
-     
-     d = dates[[day]]
-     
-     res = rainfallR::ex_rainfall(data_path = path_ncdf, spatial.obj = spatial.obj, fun = "mean",date = d, days_back = days_back )
-     
-     # just to make sure you can afterwards identify mulitple slides within one su
-     res[["slide_su_id"]] = day
-     
-     # add the rainfall of that event to the list of all events for that slope unit
-     inner_su_df = rbind(inner_su_df, res)
-   }
-   
-   # add this to the outer list 
-  su_rainfall[[counter]] = inner_su_list
-  
-  # increment the counter
-  counter = counter + 1
-  
- } 
-}
-end = Sys.time()
-took1 = end-start
-
+```{r newpointinpolyfuntion}
+# get the antecedent rainfall for all the dates in all the slope units with landslides
+slopeunits_rainfall = rainfallR::get_rainfall_for_polygons(su_points_in_poly)
 ```
 
 
-# Lets do it in parallel (with the old function)
+### What have we got back? 
 
-```{r extractinparallel, eval=F}
+Within the `get_rainfall_for_polygons`-function:
 
-# load the su data with the slide day
-su = readRDS(here("local_data/su_with_slide_dates.Rdata"))
+- The function `ex_rainfall`  which is called as many times as rows in the `su_points_in_poly`-object returns a dataframe
 
-library(foreach)
-library(doParallel)
+- We used the `.rbind`-parameter for the `.combine`.argument,  `slopeunits_rainfall` is one large dataframe
 
-# make a list for each slope unit that as least had one slide
-n_su_with_slides = length(which(su$slide))
-su_rainfall = vector("list", length = n_su_with_slides)
-
-# the names of the list are the IDs of the Slope Units
-idx = which(su$slide)
-ids = su[idx, ]$su_id
-names(su_rainfall) = ids
-
-# a counter for the print messages
-counter = 1
-
-# use eight cores
-registerDoParallel(6)
-
-start = Sys.time()
-output = foreach(
-  i = 1:nrow(su),
-  .combine = rbind,
-  .packages = c("rainfallR",
-                "dplyr",
-                "magrittr",
-                "stringr")
-) %dopar% {
-  
-  # if there actually happened a slide
-  
-  if (su[i,]$slide) {
-    
-    # one dataframe for slope units. Possibly multiple days
-    df = data.frame()
-    
-    # get the current id of the slope unit
-    current_id = su[i, ]$su_id
-    
-    # get all the dates in that slope unit
-    dates = su[i,]$slide_dates[[1]]
-    
-    # the spatial object is the slope unit in the for loop
-    spatial.obj = su[i, ]
-    
-    # lets look back 5 days
-    days_back = 5
-    
-    # in case a slope unit experienced more than one slide we need an inner list
-    # inner_su_list = vector("list", length = length(dates))
-    
-    
-    # get the rainfall for each data a landslide happened in that slope unit
-    # as we are just getting one date this loop will only run once
-    for (day in seq_along(dates)) {
-      
-      # get the day in the slope unit
-      d = dates[[day]]
-      
-      r = rainfallR::ex_rainfall(
-        data_path = path_ncdf,
-        spatial.obj = spatial.obj,
-        fun = "mean",
-        date = d,
-        days_back = days_back
-      )
-      
-      # just to make sure you can afterwards identify mulitple slides within one su
-      r[["su_slide_id"]] = day
-      
-      # add the rainfall of that event to the list of all events for that slope unit
-      # stack up the dataframe for each slope unit
-      df = rbind(df, r)
-    }
-    
-    # return the df
-    df
-  }
-}
-
-end = Sys.time()
-took2 = end - start
-```
-
-
-# Analyze the results
-
-
-```{r, eval=F}
-# verfiy that each slope unit has one entry for each day
-output %>% 
-  group_by(su_id, su_slide_id) %>% 
+```{r}
+# verfiy that each slope unit has 6 entries for all the six days before the slide
+slopeunits_rainfall %>% 
+  group_by(poly_id, iffi_id) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   count(n)
@@ -330,69 +186,17 @@ output %>%
 
 ## look at the antecedent rainfall
 
-```{r, eval=F}
-output %>% 
-  group_by(su_id, su_slide_id) %>% 
+```{r}
+slopeunits_rainfall %>% 
+  group_by(poly_id, iffi_id) %>% 
   mutate(unique_id = dplyr::cur_group_id()) %>% 
   ggplot() +
   geom_path(mapping = aes(x = days_before_event,
                   y = cumsum,
-                  group = unique_id)) +
+                  group = unique_id,
+                  color = second_level)) +
   scale_x_reverse() 
-  
 ```
-
-
-# Use the new `slide_dates_in_polygon`-function
-
-```{r newpointinpolyfuntion}
-
-# rename the data to make it consistent
-su = su_points_in_poly
-
-# load the libraries to do parallel processing
-library(foreach)
-library(doParallel)
-
-# use eight cores
-registerDoParallel(6)
-
-# measure the time
-start = Sys.time()
-
-res = foreach(
-  i = 1:nrow(su),
-  .combine = rbind,
-  .packages = c("rainfallR",
-                "dplyr",
-                "magrittr",
-                "stringr")
-) %dopar% {
-    
-    # get all the dates in that slope unit
-    date = su[i,]$date
-    
-    # the spatial object is the slope unit in the for loop
-    spatial.obj = su[i, ]
-    
-    # lets look back 5 days
-    days_back = 5
-    
-    r = rainfallR::ex_rainfall(
-      data_path = path_ncdf,
-      spatial.obj = spatial.obj,
-      fun = "mean",
-      date = date,
-      days_back = days_back
-    )
-  
-    return(r)      
-}
-
-end = Sys.time()
-took2 = end - start
-```
-
 
 
 

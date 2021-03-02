@@ -6,7 +6,7 @@
 #'
 #'
 #' @importFrom doParallel registerDoParallel
-#' @importFrom foreach foreach
+#' @importFrom foreach foreach `%dopar%`
 #' @importFrom future availableCores
 #'
 #'
