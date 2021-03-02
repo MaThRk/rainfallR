@@ -8,8 +8,6 @@ slide_dates_in_polygon(
   poly = NULL,
  
     iffi10 = "\\\\\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_1.shp",
-  second_level_regex = "translational|rotational|fast",
-  min_year = NULL,
   epsg = 32632
 )
 }
