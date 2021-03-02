@@ -1,6 +1,7 @@
 #' For each polygon with slide it keeps one row per date
 #'
 #' @importFrom dplyr n
+#' @importFrom dplyr ungroup
 #'
 #' @param joined_points_on_poly An object of sf where the points were joined on the polygon
 #'
@@ -16,7 +17,8 @@ dates_of_slides_in_poly = function(joined_points_on_poly){
   slides_per_poly_date = polys_with_points %>%
     group_by(poly_id, date) %>%
     mutate(slides_per_poly_date = n()) %>%
-    distinct(poly_id, date, .keep_all = TRUE)
+    distinct(poly_id, date, .keep_all = TRUE) %>%
+    ungroup()
 
     return(slides_per_poly_date)
 

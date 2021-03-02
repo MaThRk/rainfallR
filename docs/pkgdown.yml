@@ -4,9 +4,7 @@ pkgdown_sha: ~
 articles:
   ExamplePolygonExtraction: ExamplePolygonExtraction.html
   example_bozen: example_bozen.html
-  extract_landslide_rainfall: extract_landslide_rainfall.html
-  extract_sample_raster: extract_sample_raster.html
-  extract_su_rainfall: extract_su_rainfall.html
-  new_extract_landslide_rainfall: new_extract_landslide_rainfall.html
-last_built: 2021-02-24T13:31Z
+  extract_rainfall_landslidePoints: extract_rainfall_landslidePoints.html
+  extract_rainfall_slope_unit: extract_rainfall_slope_unit.html
+last_built: 2021-03-02T08:39Z
 

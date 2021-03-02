@@ -20,7 +20,6 @@ knitr::opts_chunk$set(
 
 ```{r pkgs, message=F, warning=F}
 library(tidyverse) # For much of the data preprocessing
-library(svMisc) # For the update bars in the for loops
 library(rainfallR) # The access and processing of the rainfall data
 library(here) # Project paths
 library(gganimate) # For a little animation
@@ -110,35 +109,46 @@ dim(su)
 
 # Get the rainfall for the slope Units
 
-- We will consider the movements of type translational, rotational and the fast flow-type
-
-```{r}
-glimpse(su)
-```
-
-
 - For each Slope Unit we will now get the dates with landslides in them
 
 - We can use the function `slide_dates_in_polygon` in order to extract all the points (landslides-initiation-points) that fall in each polygon (slope unit)
 
 - As we are using the `landsld`-object we are considering landslides of all types. Here is where we should apply some kind of filtering in order to select the slides that are of intereset to us.
 
+- Each polygon (could be catchements, slope units, ...) will have a column in the output that is called `poly_id`. Each observation (each row) is uniquely identifiable by the `date` and the `poly_id`. 
 
-```{r slidessameday, eval=F}
+- If there are more than one row for one `poly_id` this means that in the same polygon on several dates slides happened
+
+- We thus only extract the rainfall once for each polygon that saw a movement on a date
+
+- In order to not neglect the fact that potentially multiple slides could have happened, the column `slides_per_poly_date` present the number of slides that happened at that day in that polygon
+
+
+```{r slidessameday}
 su_points_in_poly = rainfallR::slide_dates_in_polygon(poly = su_path
                                                       ,iffi10 = landsld
                                                       ,second_level_regex = NULL
                                                       ,min_year = 2000)
-
 ```
-
-
 
 - Now we have all the dates of all slides that happened within each polygon of su
 
+- One interesting question would be to ask what the day and slope unit was that saw most movements?
+
+
+```{r}
+su_points_in_poly %>% 
+  dplyr::select(c(poly_id, date, month.int, second_level, slides_per_poly_date)) %>%  
+  arrange(desc(slides_per_poly_date)) %>% 
+  head()
+```
+
+
 # Extract the rainfall data for each su with landslides for each day
 
-- we only are interested in the rainfall of the slope units that actually experienced landslides. Therefore we loop over all the slope units and only take the ones with slides.
+- We only are interested in the rainfall of the slope units that actually experienced landslides. Therefore we loop over all the slope units and only take the ones with slides.
+
+> What about the rainfall Events that happened in slope units and did not cause landslides?
 
 - Then we look in the dates column and extract the rainfall for each of the date for that slope unit
 
@@ -215,7 +225,7 @@ took1 = end-start
 ```
 
 
-# Lets do it in parallel
+# Lets do it in parallel (with the old function)
 
 ```{r extractinparallel, eval=F}
 
@@ -335,14 +345,22 @@ output %>%
 
 # Use the new `slide_dates_in_polygon`-function
 
-```{r newpointinpolyfuntion, eval=F}
+```{r newpointinpolyfuntion}
 
 # rename the data to make it consistent
 su = su_points_in_poly
 
+# load the libraries to do parallel processing
+library(foreach)
+library(doParallel)
+
+# use eight cores
+registerDoParallel(6)
+
+# measure the time
 start = Sys.time()
 
-output = foreach(
+res = foreach(
   i = 1:nrow(su),
   .combine = rbind,
   .packages = c("rainfallR",
@@ -351,14 +369,8 @@ output = foreach(
                 "stringr")
 ) %dopar% {
     
-    # one dataframe for slope units. Possibly multiple days
-    df = data.frame()
-    
-    # get the current id of the slope unit
-    current_id = su[i, ]$su_id
-    
     # get all the dates in that slope unit
-    dates = su[i,]$slide_dates[[1]]
+    date = su[i,]$date
     
     # the spatial object is the slope unit in the for loop
     spatial.obj = su[i, ]
@@ -366,42 +378,19 @@ output = foreach(
     # lets look back 5 days
     days_back = 5
     
-    # in case a slope unit experienced more than one slide we need an inner list
-    # inner_su_list = vector("list", length = length(dates))
-    
-    
-    # get the rainfall for each data a landslide happened in that slope unit
-    # as we are just getting one date this loop will only run once
-    for (day in seq_along(dates)) {
-      
-      # get the day in the slope unit
-      d = dates[[day]]
-      
-      r = rainfallR::ex_rainfall(
-        data_path = path_ncdf,
-        spatial.obj = spatial.obj,
-        fun = "mean",
-        date = d,
-        days_back = days_back
-      )
-      
-      # just to make sure you can afterwards identify mulitple slides within one su
-      r[["su_slide_id"]] = day
-      
-      # add the rainfall of that event to the list of all events for that slope unit
-      # stack up the dataframe for each slope unit
-      df = rbind(df, r)
-    }
-    
-    # return the df
-    df
+    r = rainfallR::ex_rainfall(
+      data_path = path_ncdf,
+      spatial.obj = spatial.obj,
+      fun = "mean",
+      date = date,
+      days_back = days_back
+    )
+  
+    return(r)      
 }
 
 end = Sys.time()
 took2 = end - start
-
-
-
 ```
 
 

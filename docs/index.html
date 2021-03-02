@@ -61,16 +61,10 @@
       <a href="articles/example_bozen.html">Extracting data for bozen</a>
     </li>
     <li>
-      <a href="articles/extract_landslide_rainfall.html">Extract Rainfalldata for landslides</a>
+      <a href="articles/extract_rainfall_landslidePoints.html">Extract Rainfalldata for landslide-initiation points</a>
     </li>
     <li>
-      <a href="articles/extract_sample_raster.html">Work with NetCDF data in R</a>
-    </li>
-    <li>
-      <a href="articles/extract_su_rainfall.html">Extract rainfall data for the slope units</a>
-    </li>
-    <li>
-      <a href="articles/new_extract_landslide_rainfall.html">New Extract Rainfalldata for landslides</a>
+      <a href="articles/extract_rainfall_slope_unit.html"> Extract rainfall data for slopeunit-polygons</a>
     </li>
   </ul>
 </li>
@@ -93,9 +87,21 @@
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
+<ul>
+<li>The more recent commits go to gitlab. However the version in Github should be more reliable</li>
+</ul>
 <p><strong>gitlab</strong></p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># the paths to the public and private ssh-key</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a>public =<span class="st"> "C://PATH/TO/PUBLIC/id_rsa.pub"</span>,</span>
+<span id="cb1-3"><a href="#cb1-3"></a>private =<span class="st"> "C://PATH/TO/PRIVATE/id_rsa"</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a></span>
+<span id="cb1-5"><a href="#cb1-5"></a>creds =<span class="st"> </span>git2r<span class="op">::</span><span class="kw">cread_ssh_key</span>(public, private)</span>
+<span id="cb1-6"><a href="#cb1-6"></a></span>
+<span id="cb1-7"><a href="#cb1-7"></a><span class="co"># install it using devtools</span></span>
+<span id="cb1-8"><a href="#cb1-8"></a>devtools<span class="op">::</span><span class="kw">install_git</span>(<span class="st">"git@gitlab.inf.unibz.it:proslide/rainfallR.git"</span>,</span>
+<span id="cb1-9"><a href="#cb1-9"></a>                      <span class="dt">credentials =</span> creds)</span></code></pre></div>
+<p><strong>github</strong></p>
+<p><code><a href="https://remotes.r-lib.org/reference/install_github.html">remotes::install_github("RobinKohrs/rainfallR")</a></code></p>
 </div>
 <div id="main-functionalities" class="section level2">
 <h2 class="hasAnchor">

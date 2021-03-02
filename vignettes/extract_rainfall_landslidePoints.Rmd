@@ -1,5 +1,5 @@
 ---
-title: "New Extract Rainfalldata for landslides"
+title: "Extract Rainfalldata for landslide-initiation points"
 output: 
   rmarkdown::html_vignette:
     toc: true
@@ -8,8 +8,6 @@ vignette: >
   %\VignetteIndexEntry{new_extract_landslide_rainfall}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-  
-
 ---
 
 ```{r, include = FALSE}
@@ -17,9 +15,6 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-
-
-day_for_dir = Sys.Date() %>% str_replace_all(., "-", "") %>% as.character()
 ```
 
 # Set some paths
@@ -67,10 +62,12 @@ library(crayon) # for some colours
 
 ## Call the make_shapefile function
 
-- first we will query some more data for the point information in the scarve of the landslides
+- First we will query some more data for the point information in the scarve of the landslides
+
+- We can do the procedure here manually or use the `landsld`-dataset that comes with the `iffitoR`-package
 
 
-```{r pointdataiffi, message=F, warning=F, cache=T, results=F}
+```{r pointdataiffi, message=F, warning=F, cache=T, results=F, eval=F}
 # only query the data when working under windows due to the RODBC drivers
 os = Sys.info()["sysname"]
 if (os == "Windows") {
@@ -110,7 +107,7 @@ iffi_points = make_shapefile(
 
 - lets have a little look at what we got back?
 
-```{r}
+```{r, eval=F}
 # what have we got
 dplyr::glimpse(iffi_points)
 ```
@@ -121,7 +118,7 @@ dplyr::glimpse(iffi_points)
 
 - the first and second level are still in italian, wo do some more preprocessing
 
-```{r, message=F, warning=F}
+```{r, message=F, warning=F, eval=F}
 if (os == "Windows") {
   # translate the two classifying columns to english
   iffi_points_1 = iffitoR::translate_iffi(iffi_points)
@@ -137,7 +134,7 @@ if (os == "Windows") {
 
 - next we filter the data a little more in order to only get the translational sldides that have information about the da of occurence and happened after 1980
 
-```{r filter, echo=F}
+```{r filter, echo=F,eval=F}
 if (os == "Windows") {
   # filter the ones that have day information
   iffi_day = iffi_points_2 %>% filter(date_info == "day")
@@ -157,13 +154,13 @@ if (os == "Windows") {
 
 ## bring the data in the right structure
 
-- We want to extract the rainfall data for each of the `r dim(iffi_translational)[[1]]` points
-
 - We not only want the rainfall at the day of occurrence, but also the 7 days before the actualy event happended
 
-- As we have one raster per day and one raster covers the entire province of South Tyrol, we will make a list of all the events that happened on the same day. This will prevent us of extracting the same raster twice
+- As we have one raster per day and one raster covers the entire province of South Tyrol, we will make a list of all the events that happened on the same day. This will prevent us of extracting the same raster twice.
 
-- The names of the list will be the dates. Each day will have a dataframe with one row per event
+- The names of the list will be the dates. Each day will have a dataframe with one row per event that happened on that day
+
+- We can use the function `iffi10_same_day` for that
 
 ```{r slidessameday}
 # now lets use the data that comes already preprocessed with the iffitoR package
@@ -173,23 +170,10 @@ landsld = landsld %>%
   filter(date_info == "day") %>%
   filter(year.int >= 1980) 
 
-# create the list for the events on the same day
-# each list element is an object of class sf. The number of rows determines the events on that day
-slides_same_day = list()
-
-for (row in 1:nrow(landsld)) {
-  # get the day of the event
-  dts = landsld[row,][["date"]]
-  dts_chr = as.character(dts) %>% str_replace_all(., "-", "")
-
-  # add this spatial object to the list with the name being the day
-  if(dts_chr %in% names(slides_same_day)){
-    slides_same_day[[dts_chr]] = rbind(slides_same_day[[dts_chr]], landsld[row,])
-  } else{
-    slides_same_day[[dts_chr]] = landsld[row, ]
-  }
-}
+# get all the slides from the same day
+slides_same_day =  iffi10_same_day(landsld)
 ```
+
 - What is the max number of slides per day and on which day ?
 
 ```{r}
@@ -215,9 +199,11 @@ n_slides_per_day[n_slides_per_day == m]
 
 - The `rainfallR`-function was intended to work with multiple days. However, it only supports the extracting of one spatial object (be it multiple points or polygons per day). Here however, we we want to extract the rainfall for various different days for different spatial objects. So we need to write a for loop
 
-- let see how long the extraction for all the `r dim(landsld)[[1]]` slides takes
 
-```{r extractrainfallslides, message=FALSE, warning=FALSE, cache=TRUE, results="hide"}
+- This is one (probably not the most effective one) to do in in sequence
+
+
+```{r extractrainfallslides, eval=F}
 
 # lets only take a smaller subset
 slides_same_day = slides_same_day
@@ -268,7 +254,6 @@ end = Sys.time()
 took1=end-start
 ```
 
-- So the extraction in sequence for all dates took: `r took1` minutes
 
 
 # Can we do this in parallel?
@@ -280,15 +265,16 @@ library(parallel)
 
 
 # lets only take a smaller subset
-slides_same_day = slides_same_day
+slides_same_day = slides_same_day[]
 
-# for each day get the rainfall at the slide location
-out = vector("list", length=length(slides_same_day))
-names(out) = names(slides_same_day)
+# # for each day get the rainfall at the slide location
+# out = vector("list", length=length(slides_same_day))
+# names(out) = names(slides_same_day)
 
 # measure the time
 start = Sys.time()
-registerDoParallel(8)
+registerDoParallel(6)
+
 res = foreach(i = 1:length(slides_same_day), 
         .combine=rbind,
         .packages = c("rainfallR",
@@ -301,7 +287,6 @@ res = foreach(i = 1:length(slides_same_day),
   date = names(slides_same_day)[[i]] %>% as.Date(., "%Y%m%d")
 
   # the spatial object
-  # another input
   spatial.obj = slides_same_day[[i]]
 
   # some other arguments
@@ -311,11 +296,13 @@ res = foreach(i = 1:length(slides_same_day),
   # if the dts-argument would have more than one data this list would have more arguments
   rf = rainfallR::ex_rainfall(
     spatial.obj = spatial.obj,
-    fun = NULL, # as we are using points
+    fun = NULL,
+    # as we are using points
     date = date,
     days_back = days_back
   )
-}
+                      }
+
 end = Sys.time()
 took2=end-start
 
@@ -344,8 +331,10 @@ gg = ggplot(res) +
     title = "Amount of antecedent rainfall [mm]"
   )
 
+day_for_dir = Sys.Date() %>% str_replace_all(., "-", "")
+
 file = here(paste0("plots/", day_for_dir, "/antecent_rainfall_different_second_level.png"))
-ggsave(filename = file, plot = gg) 
+# ggsave(filename = file, plot = gg) 
 
 ```
 
@@ -378,7 +367,7 @@ res %>%
   )
   
 file = here(paste0("plots/", day_for_dir, "/mean_rainfall_per_type.png"))
-ggsave(file)
+# ggsave(file)
 ```
 
 
@@ -421,7 +410,7 @@ res %>%
     legend.position = "bottom"
   )
 
-ggsave("../../../presentations/internship_resume/plots/plots/precipitation_all_trans_and_rotational_movements.png", width = 12, height = 8)
+# ggsave("../../../presentations/internship_resume/plots/plots/precipitation_all_trans_and_rotational_movements.png", width = 12, height = 8)
 
 ```
 
@@ -460,7 +449,7 @@ res %>%
     legend.position = "bottom"
   ) 
 
-ggsave("../../../presentations/internship_resume/plots/plots/precipitation_all_trans_and_rotational_movements_reverse.png", width = 12, height = 8)
+# ggsave("../../../presentations/internship_resume/plots/plots/precipitation_all_trans_and_rotational_movements_reverse.png", width = 12, height = 8)
 
 
 ```
@@ -469,9 +458,10 @@ ggsave("../../../presentations/internship_resume/plots/plots/precipitation_all_t
 
 # Do it for all types of movements
 
-```{r allmovementssevendays}
+```{r allmovementssevendays, eval=F}
 # now lets use the data that comes already preprocessed with the iffitoR package
 # we need to filter the right slides as we did above for the data queried from the databse
+
 rm(list = c("landsld"))
 landsld = landsld %>%
   filter(date_info == "day") %>%
@@ -501,7 +491,7 @@ which.max(m)
 
 # measure the time
 start = Sys.time()
-registerDoParallel(10)
+registerDoParallel(6)
 res = foreach(i = 1:length(slides_same_day), 
         .combine=rbind,
         .packages = c("rainfallR",
@@ -535,7 +525,7 @@ took3=end-start
 
 ```
 
-```{r}
+```{r plotallmovement, eval=F}
 res %>% 
   st_drop_geometry() %>% 
   filter(!is.na(cumsum)) %>% 
@@ -564,7 +554,7 @@ res %>%
   theme_minimal()
 
 
-ggsave("../../../presentations/internship_resume/plots/plots/rainfall_second_level_seven_days_before_movement.png", width = 12, 
+# ggsave("../../../presentations/internship_resume/plots/plots/rainfall_second_level_seven_days_before_movement.png", width = 12, 
        height=8)  
 ```
 
