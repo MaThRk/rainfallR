@@ -10,8 +10,6 @@
 slide_dates_in_polygon = function(
   poly = NULL,
   iffi10 = "\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_1.shp",
-  second_level_regex = "translational|rotational|fast",
-  min_year = NULL,
   epsg = 32632
 ){
 
@@ -45,14 +43,7 @@ slide_dates_in_polygon = function(
   poly = st_read(poly)
   if(c) iffi10 = st_read(iffi10)
 
-  ####### filter the iffi data down to the movement that are of interest
-  if (!is.null(second_level_regex)) {
-    iffi10 = iffi10[grepl(second_level_regex, iffi10$second_level),]
-  }
-
-  if (!is.null(min_year)) {
-    iffi10 = iffi10[iffi10$year.int > min_year, ]
-  }
+  ####### filter the iffi data to only use dates
 
   # filter only the ones that have day information
   iffi10 = iffi10[iffi10$date_info == "day", ]
