@@ -162,8 +162,12 @@ su_points_in_poly %>%
 - In the end they are just stacked up to build one big dataframe
 
 ```{r newpointinpolyfuntion}
+
+# filte out the slides before the start of the rainfall data
+su_points_in_poly = su_points_in_poly[su_points_in_poly$date > as.Date("1980-01-01"), ]
+
 # get the antecedent rainfall for all the dates in all the slope units with landslides
-slopeunits_rainfall = rainfallR::get_rainfall_for_polygons(su_points_in_poly)
+slopeunits_rainfall = rainfallR::get_rainfall_for_polygons(su_points_in_poly, days_back = 14)
 ```
 
 
@@ -175,7 +179,7 @@ Within the `get_rainfall_for_polygons`-function:
 
 - We used the `.rbind`-parameter for the `.combine`.argument,  `slopeunits_rainfall` is one large dataframe
 
-```{r}
+```{r verifyuniqueness}
 # verfiy that each slope unit has 6 entries for all the six days before the slide
 slopeunits_rainfall %>% 
   group_by(poly_id, iffi_id) %>% 
@@ -187,7 +191,7 @@ slopeunits_rainfall %>%
 ## look at the antecedent rainfall
 
 ```{r}
-slopeunits_rainfall %>% 
+g =slopeunits_rainfall %>% 
   group_by(poly_id, iffi_id) %>% 
   mutate(unique_id = dplyr::cur_group_id()) %>% 
   ggplot() +
@@ -195,15 +199,35 @@ slopeunits_rainfall %>%
                   y = cumsum,
                   group = unique_id,
                   color = second_level)) +
-  scale_x_reverse() 
+  scale_x_reverse() +
+  scale_color_manual(values = c("translational slide"="#D4f0f0", "rotational slide" = "#ffc8a2")) +
+  theme_light() +
+  labs(
+    title = "Five day antecedent rainfall", 
+   y = "cumulative sum [mm]",
+   x = "Days before landslide"
+    
+  ) +
+theme(
+ panel.background = element_rect(fill="black"),
+ plot.background = element_rect(fill="black"),
+ panel.grid = element_blank(),
+ plot.margin = margin(20, 20, 20, 20),
+ axis.text = element_text(colour = "white")
+)
+
+g = ggplotGrob(g)
+bg = g$grobs[[1]] 
+round_bg = roundrectGrob(x=bg$x, y=bg$y, width=bg$width, height=bg$height,
+                          r=unit(0.1, "snpc"),
+                          just=bg$just, name=bg$name, gp=bg$gp, vp=bg$vp)
+g$grobs[[1]] <- round_bg
+plot(g)
 ```
 
-
-
-
-
-
-
+```{r edarainfall}
+table(slopeunits_rainfall$days_before_event)
+```
 
 
 

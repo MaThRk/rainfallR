@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Extracts the days of the slides for each polygon — slide_dates_in_polygon • rainfallR</title>
+<title>Extract the rainfall for a data.frame of polygons — get_rainfall_for_polygons • rainfallR</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,10 @@
 
 
 
-<meta property="og:title" content="Extracts the days of the slides for each polygon — slide_dates_in_polygon" />
-<meta property="og:description" content="Extracts the days of the slides for each polygon" />
+<meta property="og:title" content="Extract the rainfall for a data.frame of polygons — get_rainfall_for_polygons" />
+<meta property="og:description" content="This function build on the results of slide_dates_in_polygon which returns a df
+where each row is a polygon with a slide that is uniquely indentifiable by its poly_id and the
+date" />
 
 
 
@@ -124,32 +126,32 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Extracts the days of the slides for each polygon</h1>
+    <h1>Extract the rainfall for a <code>data.frame</code> of polygons</h1>
     
-    <div class="hidden name"><code>slide_dates_in_polygon.Rd</code></div>
+    <div class="hidden name"><code>get_rainfall_for_polygons.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Extracts the days of the slides for each polygon</p>
+    <p>This function build on the results of <code>slide_dates_in_polygon</code> which returns a df
+where each row is a polygon with a slide that is uniquely indentifiable by its <code>poly_id</code> and the
+<code>date</code></p>
     </div>
 
-    <pre class="usage"><span class='fu'>slide_dates_in_polygon</span><span class='op'>(</span>
-  poly <span class='op'>=</span> <span class='cn'>NULL</span>,
- 
-    iffi10 <span class='op'>=</span> <span class='st'>"\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_1.shp"</span>,
-  epsg <span class='op'>=</span> <span class='fl'>32632</span>
+    <pre class="usage"><span class='fu'>get_rainfall_for_polygons</span><span class='op'>(</span>
+  <span class='va'>landslidepoints_in_poly</span>,
+  days_back <span class='op'>=</span> <span class='fl'>5</span>,
+  funs <span class='op'>=</span> <span class='st'>"mean"</span>,
+  parallel <span class='op'>=</span> <span class='cn'>T</span>,
+  ncores <span class='op'>=</span> <span class='cn'>NULL</span>,
+  data_path <span class='op'>=</span> <span class='st'>"\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>poly</th>
-      <td><p>Path to the polygon shapefile</p></td>
-    </tr>
-    <tr>
-      <th>iffi10</th>
-      <td><p>Path to the iffi10 shapefile with already precomputed columns in english</p></td>
+      <th>landslidepoints_in_poly</th>
+      <td><p>Object of type <code>sf</code> as returned by <code>slide_dates_in_polygon</code></p></td>
     </tr>
     </table>
 

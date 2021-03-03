@@ -10,7 +10,7 @@
 #'
 #' @param iffi10 A subset of the iffi10-database with already computed day-column
 #'
-#'
+#' @export
 
 iffi10_same_day = function(iffi10){
 
