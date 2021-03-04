@@ -64,7 +64,7 @@ day = as.Date("2009-01-20")
 
 #### <u> Point data </u>
 
-- If we are interested in the extraction of rainfall for point data, a tyical workflow could look like this:
+> If we are interested in the extraction of rainfall for point data, a tyical workflow could look like this:
 
 1. **get the landslide data**
 
@@ -83,7 +83,7 @@ day = as.Date("2009-01-20")
  
 #### <u> Polygon data </u>
 
-- For Polygon data we probably want to perform some kinf of aggregation. So the workflow might look a little different
+> For Polygon data we probably want to perform some kinf of aggregation. So the workflow might look a little different
 
 1. **get the polygon data**
   

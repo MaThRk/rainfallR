@@ -14,7 +14,10 @@
 
 iffi10_same_day = function(iffi10){
 
-  # for each element (for each row...) really slow
+  # make sure there are only records with dates
+  iffi10 = iffi10 %>% filter(date_info == "day")
+
+  # the slide dates for all slides
   dates_of_slides = iffi10$date
 
   # turn them into a character
