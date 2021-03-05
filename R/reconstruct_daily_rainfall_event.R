@@ -12,7 +12,8 @@
 
 reconstruct_daily_rainfall_events = function(d,
                                              n = 1,
-                                             daily_thresh = .2) {
+                                             daily_thresh = .2,
+                                             quiet = TRUE) {
   # start int the first row
   i = 1
 
@@ -66,7 +67,9 @@ reconstruct_daily_rainfall_events = function(d,
         }
       }
 
-      print(paste("Dry period of:", dry_days, "days"))
+      if (!quiet) {
+        print(paste("Dry period of:", dry_days, "days"))
+      }
 
       # set i to where we stopped in the dry loop
       i = j + 1
