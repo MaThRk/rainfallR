@@ -7,6 +7,7 @@
 #' @param d A dataframe with the extracted rainfall for one point or polygon
 #' @param n The inverval (in days) a dry period can still be part of a rainfall event
 #' @param daily_thresh the minimum daily rainfall to be considered a day of rain
+#' @param quiet Show print messages or not
 #'
 #' @export
 
@@ -40,6 +41,12 @@ reconstruct_daily_rainfall_events = function(d,
         if (d[j,]$precip < daily_thresh) {
           dry_days = dry_days + 1
 
+          # when all the days up to the end dont see any rain anymore --> set them also to NA
+          if(j == nrow(d)){
+
+            # +1 because we don't want to set the d
+            d[((nrow(d)-dry_days)+1):nrow(d), ][["event"]] = NA
+          }
 
         } else{
           # hit a rainy day --> Get out the dry loop, just decide quickly to which event it belongs
@@ -48,8 +55,9 @@ reconstruct_daily_rainfall_events = function(d,
           if (dry_days <= n) {
             # set all the days without rainfall but within n to rainfall
             # if its the first event put it to 1
-            if (event_counter == 0)
+            if (event_counter == 0) {
               event_counter = 1
+            }
             d[(j - 1):(j - dry_days),][["event"]] = event_counter
             # set the rainy day to the same event
             d[j,][["event"]] = event_counter
