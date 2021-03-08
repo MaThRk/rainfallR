@@ -85,7 +85,7 @@ reconstruct_daily_rainfall_events = function(d,
     } else{
       # if we initially hit a rainy day, just count on
       # if it was the first day, set the counter to one
-      if(i == 0){
+      if(i == 1){
         event_counter = event_counter + 1
       }
 
