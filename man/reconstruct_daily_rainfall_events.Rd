@@ -4,7 +4,7 @@
 \alias{reconstruct_daily_rainfall_events}
 \title{Extract rainfall Events per slide}
 \usage{
-reconstruct_daily_rainfall_events(d, n = 1, daily_thresh = 0.2)
+reconstruct_daily_rainfall_events(d, n = 1, daily_thresh = 0.2, quiet = TRUE)
 }
 \arguments{
 \item{d}{A dataframe with the extracted rainfall for one point or polygon}
@@ -12,6 +12,8 @@ reconstruct_daily_rainfall_events(d, n = 1, daily_thresh = 0.2)
 \item{n}{The inverval (in days) a dry period can still be part of a rainfall event}
 
 \item{daily_thresh}{the minimum daily rainfall to be considered a day of rain}
+
+\item{quiet}{Show print messages or not}
 }
 \description{
 This function will extract the rainfall events that happened before a landslide, based on a
