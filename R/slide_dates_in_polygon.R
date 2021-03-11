@@ -29,7 +29,7 @@ slide_dates_in_polygon = function(
     if (!file.exists(poly)) {
       stop("The Polygon path is no valid spatial geometry")
     }else{
-      c_t = TRUE
+      c_p = TRUE
     }
   }
 
@@ -53,7 +53,7 @@ slide_dates_in_polygon = function(
 
 
   ####### load the data
-  if(c_t) poly = st_read(poly)
+  if(c_p) poly = st_read(poly)
   if(c) iffi10 = st_read(iffi10)
 
   ####### filter the iffi data to only use dates
