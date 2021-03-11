@@ -18,7 +18,7 @@
 
 get_rainfall_for_polygons = function(landslidepoints_in_poly,
                                      days_back = 5,
-                                     funs = "mean",
+                                     funs = c("mean"),
                                      parallel = T,
                                      ncores = NULL,
                                      data_path = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/") {
@@ -57,7 +57,7 @@ get_rainfall_for_polygons = function(landslidepoints_in_poly,
       r = ex_rainfall(
         data_path = data_path,
         spatial.obj = spatial.obj,
-        fun = "mean",
+        fun = funs,
         date = date,
         days_back = days_back
       )

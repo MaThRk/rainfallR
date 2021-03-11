@@ -3,7 +3,7 @@
 #' @importFrom dplyr group_by distinct
 #'
 #' @param poly Path to the polygon shapefile
-#' @param iffi10 Path to the iffi10 shapefile with already precomputed columns in english
+#' @param iffi10 Path to the iffi10 shapefile with already precomputed columns in english and the date information
 #'
 #' @export
 
@@ -59,7 +59,16 @@ slide_dates_in_polygon = function(
   ####### filter the iffi data to only use dates
 
   # filter only the ones that have day information
-  iffi10 = iffi10[iffi10$date_info == "day", ]
+  # get the names
+  nams = names(iffi10)
+
+  if (!"date_info" %in% nams) {
+    stop(
+      "The iffi10 dataframe you are using has no column called 'date_info \nwhich is necessary for the subsetting'"
+    )
+  } else{
+    iffi10 = iffi10[iffi10$date_info == "day",]
+  }
 
   ####### add an id to the iffi-data
   iffi10[["iffi_id"]] = 1:nrow(iffi10)
