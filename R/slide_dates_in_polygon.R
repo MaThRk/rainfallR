@@ -18,9 +18,22 @@ slide_dates_in_polygon = function(
     stop("You need to pass the path to the polygon")
   }
 
-  if (!file.exists(poly)) {
-    stop("The Polygon path is no valid spatial geometry")
+  if (class(poly)[1] == "sf") {
+    print("using an sf-object as polygons")
+    c_p = FALSE
+    poly = poly
+  } else{
+    if (!is.character(poly)) {
+      stop("The poly argument is no object of type sf, neither a path. What is it?")
+    }
+    if (!file.exists(poly)) {
+      stop("The Polygon path is no valid spatial geometry")
+    }else{
+      c_t = TRUE
+    }
   }
+
+
 
   # check if using a path to a spatial object or an object of type sf already
   if (is.character(iffi10)) {
@@ -40,7 +53,7 @@ slide_dates_in_polygon = function(
 
 
   ####### load the data
-  poly = st_read(poly)
+  if(c_t) poly = st_read(poly)
   if(c) iffi10 = st_read(iffi10)
 
   ####### filter the iffi data to only use dates
