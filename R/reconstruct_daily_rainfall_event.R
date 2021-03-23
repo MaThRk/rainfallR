@@ -5,7 +5,7 @@
 #' days and still be part of a rainfall event
 #'
 #' @param d A dataframe with the extracted rainfall for one point or polygon
-#' @param n The inverval (in days) a dry period can still be part of a rainfall event
+#' @param n The interval (in days) a dry period can still be part of a rainfall event
 #' @param daily_thresh the minimum daily rainfall to be considered a day of rain
 #' @param quiet Show print messages or not
 #'
