@@ -34,7 +34,7 @@
       # reshape it
       df_long = df %>% pivot_longer(cols=-id, values_to = "precip", names_to = "measurement") %>%
          mutate(
-            days_before_event = seq(days_back + 1, 1)
+            days_before_event = seq(days_back, 0)
          )
 
       # merge back the cols all same
@@ -88,7 +88,7 @@
           mutate(date = as.Date(str_extract(date, "\\d{8}"), format="%Y%m%d")) %>%
           group_by(id) %>%
           mutate(cumsum = cumsum(precip),
-                 days_before_event = seq(days_back +1, 1))
+                 days_before_event = seq(days_back, 0))
 
 
        # merge back the rest of the values that didnt change over time
