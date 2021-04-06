@@ -9,7 +9,7 @@ reconstruct_daily_rainfall_events(d, n = 1, daily_thresh = 0.2, quiet = TRUE)
 \arguments{
 \item{d}{A dataframe with the extracted rainfall for one point or polygon}
 
-\item{n}{The inverval (in days) a dry period can still be part of a rainfall event}
+\item{n}{The interval (in days) a dry period can still be part of a rainfall event}
 
 \item{daily_thresh}{the minimum daily rainfall to be considered a day of rain}
 

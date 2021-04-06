@@ -7,7 +7,7 @@
 get_rainfall_for_polygons(
   landslidepoints_in_poly,
   days_back = 5,
-  funs = "mean",
+  funs = c("mean"),
   parallel = T,
   ncores = NULL,
   data_path = "\\\\\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"

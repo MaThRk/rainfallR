@@ -14,7 +14,7 @@ slide_dates_in_polygon(
 \arguments{
 \item{poly}{Path to the polygon shapefile}
 
-\item{iffi10}{Path to the iffi10 shapefile with already precomputed columns in english}
+\item{iffi10}{Path to the iffi10 shapefile with already precomputed columns in english and the date information}
 }
 \description{
 Extracts the days of the slides for each polygon
