@@ -9,14 +9,20 @@
 #'@param fun How to combine the individual values. E.G. the mean for each pixel for the years 1980, 1981 and 1982 requires the
 #' the fun to be "mean". The maximum value for each month in the years 80,81,82 requires the \code{by}-parameter to be \code{month}
 #' and the \code{fun}-parameter to be \code{max}
+#' @param return.list if \code{True} it will return a list of stars oject. If \code{false} will return one stars object (if \code{by} = \code{year}),
+#' and a list of stars-objects if \code{by = 'month'}
 
 aggregate_rainfall = function(path_ncdf = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/",
-                               polygon = NULL,
-                               years = 1980:2018,
-                               by = "year",
-                               daily_fun = NULL, # how to aggregate the values in one month
-                               monthly_fun = NULL, # how to aggregate the monthly values
-                               aggre_fun = "mean"){
+                              polygon = NULL,
+                              years = 1980:2018,
+                              by = "year",
+                              daily_fun = NULL,
+                              # how to aggregate the values in one month
+                              monthly_fun = NULL,
+                              # how to aggregate the monthly values
+                              return.list = FALSE,
+                              aggre_fun = "mean") {
+
 
 
 
@@ -29,11 +35,10 @@ aggregate_rainfall = function(path_ncdf = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRID
   paths = get_monthly_paths(years, path_ncdf)
 
   if(is.null(polygon)){
-    rasters = make_rasters(paths, years, by, daily_fun, monthly_fun)
+    rasters = make_rasters(paths, years, by, daily_fun, monthly_fun, return.list=FALSE)
   }else{
     table = make_table(path_ncdf, years, by, fun, aggre_fun)
   }
-
 
 
 }

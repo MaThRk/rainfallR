@@ -4,7 +4,7 @@
 \alias{make_rasters}
 \title{Calulate the aggregated Rasters}
 \usage{
-make_rasters(paths, years, by, fun)
+make_rasters(paths, years, by, daily_fun, monthly_fun, return.list = FALSE)
 }
 \description{
 This function will return a list of length n_years. With Either 12 (by = \code{month}) or 1 (by = \code{year}) elements per element
