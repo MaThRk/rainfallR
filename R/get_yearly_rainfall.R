@@ -3,7 +3,8 @@
 #' This function takes either a polygon, or nothing (than it's pixel based) and calculates the sum of rainfall for each polygon
 #' (each pixel) for each year
 #'
-#' @importFrom stars read_stars st_apply
+#'
+#' @importFrom stars read_stars st_apply as
 #'
 #'@param aggre_fun If you pass a polygon, the values need to be aggregated somehow
 #'@param fun How to combine the individual values. E.G. the mean for each pixel for the years 1980, 1981 and 1982 requires the
@@ -37,8 +38,6 @@ aggregate_rainfall = function(path_ncdf = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRID
   if(is.null(polygon)){
     rasters = make_rasters(paths, years, by, daily_fun, monthly_fun, return.list=FALSE)
   }else{
-    table = make_table(path_ncdf, years, by, fun, aggre_fun)
+    table = make_aggregated_table(paths, polygon, years, by, daily_fun, monthly_fun, aggre_fun)
   }
-
-
 }
