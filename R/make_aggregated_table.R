@@ -111,10 +111,10 @@ make_aggregated_table = function(paths, polygon, years, by, daily_fun, monthly_f
       }
 
       # merge back the geometry
-      polygon = merge(polygon, yearly_df, by="xid")
+      p = merge(polygon, yearly_df, by="xid")
 
       # put them in the list
-      yearly_values[[y]] = polygon
+      yearly_values[[y]] = p
 
     }
 

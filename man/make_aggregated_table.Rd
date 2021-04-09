@@ -14,6 +14,10 @@ make_aggregated_table(
   return.list = FALSE
 )
 }
+\arguments{
+\item{by}{either "year" or "month". If "year", the raster with the values for one year will be calculated and than the spatial
+aggregation (with the function \code{aggre_fun}) will be applied. If "month", the spatial aggregation will be applied after each month}
+}
 \description{
 This function will return a list of length n_years. With Either 12 (by = \code{month}) or 1 (by = \code{year}) elements per element
 }

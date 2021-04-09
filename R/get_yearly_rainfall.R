@@ -12,6 +12,8 @@
 #' and the \code{fun}-parameter to be \code{max}
 #' @param return.list if \code{True} it will return a list of stars oject. If \code{false} will return one stars object (if \code{by} = \code{year}),
 #' and a list of stars-objects if \code{by = 'month'}
+#'
+#' @export
 
 aggregate_rainfall = function(path_ncdf = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/",
                               polygon = NULL,
@@ -41,3 +43,4 @@ aggregate_rainfall = function(path_ncdf = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRID
     table = make_aggregated_table(paths, polygon, years, by, daily_fun, monthly_fun, aggre_fun)
   }
 }
+

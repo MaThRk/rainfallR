@@ -1,5 +1,7 @@
 #' Extract rainfall data
 #'
+#' @description DEPRECATED. DON'T USE!!
+#'
 #' @importFrom raster raster extract brick crs
 #' @importFrom  dplyr select rename_with mutate bind_cols pull
 #' @importFrom  ncdf4 nc_open

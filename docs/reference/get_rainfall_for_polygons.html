@@ -82,7 +82,7 @@ date" />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -101,6 +101,9 @@ date" />
     </li>
     <li>
       <a href="../articles/example_bozen.html">Extracting data for bozen</a>
+    </li>
+    <li>
+      <a href="../articles/extract_aggregated_values.html">Extract aggregated Values (time and space) of the rainfall data</a>
     </li>
     <li>
       <a href="../articles/extract_rainfall_landslidePoints.html">Extract Rainfalldata for landslide-initiation points</a>
@@ -140,7 +143,7 @@ where each row is a polygon with a slide that is uniquely indentifiable by its <
     <pre class="usage"><span class='fu'>get_rainfall_for_polygons</span><span class='op'>(</span>
   <span class='va'>landslidepoints_in_poly</span>,
   days_back <span class='op'>=</span> <span class='fl'>5</span>,
-  funs <span class='op'>=</span> <span class='st'>"mean"</span>,
+  funs <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"mean"</span><span class='op'>)</span>,
   parallel <span class='op'>=</span> <span class='cn'>T</span>,
   ncores <span class='op'>=</span> <span class='cn'>NULL</span>,
   data_path <span class='op'>=</span> <span class='st'>"\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"</span>

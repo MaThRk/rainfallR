@@ -36,11 +36,17 @@ library(sf)
 - We will use the gridded rainfall data and a manually created polygon
 
 ```{r}
-# the path to the data
-path_data = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"
+os = Sys.info()["sysname"]
 
-# path to the slop units
-su_path = "\\\\projectdata.eurac.edu/projects/Proslide/Envir_data/SlopeUnits/su_opt_16_TAA/su_16_TAA.shp"
+if(os == "Linux"){
+  path_data = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/"
+  su_path = "/mnt/CEPH_PROJECTS/Proslide/Envir_data/SlopeUnits/su_opt_16_TAA/su_16_TAA.shp" 
+}else{
+  # the path to the data
+  path_data = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"
+  # path to the slop units
+  su_path = "\\\\projectdata.eurac.edu/projects/Proslide/Envir_data/SlopeUnits/su_opt_16_TAA/su_16_TAA.shp"
+}
 ```
 
 - Next we set some parameters in order to extract the data from the `rainfallR::get_rainfall`-function
@@ -90,6 +96,7 @@ su = su %>% slice(sample(1:nrow(su), 1))
 
 ```{r getrainfall, message=F, warning=F}
 rainfall = rainfallR::ex_rainfall(
+  data_path = path_data,
   spatial.obj = su,
   date = day,
   fun = c("mean", "max"),
@@ -101,9 +108,4 @@ print(rainfall)
 ```
 
 
-- Now lets transform it into long format and get the cumulative sum j
-
-```{r cumsum}
-rainfall_cumsum = rainfallR::make_cumulative_rainfall(rainfall)
-```
 

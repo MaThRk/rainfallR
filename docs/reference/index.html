@@ -79,7 +79,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -98,6 +98,9 @@
     </li>
     <li>
       <a href="../articles/example_bozen.html">Extracting data for bozen</a>
+    </li>
+    <li>
+      <a href="../articles/extract_aggregated_values.html">Extract aggregated Values (time and space) of the rainfall data</a>
     </li>
     <li>
       <a href="../articles/extract_rainfall_landslidePoints.html">Extract Rainfalldata for landslide-initiation points</a>
@@ -149,9 +152,21 @@
       <tr>
         
         <td>
+          <p><code><a href="aggregate_rainfall.html">aggregate_rainfall()</a></code> </p>
+        </td>
+        <td><p>Get the summed yearly rainfall</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="bozen.html">bozen</a></code> </p>
         </td>
         <td><p>Spatial object of the city of bozen</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="check_spatial_input.html">check_spatial_input()</a></code> </p>
+        </td>
+        <td><p>verify the input of the polyogn</p></td>
       </tr><tr>
         
         <td>
@@ -170,6 +185,12 @@
           <p><code><a href="get_dates_ncdf.html">get_dates_ncdf()</a></code> </p>
         </td>
         <td><p>Some helper functions</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="get_monthly_paths.html">get_monthly_paths()</a></code> </p>
+        </td>
+        <td><p>Get the paths to the monthly NetCDFS</p></td>
       </tr><tr>
         
         <td>
@@ -203,15 +224,27 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="make_aggregated_table.html">make_aggregated_table()</a></code> </p>
+        </td>
+        <td><p>Calulate the the aggregated values for each polygon</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="make_cumsum.html">make_cumsum()</a></code> </p>
         </td>
         <td><p>Will calculate the cumulative sum of the measurements over time</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="make_cumulative_rainfall.html">make_cumulative_rainfall()</a></code> </p>
+          <p><code><a href="make_rasters.html">make_rasters()</a></code> </p>
         </td>
-        <td><p>Reshape the dataframe and create cumulative count column</p></td>
+        <td><p>Calulate the aggregated Rasters</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="reconstruct_daily_rainfall_events.html">reconstruct_daily_rainfall_events()</a></code> </p>
+        </td>
+        <td><p>Extract rainfall Events per slide</p></td>
       </tr><tr>
         
         <td>
