@@ -69,3 +69,90 @@ get_nc_paths = function(data_path, day, days_back){
     return(paths)
   }
 }
+
+
+
+#' verify the input of the polyogn
+
+check_spatial_input = function(polygon) {
+  #if polygon is path to file
+  if (class(polygon)[[1]] == "character") {
+    if(!file.exists(polygon)) {
+      stop("The file you provided does not exist")
+    } else{
+      poly =  read_sf(polygon)
+      return(poly)
+    }
+
+  } else{
+    if (class(polygon)[[1]] == "sf") {
+      return(polygon)
+    }
+  }
+
+}
+
+
+
+#' Get the paths to the monthly NetCDFS
+#'
+
+get_monthly_paths = function(years, path_ncdf){
+
+  # how many years
+  n_years = length(years)
+
+  # create the monthly data
+  all_years_month = vector("list", length=n_years)
+  names(all_years_month) = years %>% as.character()
+
+  # for each year
+  for (i in seq_along(1:n_years)) {
+
+    # create a vector of the months
+    months = vector(length = 12)
+
+    # for each month
+    for (j in seq_along(1:12)) {
+      base = 1979
+      current_year = base + i
+      year_month = as.Date(paste0(current_year, "-", j, "-01" ))
+      months[[j]] = year_month
+    }
+
+    months = as.Date.numeric(months, origin = "1970-01-01")
+    all_years_month[[i]] = months
+  }
+
+
+  paths = vector("list", length = n_years)
+  names(paths) = years %>% as.character()
+
+  # for all the years
+  for (i in seq_along(1:n_years)) {
+
+    # all the paths for one year
+    months = vector(length = 12)
+
+    # get all the months
+    for (j in seq_along(1:length(all_years_month[[i]]))) {
+
+      # get one month
+      d = all_years_month[[i]][[j]]
+
+      # get the path
+      path = rainfallR::get_nc_paths(path_ncdf, d, 0) %>% .[[1]]
+
+      # add the path to that year
+      months[[j]] = path
+    }
+
+    # add this year to all years outer list
+    paths[[i]] = months
+
+  }
+
+  return(paths)
+
+}
+
