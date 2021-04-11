@@ -12,10 +12,14 @@ slide_dates_in_polygon(
 )
 }
 \arguments{
-\item{poly}{Path to the polygon shapefile}
+\item{poly}{A path to a polygon spatial object}
 
 \item{iffi10}{Path to the iffi10 shapefile with already precomputed columns in english and the date information}
 }
 \description{
-Extracts the days of the slides for each polygon
+Returns a \code{sf}-dataframe. For each polygon it will count the number of slides per date. This mean
+that a polygon (its column \code{poly_id}) can potentially appear multiple times if on mulitple days slides happended in
+this polygon. The computed column \code{slides_per_poly_date} counts the number of slides per date in that polygon.
+This can then be fed into the function \code{get_rainfall_for_polygon} which is more or less a wrapper around the
+function \code{ex_rainfall}
 }

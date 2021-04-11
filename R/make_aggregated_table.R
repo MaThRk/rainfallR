@@ -6,7 +6,7 @@
 #' @param by either "year" or "month". If "year", the raster with the values for one year will be calculated and than the spatial
 #' aggregation (with the function \code{aggre_fun}) will be applied. If "month", the spatial aggregation will be applied after each month
 #'
-#' @importFrom exactextract exact_extract
+#' @importFrom exactextractr exact_extract
 #'
 
 make_aggregated_table = function(paths, polygon, years, by, daily_fun, monthly_fun, return.list = FALSE){
