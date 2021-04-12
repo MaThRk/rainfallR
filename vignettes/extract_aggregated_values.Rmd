@@ -44,7 +44,14 @@ library(sf)
 
 - And call the function like
 
-```{r, eval=F}
+```{r setpath}
+
+os = ifelse(Sys.info()["sysname"] == "Windows", "w", "l")
+if(os == "l"){
+  path_ncdf = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/"
+} else{
+  path_ncdf = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"
+}
 
 yearly_sums = aggregate_rainfall(
   path_ncdf = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/",
@@ -61,10 +68,10 @@ yearly_sums = aggregate_rainfall(
 - We can plot the results and it looks like this:
 
 ```{r}
-plot(yearly_sum)
+plot(yearly_sums)
 ```
 
-- We can now also calulate the mean of the two years:
+- We can now also calculate the mean of the two years:
 
 ```{r}
 mean_2k15_2k16 = st_apply(yearly_sums, c("x", "y"), mean)
@@ -73,8 +80,11 @@ mean_2k15_2k16 = st_apply(yearly_sums, c("x", "y"), mean)
 
 - and plot it
 
-```{r}
+```{r, fig.width=10, fig.height=8}
 plot(mean_2k15_2k16, main="Mean rainfall in the years 2015 and 2016")
+# get the shape for South Tyrol
+st = iffitoR::get_shape_southtyrol()
+plot(st[0], add=T, col="red", lty=19)
 ```
 
 

@@ -3,9 +3,8 @@ pkgdown: 1.6.1
 pkgdown_sha: ~
 articles:
   ExamplePolygonExtraction: ExamplePolygonExtraction.html
-  example_bozen: example_bozen.html
   extract_aggregated_values: extract_aggregated_values.html
-  extract_rainfall_landslidePoints: extract_rainfall_landslidePoints.html
   extract_rainfall_slope_unit: extract_rainfall_slope_unit.html
-last_built: 2021-04-09T12:39Z
+  points: points.html
+last_built: 2021-04-12T12:40Z
 

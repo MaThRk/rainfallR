@@ -20,6 +20,7 @@ knitr::opts_chunk$set(
 
 ```{r pkgs, message=F, warning=F}
 library(tidyverse) # For much of the data preprocessing
+library(grid)
 library(rainfallR) # The access and processing of the rainfall data
 library(here) # Project paths
 library(gganimate) # For a little animation
@@ -125,7 +126,7 @@ dim(su)
 
 
 ```{r slidessameday}
-landsld = landsld %>% filter(str_detect(second_level, "translational|rotational"))
+landsld = landsld %>% filter(str_detect(second_level, "translational|rotational")) %>% slice(1:50)
 su_points_in_poly = rainfallR::slide_dates_in_polygon(poly = su_path
                                                       ,iffi10 = landsld)
 ```
@@ -190,7 +191,7 @@ slopeunits_rainfall %>%
 
 ## look at the antecedent rainfall
 
-```{r}
+```{r, fig.width=10, echo=F, fig.height=8}
 g =slopeunits_rainfall %>% 
   group_by(poly_id, iffi_id) %>% 
   mutate(unique_id = dplyr::cur_group_id()) %>% 

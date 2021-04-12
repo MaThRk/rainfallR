@@ -40,7 +40,11 @@
 
 
 <meta property="og:title" content="Extracts the days of the slides for each polygon — slide_dates_in_polygon" />
-<meta property="og:description" content="Extracts the days of the slides for each polygon" />
+<meta property="og:description" content="Returns a sf-dataframe. For each polygon it will count the number of slides per date. This mean
+that a polygon (its column poly_id) can potentially appear multiple times if on mulitple days slides happended in
+this polygon. The computed column slides_per_poly_date counts the number of slides per date in that polygon.
+This can then be fed into the function get_rainfall_for_polygon which is more or less a wrapper around the
+function ex_rainfall" />
 
 
 
@@ -95,19 +99,16 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/ExamplePolygonExtraction.html">ExamplePolygonExtraction</a>
-    </li>
-    <li>
-      <a href="../articles/example_bozen.html">Extracting data for bozen</a>
+      <a href="../articles/ExamplePolygonExtraction.html">Example Extraction for one polygon</a>
     </li>
     <li>
       <a href="../articles/extract_aggregated_values.html">Extract aggregated Values (time and space) of the rainfall data</a>
     </li>
     <li>
-      <a href="../articles/extract_rainfall_landslidePoints.html">Extract Rainfalldata for landslide-initiation points</a>
+      <a href="../articles/extract_rainfall_slope_unit.html"> Extract rainfall data for slopeunit-polygons</a>
     </li>
     <li>
-      <a href="../articles/extract_rainfall_slope_unit.html"> Extract rainfall data for slopeunit-polygons</a>
+      <a href="../articles/points.html">Extract the rainfall for points</a>
     </li>
   </ul>
 </li>
@@ -133,7 +134,11 @@
     </div>
 
     <div class="ref-description">
-    <p>Extracts the days of the slides for each polygon</p>
+    <p>Returns a <code>sf</code>-dataframe. For each polygon it will count the number of slides per date. This mean
+that a polygon (its column <code>poly_id</code>) can potentially appear multiple times if on mulitple days slides happended in
+this polygon. The computed column <code>slides_per_poly_date</code> counts the number of slides per date in that polygon.
+This can then be fed into the function <code>get_rainfall_for_polygon</code> which is more or less a wrapper around the
+function <code>ex_rainfall</code></p>
     </div>
 
     <pre class="usage"><span class='fu'>slide_dates_in_polygon</span><span class='op'>(</span>
@@ -148,7 +153,7 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>poly</th>
-      <td><p>Path to the polygon shapefile</p></td>
+      <td><p>A path to a polygon spatial object</p></td>
     </tr>
     <tr>
       <th>iffi10</th>
