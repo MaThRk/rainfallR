@@ -199,7 +199,6 @@ ex_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PR
       select(!!cols_with_vals[[i]]) %>%
       st_drop_geometry()
 
-
     # put it in the only vals list
     list_only_vals[[i]] = df
   }

@@ -98,6 +98,7 @@ day = as.Date("2009-01-20")
   * The function `get_rainfall_for_polygons` now extracts in parallel the rainfall for the each polygon. 
 
 
+
 #### More help
 
 - See [this vignette for more info](https://robinkohrs.github.io/rainfallR/articles/extract_landslide_rainfall.html)
@@ -105,3 +106,22 @@ day = as.Date("2009-01-20")
 ***
 
 ![](man/figures/readmeplot.png)
+
+# Working with temperature data
+
+- As we have access to data about the temperature from 2000 to 2020 in almost the same format it was worth adapting the function slightly to also extract this data for points and polygons. 
+
+- The funciton `ex_rainfall` now also can work with temperature data. Therefore you only need to change the paramter passed to the `nc_var`-argument. Instead of using the default: `precipitation`, use `temperature`.
+
+- The rest should stay the same. An Example function call could then look like this:
+
+```r
+data_path = "path_to_temperature_data"
+spatial.obj = "path_to_polygons" # lets assume this is a polygon (e.g. a slope-unit)
+fun = c("mean", "max")
+date = as.Date("2020-01-01")
+nc_var = "precipitation"
+days_back = 7
+
+res = ex_rainfall(data_oath=data_path, spatial.obj=spatial.obj, fun=fun, data=date, nc_var=nc_var, days_back=days_back)
+```
