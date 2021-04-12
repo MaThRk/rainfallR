@@ -102,6 +102,7 @@ check_spatial_input = function(polygon) {
 #' Get the paths to the monthly NetCDFS
 #'
 
+
 get_monthly_paths = function(years, path_ncdf){
 
   # how many years
@@ -119,8 +120,7 @@ get_monthly_paths = function(years, path_ncdf){
 
     # for each month
     for (j in seq_along(1:12)) {
-      base = 1979
-      current_year = base + i
+      current_year = years[[i]]
       year_month = as.Date(paste0(current_year, "-", j, "-01" ))
       months[[j]] = year_month
     }
