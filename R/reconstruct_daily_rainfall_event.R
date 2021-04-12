@@ -1,13 +1,17 @@
 #' Extract rainfall Events per slide
 #'
-#' @description This function will extract the rainfall events that happened before a landslide, based on a
-#' predefined length ,\code{n}, that can be dry days and still be part of a rainfall event , that can be dry
-#' days and still be part of a rainfall event
+#' @description Extracts the rainfall events that happened before a landslide, based on a predefined length ,
+#' \code{n}, that can be dry days and still be part of a rainfall event.  Input usually is the result of the
+#' function \code{ex_rainfall} for one slide with a unique `PIFF_ID`.
 #'
-#' @param d A dataframe with the extracted rainfall for one point or polygon
+#' @param d A dataframe with the extracted rainfall for one point or polygon. This dataframe needs to have a column
+#' called \code{precip}
 #' @param n The interval (in days) a dry period can still be part of a rainfall event
 #' @param daily_thresh the minimum daily rainfall to be considered a day of rain
 #' @param quiet Show print messages or not
+#'
+#' @returns The same dataframe as inputted, just with the column \code{event} appended that shows the number of
+#' rainfall event before the slide happened
 #'
 #' @export
 

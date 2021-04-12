@@ -8,5 +8,5 @@ make_cumsum(df_wide, fun, days_back)
 }
 \description{
 This function is called by the "parent"-function ex_rainfall in order to get the
-cumulative rainfall
+Create the cumulative values. This function is not exported.
 }

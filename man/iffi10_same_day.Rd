@@ -7,7 +7,7 @@
 iffi10_same_day(iffi10)
 }
 \arguments{
-\item{iffi10}{A subset of the iffi10-database with already computed day-column}
+\item{iffi10}{An object of type \code{sf} which has a column called date!!}
 }
 \value{
 A list where each element is a dataframe with all the slides from
@@ -16,5 +16,5 @@ that day
 \description{
 This function will group all of the points that happened on the
 same day into a \code{data.frame} and put this dataframe into a list. Each
-element of the list thus can be considered to be a day.
+element of the list thus can be considered to be a day. This requires that the input has a column called date
 }

@@ -1,7 +1,7 @@
 #' Will calculate the cumulative sum of the measurements over time
 #'
 #' @description This function is called by the "parent"-function ex_rainfall in order to get the
-#' cumulative rainfall
+#' Create the cumulative values. This function is not exported.
 #'
 #' @importFrom tidyr pivot_longer
 #'

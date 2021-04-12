@@ -4,7 +4,6 @@
 
 - The more recent commits go to gitlab. However the version in Github should be more reliable
 
-
 #### <u> gitlab </u>
 
 ```r
@@ -19,7 +18,6 @@ devtools::install_git("git@gitlab.inf.unibz.it:proslide/rainfallR.git",
                       credentials = creds)
 
 ```
-
 
 #### <u> github </u>
 

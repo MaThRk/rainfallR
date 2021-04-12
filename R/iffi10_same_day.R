@@ -2,13 +2,13 @@
 #'
 #' @description  This function will group all of the points that happened on the
 #' same day into a \code{data.frame} and put this dataframe into a list. Each
-#' element of the list thus can be considered to be a day.
+#' element of the list thus can be considered to be a day. This requires that the input has a column called date
 #'
 #'
 #' @return A list where each element is a dataframe with all the slides from
 #' that day
 #'
-#' @param iffi10 A subset of the iffi10-database with already computed day-column
+#' @param iffi10 An object of type \code{sf} which has a column called date!!
 #'
 #' @export
 
@@ -16,6 +16,10 @@ iffi10_same_day = function(iffi10){
 
   # make sure there are only records with dates
   iffi10 = iffi10 %>% filter(date_info == "day")
+
+  if(! any(grepl("date", names(iffi10)))){
+    stop("There is no column called `date` in your object")
+  }
 
   # the slide dates for all slides
   dates_of_slides = iffi10$date

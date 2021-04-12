@@ -1,0 +1,264 @@
+---
+title: "Extract the rainfall for points"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{points}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# How to extract the rainfall data for points
+
+```{r setup}
+library(rainfallR)
+library(tidyverse)
+library(iffitoR)
+library(ggforce)
+library(ggtext)
+library(rainfallR)
+library(glue)
+library(here)
+library(scales)
+library(lubridate)
+library(sf)
+library(stars)
+library(raster)
+```
+
+## Requiremets
+
+1. We need access to the rainfall data
+
+```{r}
+data_path = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/"
+```
+
+2. We need a "spatial object" (points in that case), that hase some temporal **daily** temporal information. This is important as it only makes sense to extract the daily rainfall data if one has information about the date one wants to extract the data. It would be possible to think about to handle the extraction if the input is a month. However, this is not implemented here.
+
+We use the landslide-data from the `iffitoR`-package.
+
+```{r}
+library(iffitoR) # comes with the data-object called landsld
+
+# select only the daily data after 1980
+# the filtering for the "day" would not even be necessary as the function 'iffi10_same_day' does the same
+landsld = landsld[landsld$date_info == "day" & landsld$date > as.Date("1980-01-01"), ]
+
+# select the first 100
+landsld = landsld[1:100, ]
+```
+
+## 1. Get all the slides that happened on the same day
+
+- This function does not only work with objects of the iffi database
+
+-It however requires, that there is a column called `date`
+
+- This returns a list with where each element is an object of class `sf` with spatial objects that happened on the same day
+
+```{r}
+slides_same_day = iffi10_same_day(landsld)
+```
+
+- We could now ask for example for the maximim number of slides on one day in all our area of interest. 
+
+- The number of slides per day is equal to the number of rows per dataframe.
+
+```{r}
+n_slides_per_day = sapply(slides_same_day, nrow)
+n = max(n_slides_per_day)
+idx = which.max(n_slides_per_day)
+sprintf("The maximum number of slides per day in our data is %d", n)
+sprintf("They happened on the: %s", as.Date(names(n_slides_per_day)[[idx]], format = "%Y%m%d"))
+```
+
+## Extract the rainfall data
+
+- Now we can extract the rainfall data for each date. 
+
+- The `rainfallR`-package extracts the data for objects of class `sf`. So spatical rectangular dataframes. 
+
+- It was designed so that it can extract the rainfall data, for a dataframe that consists of multiple slide-locations (usually in the column `geom`), but only for one date. 
+
+- (Here I'm talking about an `sf`-object of clas `POINT` and not about class `MULTIPOINT`)
+
+- This was done because it made it easier to read the large daily NetCDfs only once and extract directly all the data for the multiple slides
+
+- That is why we ran the function `iffi10_same_day`. In order to get all the unique days where slides happened and bring down the computation time.
+
+**THIS WORKS** (same date, different location)
+
+| slide_id | date         | geom          |
+|----------|--------------|---------------|
+| 1        | "2020-01-01" | POINT (30 10) |
+| 2        | "2020-01-01" | POINT (40 10) |
+
+**THIS DOES NOT WORK** (same location, different date)
+
+| slide_id | date         | geom          |
+|----------|--------------|---------------|
+| 1        | "2020-01-01" | POINT (30 10) |
+| 2        | "2020-02-01" | POINT (30 10) |
+
+
+- We thus will iterate over the elements in the list `slides_same_day` and apply to each element the function `ex_rainfall`
+
+- This function returns a dataframe with `nrow(element_of_list)` * `days_back` rows. 
+
+- We will row-bind these dataframes and so construct one big dataframe
+
+```{r}
+library(doParallel)
+registerDoParallel(8)
+
+start = Sys.time()
+res = foreach(
+  i = 1:length(slides_same_day),
+  .combine = rbind,
+  .packages = c("rainfallR",
+                "magrittr",
+                "stringr",
+                "dplyr")
+) %dopar% {
+
+  # get the date of the slides
+  date = names(slides_same_day)[[i]] %>% as.Date(., "%Y%m%d")
+
+  # the spatial object
+  spatial.obj = slides_same_day[[i]]
+
+  # go thirty days_back. Pray this works
+  days_back = 7
+
+  # this returns a dataframe
+  rf = rainfallR::ex_rainfall(
+    data_path = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/",
+    spatial.obj = spatial.obj,
+    fun = NULL, # we are using points
+    nc_var = "precipitation",
+    date = date,
+    days_back = days_back
+  )
+}
+
+end = Sys.time()
+took = end-start
+
+dim(res)
+```
+
+### Inspect the results
+
+#### All slides
+
+- We can visualize the rainfall for all of the slides of the day of the slide and the 7 days before
+
+```{r}
+ggplot(res) +
+  geom_path(
+    aes(x = days_before_event,
+        y = cumsum, 
+        group = PIFF_ID),
+    show.legend = F
+  ) +
+  theme_light(base_family = "Times") +
+  scale_x_reverse() +
+  labs(
+    x = "Days before the event",
+    y = "Cumulative rainfall [mm]"
+  )
+
+```
+
+#### One slide
+
+- In order to understand the next step, we can also look at one single slide
+
+```{r}
+# get the first slide
+slide = res %>% 
+  filter(PIFF_ID == first(PIFF_ID))
+
+```
+
+```{r, echo=F}
+
+d = data.frame(
+  x1 = c(as.Date("1993-09-17"), as.Date("1993-09-22")),
+  x2 = c(as.Date("1993-09-19"), as.Date("1993-09-27")),
+  y1 = c(0, 0),
+  y2 = c(2, 28),
+  col = c("a", "b")
+)
+
+ggplot(slide) +
+    geom_rect(
+    data = d,
+    mapping = aes(xmin = x1,
+                  xmax = x2,
+                  ymin = y1,
+                  ymax = y2,
+                  fill = col),
+    alpha = .5
+  ) +
+  geom_col(mapping = aes(x = date.x,
+                         y = precip)) +
+
+  geom_path(mapping = aes(x = date.x,
+                          y = cumsum / 5),
+            color = "blue",
+            size = 2) +
+
+  scale_y_continuous(name = "Precipitation [mm]",
+                     sec.axis = sec_axis(~ . * 5, name = "Cumulative Rainfall")) +
+
+  scale_x_date(date_labels = "%Y-%m-%d") +
+
+  geom_vline(
+    mapping = aes(xintercept = last(date.x + 1),
+                 color = ""),
+    size = 2
+  ) +
+  scale_color_manual(values = c("darkred"), name="") +
+  labs(x = "",
+       y = "precipitation [mm]",
+       title = "Cumulated rainfall 7 days before the landslide and identification of the Rainfall Events") +
+  theme_light(base_family = "Times") +
+  theme(
+    legend.position = "none",
+    axis.text.y.right = element_text(hjust=.2, color="blue"),
+    axis.title.y.right = element_text(vjust = 2, color="blue")
+  )
+```
+
+
+## Reconstruct the rainfall events
+
+- In order to get the rainfall events per slide (in our time of consideration, here 7 days) we will "reconstruct" the rainfall events
+
+- As we are working with continous gridded data, we do not need to worry about selecting a rain-gauge based on some criteria as the data is directy "below" the point
+
+- The dataframe `res` now has 800 rows and still 100 unique slides. We can confirm this by `r length(unique(res$PIFF_ID))``
+
+- We want to reconstruct the rainfall for each of the unique slides
+
+```{r}
+# we therefore create a list again for each slide
+unique_slides_with_cumulated_rainfall = split(res, res$PIFF_ID)
+```
+
+- and then we can apply the funtion `reconstruct_daily_rainfall_events` on each element
+
+```{r}
+slides_with_rainfall_event = lapply(unique_slides_with_cumulated_rainfall, function(x){
+  rainfallR::reconstruct_daily_rainfall_events(x, n = 0, daily_thresh = .2) 
+})
+```
+
