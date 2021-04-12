@@ -167,7 +167,7 @@ su_points_in_poly %>%
 su_points_in_poly = su_points_in_poly[su_points_in_poly$date > as.Date("1980-01-01"), ]
 
 # get the antecedent rainfall for all the dates in all the slope units with landslides
-slopeunits_rainfall = rainfallR::get_rainfall_for_polygons(su_points_in_poly, days_back = 14)
+slopeunits_rainfall = rainfallR::get_rainfall_for_polygons(su_points_in_poly, nc_var = "precipitation", days_back = 14, data_path = path_ncdf)
 ```
 
 

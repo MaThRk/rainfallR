@@ -1,0 +1,259 @@
+---
+title: "Extracting data for bozen"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{example_bozen}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+- read the necessary libraries
+
+
+```{r setup, echo=T, message=FALSE, warning=FALSE}
+library(rainfallR)
+library(here)
+library(sf)
+library(dplyr)
+library(tmap)
+library(mapview)
+library(tidyverse)
+library(raster)
+library(leaflet)
+```
+
+- first we need to set some paths
+
+```{r}
+os = ifelse(Sys.info()["sysname"] == "Windows", "w", "l")
+if(os == "l"){
+  path_ncdf = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/"
+} else{
+  path_ncdf = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"
+}
+
+# then we need a path to a spatial object (shape, geopackage...)
+spatial.obj = bozen # should be included in the package
+head(spatial.obj)
+```
+
+- check to see if we are in the right location
+
+```{r, echo=F}
+data(World)
+tmap_mode("view")
+tm_shape(spatial.obj) +
+tm_dots()
+```
+
+
+> set some more options
+
+  + **`dts=c(as.Date("2016-01-12"), as.Date("2016-01-14"))`**: The dates we want the data for
+  + **`seqq=TRUE`**: We want all the dates inbetween. So set seqq (sequence) to true
+  + **`days_back=4`**: For each date we want to have the rainfall for four days prior to the date we are considering
+
+```{r, echo=T}
+dts = c(as.Date("2016-01-12"), as.Date("2016-01-14"))
+seqq = T 
+days_back = 4
+```
+
+> get the rainfall data
+
+- what we will get back is a list of three `sf`-dataframes. One for each day of consideration
+
+```{r getdata, echo=T, warning=F, message=F}
+res = get_rainfall(data_path = path_ncdf,
+                   spatial.obj = spatial.obj,
+                   dts = dts,
+                   seqq = seqq, 
+                   days_back = days_back)
+```
+
+
+- os one can see, the `days_back`, so the antecedent days are not stored in one column, but each day prior to the day of consideration is an own column. 
+
+- This is not the best way to store the data
+
+- we want to bring the data in "long"-format and additionally calculate the cumulative antecedent rainfall
+
+
+```{r longformat}
+res_long = rainfallR::make_cumulative_rainfall(res, days_back = days_back)
+```
+
+
+- now we have a list with 3 (one for each date) "long" dataframes and an additional column for the comulative rainfall
+
+- if we would have more than one point, they would have an id an be stored as rows
+
+```{r, message=F}
+library(purrr)
+# lapply(res_long, head, n=2)
+map(res_long, ~head(.x, n=2))
+```
+
+
+## simulate the extration for two points
+
+```{r makepoint}
+# create a random point right next to bolzano
+bozen2 = bozen 
+
+x = st_coordinates(bozen)[,1] + 0.1
+y = st_coordinates(bozen)[,2] + 0.1
+#modify the x and y coordinates of the new point
+bozen2 = data.frame(x,y) %>% st_as_sf(coords=c(1,2), crs=st_crs(bozen)) 
+# bind them together
+bozen2 = rbind(bozen, bozen2)
+```
+
+- where did the second point land?
+
+```{r}
+data(World)
+tmap_mode("view")
+tm_shape(bozen2) +
+tm_dots()
+```
+
+
+
+```{r res2, warning=F, message=F, warning=F}
+res2 = get_rainfall(data_path = path_ncdf,
+                   spatial.obj = bozen2,
+                   dts = dts,
+                   seqq = seqq, 
+                   days_back = days_back)
+```
+- the two points appear as two lines in the output
+
+```{r}
+res2
+```
+
+
+- bring it again in long format 
+- In order to seperate the points and group by the spatial object, an id-column is now created
+
+```{r id}
+res2_long = rainfallR::make_cumulative_rainfall(res2, days_back = days_back)
+```
+
+
+
+- we can now plot the data for the one-point and the two(n)-point situation
+
+- **I think it is a rather unusual situation that one wants data for more than one date under consideration. Thus, the creation of the dataframe here below would not be necessary**
+
+```{r gg1, echo=F, fig.width=8}
+
+# bind all the dates together and make the name a column to identify
+
+# initalizes an empty df
+df_long = res_long[[1]]
+df_long$date_consid = names(res_long)[[1]]
+
+for (day in seq_along(res_long)) {
+  
+  # skip the first one
+  if(day!=1){
+    df = res_long[[day]]
+    df$date_consid = names(res_long)[[day]]
+    df_long = rbind(df_long, df)
+  }
+  
+}
+
+ggplot(df_long) +
+  geom_col(aes(x=date, y=cumsum)) +
+  facet_wrap(~date_consid) +
+  theme_light() +
+  labs(y="Cumulative Antecedent Rainfall in Bozen")
+  
+```
+
+- do it for the two points
+
+```{r, fig.width=8}
+# bind all the dates together and make the name a column to identify
+
+# initalizes an empty df
+df_long2 = res2_long[[1]]
+df_long2$date_consid = names(res2_long)[[1]]
+
+for (day in seq_along(res2_long)) {
+  
+  # skip the first one
+  if(day!=1){
+    df = res2_long[[day]]
+    df$date_consid = names(res2_long)[[day]]
+    df_long2 = rbind(df_long2, df)
+  }
+  
+}
+
+ggplot(df_long2) +
+  geom_col(aes(x=date, y=cumsum, fill=as.factor(id)), position="dodge") +
+  facet_wrap(~date_consid) +
+  theme_light() +
+  labs(y="Cumulative Antecedent Rainfall in Bozen")
+
+```
+
+
+## get the unterlying rasters to confirm if this makes sense
+
+```{r readraster, warning=F, fig.width=8}
+# make the path to the raster on the eurac server
+path_raster = rainfallR::get_nc_paths(data_path = path_ncdf, day = dts[[1]], days_back = 5)
+
+# select the 12th, 13th and 14th day
+days = c(12,13,14)
+raster_brick = raster::brick(path_raster)
+selected_raster = subset(raster_brick, days)
+
+# transform the stack and the polygon
+selected_raster = projectRaster(selected_raster, crs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+bozen2 = st_transform(bozen2, 4326)
+
+# set up the color palettes for each raster
+pal1 = colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(selected_raster[[1]]),
+  na.color = "transparent")
+pal2 = colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(selected_raster[[2]]),
+  na.color = "transparent")
+pal3 = colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(selected_raster[[3]]),
+  na.color = "transparent")
+
+
+bz_sp = as(bozen2, Class="Spatial")
+
+groups_rasters = seq(dts[[1]], dts[[2]], by="day") %>% sapply(., function(x){
+  x = str_replace_all(x, "-", "")
+  paste0("x", x) 
+})
+
+names(selected_raster) = groups_rasters
+
+p1 = selected_raster[[1]]
+p2 = selected_raster[[2]]
+p3 = selected_raster[[3]]
+
+leaflet() %>% 
+  addTiles() %>% 
+  addCircles(data=bozen2, group = "shape") %>% 
+  addRasterImage(p1, group=names(selected_raster)[[1]], colors=pal1) %>% 
+  addRasterImage(p2, group=names(selected_raster)[[2]], colors=pal2) %>% 
+  addRasterImage(p3, group=names(selected_raster)[[3]], colors=pal3) %>% 
+  addLayersControl(overlayGroups = c("shape", names(selected_raster)))
+```
+
+

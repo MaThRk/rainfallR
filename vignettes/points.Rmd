@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 # How to extract the rainfall data for points
 
-```{r setup}
+```{r setup, warning=F, message=F}
 library(rainfallR)
 library(tidyverse)
 library(iffitoR)
@@ -36,8 +36,13 @@ library(raster)
 
 1. We need access to the rainfall data
 
-```{r}
-data_path = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/"
+```{r, echo=F}
+os = ifelse(Sys.info()["sysname"] == "Windows", "w", "l")
+if(os == "l"){
+  data_path = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/"
+} else{
+  data_path = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"
+}
 ```
 
 2. We need a "spatial object" (points in that case), that hase some temporal **daily** temporal information. This is important as it only makes sense to extract the daily rainfall data if one has information about the date one wants to extract the data. It would be possible to think about to handle the extraction if the input is a month. However, this is not implemented here.
@@ -139,7 +144,7 @@ res = foreach(
 
   # this returns a dataframe
   rf = rainfallR::ex_rainfall(
-    data_path = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/",
+    data_path = data_path,
     spatial.obj = spatial.obj,
     fun = NULL, # we are using points
     nc_var = "precipitation",
@@ -160,7 +165,7 @@ dim(res)
 
 - We can visualize the rainfall for all of the slides of the day of the slide and the 7 days before
 
-```{r}
+```{r, echo=F, fig.width=8}
 ggplot(res) +
   geom_path(
     aes(x = days_before_event,
@@ -188,7 +193,7 @@ slide = res %>%
 
 ```
 
-```{r, echo=F}
+```{r, echo=F, fig.width=8}
 
 d = data.frame(
   x1 = c(as.Date("1993-09-17"), as.Date("1993-09-22")),
@@ -256,9 +261,40 @@ unique_slides_with_cumulated_rainfall = split(res, res$PIFF_ID)
 
 - and then we can apply the funtion `reconstruct_daily_rainfall_events` on each element
 
+- This function takes as input a dataframe with a column called `precip` and return also a dataframe with an additional column called `event`. This column shows the number of the event
+
+- One can control the number of days ("The dry period") which can interleave rainy days (controlled by the argument `daily_thresh`). Here we set it to 0, meaning that there can't be any day without less than 0.2 mm rainfall which is part of a "rainfall event"
+
+- after the application of the funciton we will stack all the dataframes on top of each other
+
 ```{r}
 slides_with_rainfall_event = lapply(unique_slides_with_cumulated_rainfall, function(x){
   rainfallR::reconstruct_daily_rainfall_events(x, n = 0, daily_thresh = .2) 
 })
+
+# stack them
+final_df = do.call("rbind", slides_with_rainfall_event)
 ```
+
+
+- Now we can for example plot the duration of the last rainfall event for each slide
+
+```{r echo=F, fig.width=6}
+final_df %>% 
+  group_by(PIFF_ID) %>% 
+  filter(event == last(event)) %>% 
+  summarise(days_last_event = n()) %>% 
+  ggplot() +
+  geom_histogram(
+    aes(x = days_last_event)
+  ) +
+  scale_x_continuous(breaks = 1:8) +
+  theme_light(base_family="Times") +
+  labs(
+    x = "Duration of last rainfall event before the slide",
+    y = "# slides",
+    title = "How long did the last rainfall event took?"
+  )
+```
+
 
