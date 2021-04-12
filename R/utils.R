@@ -43,7 +43,12 @@ get_nc_paths = function(data_path, day, days_back){
   y = format(day, "%Y")
   m = format(day, "%m")
   d = format(day, "%d")
-  path_day = paste0(data_path, y, "/", "DAILYPCP_", y, formatC(m, flag = 0, width = 2), ".nc")
+
+  # precip or temp?
+  var = ifelse(grepl("TEMP", data_path), "DTMEAN_", "DAILYPCP_")
+
+  # build the path
+  path_day = paste0(data_path, y, "/", var, y, formatC(m, flag = 0, width = 2), ".nc")
 
   # last day to extract
   days_back = max(days_back)
@@ -51,7 +56,7 @@ get_nc_paths = function(data_path, day, days_back){
   y_b = format(max_day_back, "%Y")
   m_b = format(max_day_back, "%m")
   d_b = format(max_day_back, "%d")
-  last_month_path = paste0(data_path, y_b, "/", "DAILYPCP_", y_b, formatC(m_b, flag = 0, width = 2), ".nc")
+  last_month_path = paste0(data_path, y_b, "/", var, y_b, formatC(m_b, flag = 0, width = 2), ".nc")
 
   # if the current day has a different month than the last day back we need two paths
   if(!m == m_b){

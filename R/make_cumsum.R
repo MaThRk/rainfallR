@@ -3,6 +3,7 @@
 #' @description This function is called by the "parent"-function ex_rainfall in order to get the
 #' cumulative rainfall
 #'
+#' @importFrom tidyr pivot_longer
 #'
 #' @param
 #'
