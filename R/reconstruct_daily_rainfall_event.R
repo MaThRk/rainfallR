@@ -34,15 +34,16 @@ reconstruct_daily_rainfall_events = function(d,
     precip = d[i,]$precip
 
     # if its below the threshold --> DRY period starts
-    if (precip < daily_thresh) {
+    if (precip <= daily_thresh) { # has to be less or equal to in case the threshold is set to 0
       # count unknown number of following dry days of this dry episode
       dry_days = 0
 
       ### DRY LOOP
       # start from the day with rainfall under the threshold
       for (j in i:nrow(d)) {
+
         # count the consecutive dry days
-        if (d[j,]$precip < daily_thresh) {
+        if (d[j,]$precip <= daily_thresh) { # has to be less or equal to in case the threshold is set to 0
           dry_days = dry_days + 1
 
           # when all the days up to the end dont see any rain anymore --> set them also to NA
