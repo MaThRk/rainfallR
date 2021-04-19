@@ -1,6 +1,6 @@
 #' Extract the rainfall for a \code{data.frame} of polygons
 #'
-#' @description This function build on the results of \code{slide_dates_in_polygon} which returns a df
+#' @description This function builds on the results of \code{slide_dates_in_polygon} which returns a df
 #' where each row is a polygon with a slide that is uniquely indentifiable by its \code{poly_id} and the
 #' \code{date}
 #'
