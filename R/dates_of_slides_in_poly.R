@@ -8,8 +8,8 @@
 #'
 dates_of_slides_in_poly = function(joined_points_on_poly){
 
-  ####### from the spatially joined data only select the polys which have an iffi_id
-  polys_with_points = joined_points_on_poly[!is.na(joined_points_on_poly$iffi_id), ]
+  ####### from the spatially joined data only select the polys which have an landsld_id
+  polys_with_points = joined_points_on_poly[!is.na(joined_points_on_poly$landsld_id), ]
 
   # now all polygons with the same poly_id have the same spatial information.
   # only their date and information from the dataframe can change
