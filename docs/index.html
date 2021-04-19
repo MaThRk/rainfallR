@@ -40,7 +40,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -55,16 +55,16 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/ExamplePolygonExtraction.html">ExamplePolygonExtraction</a>
+      <a href="articles/ExamplePolygonExtraction.html">Example Extraction for one polygon</a>
     </li>
     <li>
-      <a href="articles/example_bozen.html">Extracting data for bozen</a>
-    </li>
-    <li>
-      <a href="articles/extract_rainfall_landslidePoints.html">Extract Rainfalldata for landslide-initiation points</a>
+      <a href="articles/extract_aggregated_values.html">Extract aggregated Values (time and space) of the rainfall data</a>
     </li>
     <li>
       <a href="articles/extract_rainfall_slope_unit.html"> Extract rainfall data for slopeunit-polygons</a>
+    </li>
+    <li>
+      <a href="articles/points.html">Extract the rainfall for points</a>
     </li>
   </ul>
 </li>
@@ -81,6 +81,7 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
+
 <div id="rainfallr" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#rainfallr" class="anchor"></a>rainfallR</h1></div>
@@ -94,15 +95,15 @@
 <h4 class="hasAnchor">
 <a href="#-gitlab-" class="anchor"></a><u> gitlab </u>
 </h4>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># the paths to the public and private ssh-key</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a>public =<span class="st"> "C://PATH/TO/PUBLIC/id_rsa.pub"</span>,</span>
-<span id="cb1-3"><a href="#cb1-3"></a>private =<span class="st"> "C://PATH/TO/PRIVATE/id_rsa"</span></span>
-<span id="cb1-4"><a href="#cb1-4"></a></span>
-<span id="cb1-5"><a href="#cb1-5"></a>creds =<span class="st"> </span>git2r<span class="op">::</span><span class="kw">cread_ssh_key</span>(public, private)</span>
-<span id="cb1-6"><a href="#cb1-6"></a></span>
-<span id="cb1-7"><a href="#cb1-7"></a><span class="co"># install it using devtools</span></span>
-<span id="cb1-8"><a href="#cb1-8"></a>devtools<span class="op">::</span><span class="kw">install_git</span>(<span class="st">"git@gitlab.inf.unibz.it:proslide/rainfallR.git"</span>,</span>
-<span id="cb1-9"><a href="#cb1-9"></a>                      <span class="dt">credentials =</span> creds)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the paths to the public and private ssh-key</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>public <span class="ot">=</span> <span class="st">"C://PATH/TO/PUBLIC/id_rsa.pub"</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>private <span class="ot">=</span> <span class="st">"C://PATH/TO/PRIVATE/id_rsa"</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>creds <span class="ot">=</span> git2r<span class="sc">::</span><span class="fu">cread_ssh_key</span>(public, private)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># install it using devtools</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_git</span>(<span class="st">"git@gitlab.inf.unibz.it:proslide/rainfallR.git"</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                      <span class="at">credentials =</span> creds)</span></code></pre></div>
 </div>
 <div id="-github-" class="section level4">
 <h4 class="hasAnchor">
@@ -156,9 +157,9 @@
 <h4 class="hasAnchor">
 <a href="#-point-data-" class="anchor"></a><u> Point data </u>
 </h4>
-<ul>
-<li>If we are interested in the extraction of rainfall for point data, a tyical workflow could look like this:</li>
-</ul>
+<blockquote>
+<p>If we are interested in the extraction of rainfall for point data, a tyical workflow could look like this:</p>
+</blockquote>
 <ol>
 <li><strong>get the landslide data</strong></li>
 </ol>
@@ -183,9 +184,9 @@
 <h4 class="hasAnchor">
 <a href="#-polygon-data-" class="anchor"></a><u> Polygon data </u>
 </h4>
-<ul>
-<li>For Polygon data we probably want to perform some kinf of aggregation. So the workflow might look a little different</li>
-</ul>
+<blockquote>
+<p>For Polygon data we probably want to perform some kinf of aggregation. So the workflow might look a little different</p>
+</blockquote>
 <ol>
 <li><strong>get the polygon data</strong></li>
 </ol>
@@ -218,6 +219,25 @@
 </div>
 </div>
 </div>
+<div id="working-with-temperature-data" class="section level1">
+<h1 class="hasAnchor">
+<a href="#working-with-temperature-data" class="anchor"></a>Working with temperature data</h1>
+<ul>
+<li><p>As we have access to data about the temperature from 2000 to 2020 in almost the same format it was worth adapting the function slightly to also extract this data for points and polygons.</p></li>
+<li><p>The funciton <code>ex_rainfall</code> now also can work with temperature data. Therefore you only need to change the paramter passed to the <code>nc_var</code>-argument. Instead of using the default: <code>precipitation</code>, use <code>temperature</code>.</p></li>
+<li><p>The rest should stay the same. An Example function call could then look like this:</p></li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">data_path</span> <span class="op">=</span> <span class="st">"path_to_temperature_data"</span>
+<span class="va">spatial.obj</span> <span class="op">=</span> <span class="st">"path_to_polygons"</span> <span class="co"># lets assume this is a polygon (e.g. a slope-unit)</span>
+<span class="va">fun</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"max"</span><span class="op">)</span>
+<span class="va">date</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="st">"2020-01-01"</span><span class="op">)</span>
+<span class="va">nc_var</span> <span class="op">=</span> <span class="st">"precipitation"</span>
+<span class="va">days_back</span> <span class="op">=</span> <span class="fl">7</span>
+
+<span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="reference/ex_rainfall.html">ex_rainfall</a></span><span class="op">(</span>data_oath<span class="op">=</span><span class="va">data_path</span>, spatial.obj<span class="op">=</span><span class="va">spatial.obj</span>, fun<span class="op">=</span><span class="va">fun</span>, data<span class="op">=</span><span class="va">date</span>, nc_var<span class="op">=</span><span class="va">nc_var</span>, days_back<span class="op">=</span><span class="va">days_back</span><span class="op">)</span></code></pre></div>
+</div>
+
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

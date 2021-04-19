@@ -1,13 +1,17 @@
 #' Extract rainfall Events per slide
 #'
-#' @description This function will extract the rainfall events that happened before a landslide, based on a
-#' predefined length ,\code{n}, that can be dry days and still be part of a rainfall event , that can be dry
-#' days and still be part of a rainfall event
+#' @description Extracts the rainfall events that happened before a landslide, based on a predefined length ,
+#' \code{n}, that can be dry days and still be part of a rainfall event.  Input usually is the result of the
+#' function \code{ex_rainfall} for one slide with a unique `PIFF_ID`.
 #'
-#' @param d A dataframe with the extracted rainfall for one point or polygon
+#' @param d A dataframe with the extracted rainfall for one point or polygon. This dataframe needs to have a column
+#' called \code{precip}
 #' @param n The interval (in days) a dry period can still be part of a rainfall event
 #' @param daily_thresh the minimum daily rainfall to be considered a day of rain
 #' @param quiet Show print messages or not
+#'
+#' @returns The same dataframe as inputted, just with the column \code{event} appended that shows the number of
+#' rainfall event before the slide happened
 #'
 #' @export
 
@@ -30,15 +34,16 @@ reconstruct_daily_rainfall_events = function(d,
     precip = d[i,]$precip
 
     # if its below the threshold --> DRY period starts
-    if (precip < daily_thresh) {
+    if (precip <= daily_thresh) { # has to be less or equal to in case the threshold is set to 0
       # count unknown number of following dry days of this dry episode
       dry_days = 0
 
       ### DRY LOOP
       # start from the day with rainfall under the threshold
       for (j in i:nrow(d)) {
+
         # count the consecutive dry days
-        if (d[j,]$precip < daily_thresh) {
+        if (d[j,]$precip <= daily_thresh) { # has to be less or equal to in case the threshold is set to 0
           dry_days = dry_days + 1
 
           # when all the days up to the end dont see any rain anymore --> set them also to NA

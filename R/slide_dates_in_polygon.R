@@ -12,6 +12,7 @@
 #' (as in the classic iffi-data from the \code{iffitoR}-package) or column called \code{date} with dates of class \code{date}. If both do not
 #' exist, the first column with the class \code{date} will be used to subset only the landslides with day-precise information
 #'
+#'
 #' @export
 
 slide_dates_in_polygon = function(
@@ -101,7 +102,7 @@ slide_dates_in_polygon = function(
   landsld = st_transform(landsld, epsg)
   poly = st_transform(poly, epsg)
 
-  ####### crop the poly to the bounding box of the iffi10-points
+  ####### crop the poly to the bounding box of the landld-points
   bb = st_bbox(landsld) %>% st_as_sfc() %>% st_as_sf()
   poly = st_crop(poly, bb)
 

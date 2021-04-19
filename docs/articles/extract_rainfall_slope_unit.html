@@ -39,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -54,16 +54,16 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/ExamplePolygonExtraction.html">ExamplePolygonExtraction</a>
+      <a href="../articles/ExamplePolygonExtraction.html">Example Extraction for one polygon</a>
     </li>
     <li>
-      <a href="../articles/example_bozen.html">Extracting data for bozen</a>
-    </li>
-    <li>
-      <a href="../articles/extract_rainfall_landslidePoints.html">Extract Rainfalldata for landslide-initiation points</a>
+      <a href="../articles/extract_aggregated_values.html">Extract aggregated Values (time and space) of the rainfall data</a>
     </li>
     <li>
       <a href="../articles/extract_rainfall_slope_unit.html"> Extract rainfall data for slopeunit-polygons</a>
+    </li>
+    <li>
+      <a href="../articles/points.html">Extract the rainfall for points</a>
     </li>
   </ul>
 </li>
@@ -78,7 +78,7 @@
 
       
 
-      </header><script src="extract_rainfall_slope_unit_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><script src="extract_rainfall_slope_unit_files/header-attrs-2.6/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Extract rainfall data for slopeunit-polygons</h1>
@@ -99,6 +99,7 @@
 </ul>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span> <span class="co"># For much of the data preprocessing</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">grid</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">rainfallR</span><span class="op">)</span> <span class="co"># The access and processing of the rainfall data</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://here.r-lib.org/">here</a></span><span class="op">)</span> <span class="co"># Project paths</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://gganimate.com">gganimate</a></span><span class="op">)</span> <span class="co"># For a little animation</span>
@@ -141,16 +142,16 @@
 <code class="sourceCode R"><span class="co"># get vector of South Tyrol</span>
 <span class="va">st</span> <span class="op">=</span> <span class="fu">iffitoR</span><span class="fu">::</span><span class="fu">get_shape_southtyrol</span><span class="op">(</span><span class="op">)</span> 
 
-<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">st</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<span class="fu">ggplot</span><span class="op">(</span><span class="va">st</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">geom_sf</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="extract_rainfall_slope_unit_files/figure-html/plotst-1.png" width="700"></p>
 <ul>
 <li>Now we get the vector data for the slope units</li>
 </ul>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">su_orig</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">su_path</span><span class="op">)</span>
-<span class="co">#&gt; Reading layer `su_16_TAA' from data source `\\projectdata.eurac.edu\projects\Proslide\Envir_data\SlopeUnits\su_opt_16_TAA\su_16_TAA.shp' using driver `ESRI Shapefile'</span>
+<span class="co">#&gt; Reading layer `su_16_TAA' from data source `/mnt/CEPH_PROJECTS/Proslide/Envir_data/SlopeUnits/su_opt_16_TAA/su_16_TAA.shp' using driver `ESRI Shapefile'</span>
 <span class="co">#&gt; Simple feature collection with 14543 features and 4 fields</span>
 <span class="co">#&gt; geometry type:  POLYGON</span>
 <span class="co">#&gt; dimension:      XY</span>
@@ -203,12 +204,11 @@
 <li><p>In order to not neglect the fact that potentially multiple slides could have happened, the column <code>slides_per_poly_date</code> present the number of slides that happened at that day in that polygon</p></li>
 </ul>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">su_points_in_poly</span> <span class="op">=</span> <span class="fu">rainfallR</span><span class="fu">::</span><span class="fu"><a href="../reference/slide_dates_in_polygon.html">slide_dates_in_polygon</a></span><span class="op">(</span>poly <span class="op">=</span> <span class="va">su_path</span>
-                                                      ,iffi10 <span class="op">=</span> <span class="va">landsld</span>
-                                                      ,second_level_regex <span class="op">=</span> <span class="cn">NULL</span>
-                                                      ,min_year <span class="op">=</span> <span class="fl">2000</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">landsld</span> <span class="op">=</span> <span class="va">landsld</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">second_level</span>, <span class="st">"translational|rotational"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">slice</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">50</span><span class="op">)</span>
+<span class="va">su_points_in_poly</span> <span class="op">=</span> <span class="fu">rainfallR</span><span class="fu">::</span><span class="fu"><a href="../reference/slide_dates_in_polygon.html">slide_dates_in_polygon</a></span><span class="op">(</span>poly <span class="op">=</span> <span class="va">su_path</span>
+                                                      ,iffi10 <span class="op">=</span> <span class="va">landsld</span><span class="op">)</span>
 <span class="co">#&gt; [1] "using an sf-object as input to the iffi-argument"</span>
-<span class="co">#&gt; Reading layer `su_16_TAA' from data source `\\projectdata.eurac.edu\projects\Proslide\Envir_data\SlopeUnits\su_opt_16_TAA\su_16_TAA.shp' using driver `ESRI Shapefile'</span>
+<span class="co">#&gt; Reading layer `su_16_TAA' from data source `/mnt/CEPH_PROJECTS/Proslide/Envir_data/SlopeUnits/su_opt_16_TAA/su_16_TAA.shp' using driver `ESRI Shapefile'</span>
 <span class="co">#&gt; Simple feature collection with 14543 features and 4 fields</span>
 <span class="co">#&gt; geometry type:  POLYGON</span>
 <span class="co">#&gt; dimension:      XY</span>
@@ -223,23 +223,23 @@
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">su_points_in_poly</span> <span class="op">%&gt;%</span> 
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">poly_id</span>, <span class="va">date</span>, <span class="va">month.int</span>, <span class="va">second_level</span>, <span class="va">slides_per_poly_date</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>  
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span><span class="op">(</span><span class="va">slides_per_poly_date</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">slides_per_poly_date</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html">head</a></span><span class="op">(</span><span class="op">)</span>
 <span class="co">#&gt; Simple feature collection with 6 features and 5 fields</span>
 <span class="co">#&gt; geometry type:  POLYGON</span>
 <span class="co">#&gt; dimension:      XY</span>
-<span class="co">#&gt; bbox:           xmin: 665103.4 ymin: 5142844 xmax: 698604.7 ymax: 5177198</span>
+<span class="co">#&gt; bbox:           xmin: 716861.3 ymin: 5204596 xmax: 735880.9 ymax: 5214580</span>
 <span class="co">#&gt; projected CRS:  WGS 84 / UTM zone 32N</span>
 <span class="co">#&gt; # A tibble: 6 x 6</span>
-<span class="co">#&gt;   poly_id date       month.int second_level slides_per_poly~</span>
+<span class="co">#&gt;   poly_id date       month.int second_level slides_per_poly…</span>
 <span class="co">#&gt;     &lt;int&gt; &lt;date&gt;         &lt;int&gt; &lt;chr&gt;                   &lt;int&gt;</span>
-<span class="co">#&gt; 1    3243 2016-08-04         8 translation~               16</span>
-<span class="co">#&gt; 2    5802 2014-01-22         1 rotational ~                5</span>
-<span class="co">#&gt; 3    3659 2008-07-29         7 rotational ~                3</span>
-<span class="co">#&gt; 4    4010 2017-06-24         6 translation~                3</span>
-<span class="co">#&gt; 5    4607 2014-02-02         2 fall-type                   3</span>
-<span class="co">#&gt; 6    7328 2007-07-26         7 fall-type                   3</span>
-<span class="co">#&gt; # ... with 1 more variable: geometry &lt;POLYGON [m]&gt;</span></code></pre></div>
+<span class="co">#&gt; 1      36 1998-04-08         4 rotational …                1</span>
+<span class="co">#&gt; 2      63 1998-02-20         2 translation…                1</span>
+<span class="co">#&gt; 3      72 2018-05-07         5 rotational …                1</span>
+<span class="co">#&gt; 4      96 1993-04-30         4 translation…                1</span>
+<span class="co">#&gt; 5     154 1997-06-30         6 rotational …                1</span>
+<span class="co">#&gt; 6     199 1998-02-16         2 translation…                1</span>
+<span class="co">#&gt; # … with 1 more variable: geometry &lt;POLYGON [m]&gt;</span></code></pre></div>
 </div>
 <div id="extract-the-rainfall-data-for-each-su-with-landslides-for-each-day" class="section level1">
 <h1 class="hasAnchor">
@@ -252,249 +252,73 @@
 </blockquote>
 <ul>
 <li><p>Then we look in the dates column and extract the rainfall for each of the date for that slope unit</p></li>
-<li><p>We could do this in sequence</p></li>
+<li><p>We could do this in sequence, but lets do it in parallel as the extraction of the rainfall for each slope unit are independent tasks</p></li>
+</ul>
+</div>
+<div id="use-the-results-from-the-new-slide_dates_in_polygon-function" class="section level1">
+<h1 class="hasAnchor">
+<a href="#use-the-results-from-the-new-slide_dates_in_polygon-function" class="anchor"></a>Use the results from the new <code>slide_dates_in_polygon</code>-function</h1>
+<ul>
+<li><p>The function <code>get_rainfall_for_polygons</code> iterates over the dataframe returned by <code>slides_dates_in_polygon</code></p></li>
+<li><p>This is done in parallel as each row is one spatial object and is idependent of the others</p></li>
+<li><p>In the end they are just stacked up to build one big dataframe</p></li>
 </ul>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
-<span class="co"># make a list for each slope unit that as least had one slide</span>
-<span class="va">n_su_with_slides</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="va">su</span><span class="op">$</span><span class="va">slide</span><span class="op">)</span><span class="op">)</span>
-<span class="va">su_rainfall</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html">vector</a></span><span class="op">(</span><span class="st">"list"</span>, length<span class="op">=</span><span class="va">n_su_with_slides</span><span class="op">)</span>
+<span class="co"># filte out the slides before the start of the rainfall data</span>
+<span class="va">su_points_in_poly</span> <span class="op">=</span> <span class="va">su_points_in_poly</span><span class="op">[</span><span class="va">su_points_in_poly</span><span class="op">$</span><span class="va">date</span> <span class="op">&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="st">"1980-01-01"</span><span class="op">)</span>, <span class="op">]</span>
 
-<span class="co"># the names of the list are the IDs of the Slope Units</span>
-<span class="va">idx</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="va">su</span><span class="op">$</span><span class="va">slide</span><span class="op">)</span>
-<span class="va">ids</span> <span class="op">=</span> <span class="va">su</span><span class="op">[</span><span class="va">idx</span>,<span class="op">]</span><span class="op">$</span><span class="va">su_id</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html">names</a></span><span class="op">(</span><span class="va">su_rainfall</span><span class="op">)</span> <span class="op">=</span> <span class="va">ids</span>
-
-<span class="co"># a counter for the print messages</span>
-<span class="va">counter</span> <span class="op">=</span> <span class="fl">1</span>
-<span class="va">start</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span><span class="op">(</span><span class="op">)</span>
-<span class="kw">for</span> <span class="op">(</span><span class="va">row</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">nrow</a></span><span class="op">(</span><span class="va">su</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
-  
-  
-  <span class="co"># if there actually happened a slide </span>
-  <span class="co"># this will run as many times as the list elements are in su_rainfall</span>
-  
- <span class="kw">if</span> <span class="op">(</span><span class="va">su</span><span class="op">[</span><span class="va">row</span>,<span class="op">]</span><span class="op">$</span><span class="va">slide</span><span class="op">)</span> <span class="op">{</span>
-   
-   <span class="va">n</span> <span class="op">=</span> <span class="va">n_su_with_slides</span>
-   <span class="va">str</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">counter</span>, <span class="st">"/"</span>, <span class="va">n</span><span class="op">)</span>
-   <span class="va">dashes</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">replicate</a></span><span class="op">(</span><span class="fl">20</span>, <span class="st">"-"</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">""</span><span class="op">)</span>
-   <span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="va">yellow</span><span class="op">$</span><span class="va">bold</span><span class="op">$</span><span class="fu">underline</span><span class="op">(</span><span class="st">"\n------------"</span>, <span class="va">str</span>, <span class="va">dashes</span>, <span class="st">"\n\n"</span><span class="op">)</span><span class="op">)</span>
-  
-   
-   
-   <span class="co"># get the current id of the slope unit</span>
-   <span class="va">current_id</span> <span class="op">=</span> <span class="va">su</span><span class="op">[</span><span class="va">row</span>, <span class="op">]</span><span class="op">$</span><span class="va">su_id</span>
-    
-   <span class="va">dates</span> <span class="op">=</span> <span class="va">su</span><span class="op">[</span><span class="va">row</span>,<span class="op">]</span><span class="op">$</span><span class="va">slide_dates</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>
-    
-   <span class="co">## get the rainfall data for that slope unit the first day</span>
-   <span class="va">spatial.obj</span> <span class="op">=</span> <span class="va">su</span><span class="op">[</span><span class="va">row</span>, <span class="op">]</span>
-   <span class="va">days_back</span> <span class="op">=</span> <span class="fl">5</span>
-   
-   <span class="co"># in case a slope unit experienced more than one slide we need an inner list</span>
-   <span class="va">inner_su_df</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="op">)</span>
-   
-   <span class="co"># get the rainfall for each data a landslide happened in that slope unit</span>
-   <span class="co"># as we are just getting one date this loop will only run once</span>
-   <span class="kw">for</span> <span class="op">(</span><span class="va">day</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_along</a></span><span class="op">(</span><span class="va">dates</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
-     
-     <span class="va">d</span> <span class="op">=</span> <span class="va">dates</span><span class="op">[[</span><span class="va">day</span><span class="op">]</span><span class="op">]</span>
-     
-     <span class="va">res</span> <span class="op">=</span> <span class="fu">rainfallR</span><span class="fu">::</span><span class="fu"><a href="../reference/ex_rainfall.html">ex_rainfall</a></span><span class="op">(</span>data_path <span class="op">=</span> <span class="va">path_ncdf</span>, spatial.obj <span class="op">=</span> <span class="va">spatial.obj</span>, fun <span class="op">=</span> <span class="st">"mean"</span>,date <span class="op">=</span> <span class="va">d</span>, days_back <span class="op">=</span> <span class="va">days_back</span> <span class="op">)</span>
-     
-     <span class="co"># just to make sure you can afterwards identify mulitple slides within one su</span>
-     <span class="va">res</span><span class="op">[[</span><span class="st">"slide_su_id"</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">day</span>
-     
-     <span class="co"># add the rainfall of that event to the list of all events for that slope unit</span>
-     <span class="va">inner_su_df</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">inner_su_df</span>, <span class="va">res</span><span class="op">)</span>
-   <span class="op">}</span>
-   
-   <span class="co"># add this to the outer list </span>
-  <span class="va">su_rainfall</span><span class="op">[[</span><span class="va">counter</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">inner_su_list</span>
-  
-  <span class="co"># increment the counter</span>
-  <span class="va">counter</span> <span class="op">=</span> <span class="va">counter</span> <span class="op">+</span> <span class="fl">1</span>
-  
- <span class="op">}</span> 
-<span class="op">}</span>
-<span class="va">end</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">took1</span> <span class="op">=</span> <span class="va">end</span><span class="op">-</span><span class="va">start</span></code></pre></div>
-</div>
-<div id="lets-do-it-in-parallel-with-the-old-function" class="section level1">
-<h1 class="hasAnchor">
-<a href="#lets-do-it-in-parallel-with-the-old-function" class="anchor"></a>Lets do it in parallel (with the old function)</h1>
+<span class="co"># get the antecedent rainfall for all the dates in all the slope units with landslides</span>
+<span class="va">slopeunits_rainfall</span> <span class="op">=</span> <span class="fu">rainfallR</span><span class="fu">::</span><span class="fu"><a href="../reference/get_rainfall_for_polygons.html">get_rainfall_for_polygons</a></span><span class="op">(</span><span class="va">su_points_in_poly</span>, nc_var <span class="op">=</span> <span class="st">"precipitation"</span>, days_back <span class="op">=</span> <span class="fl">14</span>, data_path <span class="op">=</span> <span class="va">path_ncdf</span><span class="op">)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Attaching package: 'magrittr'</span>
+<span class="co">#&gt; The following object is masked from 'package:raster':</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     extract</span>
+<span class="co">#&gt; The following object is masked from 'package:purrr':</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     set_names</span>
+<span class="co">#&gt; The following object is masked from 'package:tidyr':</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     extract</span></code></pre></div>
+<div id="what-have-we-got-back" class="section level3">
+<h3 class="hasAnchor">
+<a href="#what-have-we-got-back" class="anchor"></a>What have we got back?</h3>
+<p>Within the <code>get_rainfall_for_polygons</code>-function:</p>
+<ul>
+<li><p>The function <code>ex_rainfall</code> which is called as many times as rows in the <code>su_points_in_poly</code>-object returns a dataframe</p></li>
+<li><p>We used the <code>.rbind</code>-parameter for the <code>.combine</code>.argument, <code>slopeunits_rainfall</code> is one large dataframe</p></li>
+</ul>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="co"># load the su data with the slide day</span>
-<span class="va">su</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html">here</a></span><span class="op">(</span><span class="st">"local_data/su_with_slide_dates.Rdata"</span><span class="op">)</span><span class="op">)</span>
-
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/RevolutionAnalytics/foreach">foreach</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">doParallel</span><span class="op">)</span>
-
-<span class="co"># make a list for each slope unit that as least had one slide</span>
-<span class="va">n_su_with_slides</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="va">su</span><span class="op">$</span><span class="va">slide</span><span class="op">)</span><span class="op">)</span>
-<span class="va">su_rainfall</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html">vector</a></span><span class="op">(</span><span class="st">"list"</span>, length <span class="op">=</span> <span class="va">n_su_with_slides</span><span class="op">)</span>
-
-<span class="co"># the names of the list are the IDs of the Slope Units</span>
-<span class="va">idx</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="va">su</span><span class="op">$</span><span class="va">slide</span><span class="op">)</span>
-<span class="va">ids</span> <span class="op">=</span> <span class="va">su</span><span class="op">[</span><span class="va">idx</span>, <span class="op">]</span><span class="op">$</span><span class="va">su_id</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html">names</a></span><span class="op">(</span><span class="va">su_rainfall</span><span class="op">)</span> <span class="op">=</span> <span class="va">ids</span>
-
-<span class="co"># a counter for the print messages</span>
-<span class="va">counter</span> <span class="op">=</span> <span class="fl">1</span>
-
-<span class="co"># use eight cores</span>
-<span class="fu"><a href="https://rdrr.io/pkg/doParallel/man/registerDoParallel.html">registerDoParallel</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span>
-
-<span class="va">start</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">output</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/foreach/man/foreach.html">foreach</a></span><span class="op">(</span>
-  i <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">nrow</a></span><span class="op">(</span><span class="va">su</span><span class="op">)</span>,
-  .combine <span class="op">=</span> <span class="va">rbind</span>,
-  .packages <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"rainfallR"</span>,
-                <span class="st">"dplyr"</span>,
-                <span class="st">"magrittr"</span>,
-                <span class="st">"stringr"</span><span class="op">)</span>
-<span class="op">)</span> <span class="op">%dopar%</span> <span class="op">{</span>
-  
-  <span class="co"># if there actually happened a slide</span>
-  
-  <span class="kw">if</span> <span class="op">(</span><span class="va">su</span><span class="op">[</span><span class="va">i</span>,<span class="op">]</span><span class="op">$</span><span class="va">slide</span><span class="op">)</span> <span class="op">{</span>
-    
-    <span class="co"># one dataframe for slope units. Possibly multiple days</span>
-    <span class="va">df</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="op">)</span>
-    
-    <span class="co"># get the current id of the slope unit</span>
-    <span class="va">current_id</span> <span class="op">=</span> <span class="va">su</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span><span class="op">$</span><span class="va">su_id</span>
-    
-    <span class="co"># get all the dates in that slope unit</span>
-    <span class="va">dates</span> <span class="op">=</span> <span class="va">su</span><span class="op">[</span><span class="va">i</span>,<span class="op">]</span><span class="op">$</span><span class="va">slide_dates</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>
-    
-    <span class="co"># the spatial object is the slope unit in the for loop</span>
-    <span class="va">spatial.obj</span> <span class="op">=</span> <span class="va">su</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span>
-    
-    <span class="co"># lets look back 5 days</span>
-    <span class="va">days_back</span> <span class="op">=</span> <span class="fl">5</span>
-    
-    <span class="co"># in case a slope unit experienced more than one slide we need an inner list</span>
-    <span class="co"># inner_su_list = vector("list", length = length(dates))</span>
-    
-    
-    <span class="co"># get the rainfall for each data a landslide happened in that slope unit</span>
-    <span class="co"># as we are just getting one date this loop will only run once</span>
-    <span class="kw">for</span> <span class="op">(</span><span class="va">day</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_along</a></span><span class="op">(</span><span class="va">dates</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
-      
-      <span class="co"># get the day in the slope unit</span>
-      <span class="va">d</span> <span class="op">=</span> <span class="va">dates</span><span class="op">[[</span><span class="va">day</span><span class="op">]</span><span class="op">]</span>
-      
-      <span class="va">r</span> <span class="op">=</span> <span class="fu">rainfallR</span><span class="fu">::</span><span class="fu"><a href="../reference/ex_rainfall.html">ex_rainfall</a></span><span class="op">(</span>
-        data_path <span class="op">=</span> <span class="va">path_ncdf</span>,
-        spatial.obj <span class="op">=</span> <span class="va">spatial.obj</span>,
-        fun <span class="op">=</span> <span class="st">"mean"</span>,
-        date <span class="op">=</span> <span class="va">d</span>,
-        days_back <span class="op">=</span> <span class="va">days_back</span>
-      <span class="op">)</span>
-      
-      <span class="co"># just to make sure you can afterwards identify mulitple slides within one su</span>
-      <span class="va">r</span><span class="op">[[</span><span class="st">"su_slide_id"</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">day</span>
-      
-      <span class="co"># add the rainfall of that event to the list of all events for that slope unit</span>
-      <span class="co"># stack up the dataframe for each slope unit</span>
-      <span class="va">df</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">r</span><span class="op">)</span>
-    <span class="op">}</span>
-    
-    <span class="co"># return the df</span>
-    <span class="va">df</span>
-  <span class="op">}</span>
-<span class="op">}</span>
-
-<span class="va">end</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">took2</span> <span class="op">=</span> <span class="va">end</span> <span class="op">-</span> <span class="va">start</span></code></pre></div>
+<code class="sourceCode R"><span class="co"># verfiy that each slope unit has 6 entries for all the six days before the slide</span>
+<span class="va">slopeunits_rainfall</span> <span class="op">%&gt;%</span> 
+  <span class="fu">group_by</span><span class="op">(</span><span class="va">poly_id</span>, <span class="va">iffi_id</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/tidyverse.html">summarise</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fu">n</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">count</span><span class="op">(</span><span class="va">n</span><span class="op">)</span>
+<span class="co">#&gt; `summarise()` has grouped output by 'poly_id'. You can override using the `.groups` argument.</span>
+<span class="co">#&gt; Storing counts in `nn`, as `n` already present in input</span>
+<span class="co">#&gt; ℹ Use `name = "new_name"` to pick a new name.</span>
+<span class="co">#&gt; Simple feature collection with 1 feature and 2 fields</span>
+<span class="co">#&gt; geometry type:  MULTIPOLYGON</span>
+<span class="co">#&gt; dimension:      XY</span>
+<span class="co">#&gt; bbox:           xmin: 670084.8 ymin: 5123189 xmax: 735880.9 ymax: 5214580</span>
+<span class="co">#&gt; CRS:            +proj=utm +zone=32 +ellps=WGS84 +units=m +no_defs</span>
+<span class="co">#&gt; # A tibble: 1 x 3</span>
+<span class="co">#&gt;       n    nn                                                           geometry</span>
+<span class="co">#&gt; * &lt;int&gt; &lt;int&gt;                                                 &lt;MULTIPOLYGON [m]&gt;</span>
+<span class="co">#&gt; 1    15    24 (((671156.3 5123433, 671331.1 5123435, 671331.4 5123410, 671381.3…</span></code></pre></div>
 </div>
-<div id="analyze-the-results" class="section level1">
-<h1 class="hasAnchor">
-<a href="#analyze-the-results" class="anchor"></a>Analyze the results</h1>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># verfiy that each slope unit has one entry for each day</span>
-<span class="va">output</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">su_id</span>, <span class="va">su_slide_id</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/tidyverse.html">summarise</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html">count</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></code></pre></div>
 <div id="look-at-the-antecedent-rainfall" class="section level2">
 <h2 class="hasAnchor">
 <a href="#look-at-the-antecedent-rainfall" class="anchor"></a>look at the antecedent rainfall</h2>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">output</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">su_id</span>, <span class="va">su_slide_id</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>unique_id <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html">cur_group_id</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_path</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">days_before_event</span>,
-                  y <span class="op">=</span> <span class="va">cumsum</span>,
-                  group <span class="op">=</span> <span class="va">unique_id</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_x_reverse</a></span><span class="op">(</span><span class="op">)</span> 
-  </code></pre></div>
-</div>
-</div>
-<div id="use-the-new-slide_dates_in_polygon-function" class="section level1">
-<h1 class="hasAnchor">
-<a href="#use-the-new-slide_dates_in_polygon-function" class="anchor"></a>Use the new <code>slide_dates_in_polygon</code>-function</h1>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="co"># rename the data to make it consistent</span>
-<span class="va">su</span> <span class="op">=</span> <span class="va">su_points_in_poly</span>
-
-<span class="co"># load the libraries to do parallel processing</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/RevolutionAnalytics/foreach">foreach</a></span><span class="op">)</span>
-<span class="co">#&gt; Warning: Paket 'foreach' wurde unter R Version 4.0.3 erstellt</span>
+<p><img src="extract_rainfall_slope_unit_files/figure-html/unnamed-chunk-4-1.png" width="960"></p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">slopeunits_rainfall</span><span class="op">$</span><span class="va">days_before_event</span><span class="op">)</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Attache Paket: 'foreach'</span>
-<span class="co">#&gt; The following objects are masked from 'package:purrr':</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt;     accumulate, when</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">doParallel</span><span class="op">)</span>
-<span class="co">#&gt; Warning: Paket 'doParallel' wurde unter R Version 4.0.3 erstellt</span>
-<span class="co">#&gt; Lade nötiges Paket: iterators</span>
-<span class="co">#&gt; Warning: Paket 'iterators' wurde unter R Version 4.0.3 erstellt</span>
-<span class="co">#&gt; Lade nötiges Paket: parallel</span>
-
-<span class="co"># use eight cores</span>
-<span class="fu"><a href="https://rdrr.io/pkg/doParallel/man/registerDoParallel.html">registerDoParallel</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span>
-
-<span class="co"># measure the time</span>
-<span class="va">start</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/foreach/man/foreach.html">foreach</a></span><span class="op">(</span>
-  i <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">nrow</a></span><span class="op">(</span><span class="va">su</span><span class="op">)</span>,
-  .combine <span class="op">=</span> <span class="va">rbind</span>,
-  .packages <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"rainfallR"</span>,
-                <span class="st">"dplyr"</span>,
-                <span class="st">"magrittr"</span>,
-                <span class="st">"stringr"</span><span class="op">)</span>
-<span class="op">)</span> <span class="op">%dopar%</span> <span class="op">{</span>
-    
-    <span class="co"># get all the dates in that slope unit</span>
-    <span class="va">date</span> <span class="op">=</span> <span class="va">su</span><span class="op">[</span><span class="va">i</span>,<span class="op">]</span><span class="op">$</span><span class="va">date</span>
-    
-    <span class="co"># the spatial object is the slope unit in the for loop</span>
-    <span class="va">spatial.obj</span> <span class="op">=</span> <span class="va">su</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span>
-    
-    <span class="co"># lets look back 5 days</span>
-    <span class="va">days_back</span> <span class="op">=</span> <span class="fl">5</span>
-    
-    <span class="va">r</span> <span class="op">=</span> <span class="fu">rainfallR</span><span class="fu">::</span><span class="fu"><a href="../reference/ex_rainfall.html">ex_rainfall</a></span><span class="op">(</span>
-      data_path <span class="op">=</span> <span class="va">path_ncdf</span>,
-      spatial.obj <span class="op">=</span> <span class="va">spatial.obj</span>,
-      fun <span class="op">=</span> <span class="st">"mean"</span>,
-      date <span class="op">=</span> <span class="va">date</span>,
-      days_back <span class="op">=</span> <span class="va">days_back</span>
-    <span class="op">)</span>
-  
-    <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span>      
-<span class="op">}</span>
-
-<span class="va">end</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.time</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">took2</span> <span class="op">=</span> <span class="va">end</span> <span class="op">-</span> <span class="va">start</span></code></pre></div>
+<span class="co">#&gt;  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 </span>
+<span class="co">#&gt; 24 24 24 24 24 24 24 24 24 24 24 24 24 24 24</span></code></pre></div>
+</div>
 </div>
   </div>
 

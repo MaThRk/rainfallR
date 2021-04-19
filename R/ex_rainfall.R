@@ -62,7 +62,11 @@ ex_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PR
   d = format(day, "%d")
 
   # example path
-  ex_path = paste0(data_path, y, "/", "DAILYPCP_", y, formatC(m, flag = 0, width = 2), ".nc")
+  if(nc_var == "precipitation"){
+    ex_path = paste0(data_path, y, "/", "DAILYPCP_", y, formatC(m, flag = 0, width = 2), ".nc")
+  }else if (nc_var == "temperature"){
+    ex_path = paste0(data_path, y, "/", "DTMEAN_", y, formatC(m, flag = 0, width=2), ".nc")
+  }
 
   # if not path exists --> there is no nc file for this path
   if(!file.exists(ex_path)){
@@ -125,6 +129,7 @@ ex_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PR
       print(paste0("Extracting data for: ", d))
       raster::extract(x, spatial.obj, sp = T) %>% st_as_sf()
     })
+
   } else{
     # if working with polygons
 
@@ -166,7 +171,7 @@ ex_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PR
   }
 
 
-# build one dataframe -----------------------------------------------------
+  # build one dataframe -----------------------------------------------------
 
   # each object in the list has data for different dates
 
@@ -194,7 +199,6 @@ ex_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PR
       select(!!cols_with_vals[[i]]) %>%
       st_drop_geometry()
 
-
     # put it in the only vals list
     list_only_vals[[i]] = df
   }
@@ -210,7 +214,7 @@ ex_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PR
   df_all = dplyr::bind_cols(one_df, df_to_append) %>% select(-contains("geom"))
 
 
-# calculate the evolution over time --------------------------------------
+  # calculate the evolution over time --------------------------------------
   res = make_cumsum(df_all, fun, days_back)
   res = merge(res, geom, by="id") %>% st_as_sf()
 

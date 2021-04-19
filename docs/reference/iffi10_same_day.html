@@ -42,7 +42,7 @@
 <meta property="og:title" content="What slides happened on the same day? — iffi10_same_day" />
 <meta property="og:description" content="This function will group all of the points that happened on the
 same day into a data.frame and put this dataframe into a list. Each
-element of the list thus can be considered to be a day." />
+element of the list thus can be considered to be a day. This requires that the input has a column called date" />
 
 
 
@@ -82,7 +82,7 @@ element of the list thus can be considered to be a day." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -97,16 +97,16 @@ element of the list thus can be considered to be a day." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/ExamplePolygonExtraction.html">ExamplePolygonExtraction</a>
+      <a href="../articles/ExamplePolygonExtraction.html">Example Extraction for one polygon</a>
     </li>
     <li>
-      <a href="../articles/example_bozen.html">Extracting data for bozen</a>
-    </li>
-    <li>
-      <a href="../articles/extract_rainfall_landslidePoints.html">Extract Rainfalldata for landslide-initiation points</a>
+      <a href="../articles/extract_aggregated_values.html">Extract aggregated Values (time and space) of the rainfall data</a>
     </li>
     <li>
       <a href="../articles/extract_rainfall_slope_unit.html"> Extract rainfall data for slopeunit-polygons</a>
+    </li>
+    <li>
+      <a href="../articles/points.html">Extract the rainfall for points</a>
     </li>
   </ul>
 </li>
@@ -134,7 +134,7 @@ element of the list thus can be considered to be a day." />
     <div class="ref-description">
     <p>This function will group all of the points that happened on the
 same day into a <code>data.frame</code> and put this dataframe into a list. Each
-element of the list thus can be considered to be a day.</p>
+element of the list thus can be considered to be a day. This requires that the input has a column called date</p>
     </div>
 
     <pre class="usage"><span class='fu'>iffi10_same_day</span><span class='op'>(</span><span class='va'>iffi10</span><span class='op'>)</span></pre>
@@ -144,7 +144,7 @@ element of the list thus can be considered to be a day.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>iffi10</th>
-      <td><p>A subset of the iffi10-database with already computed day-column</p></td>
+      <td><p>An object of type <code>sf</code> which has a column called date!!</p></td>
     </tr>
     </table>
 

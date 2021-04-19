@@ -47,7 +47,7 @@ get_raster_list_n_month = function(paths_to_data, day, days_back){
 
 
     # abbreviated path to read the brick
-    right_path_abb = right_path %>% str_split(., "/") %>% .[[1]] %>% .[c(length(.) -1, length(.))] %>%
+    right_path_abb = right_path %>% strsplit(., "/") %>% .[[1]] %>% .[c(length(.) -1, length(.))] %>%
       paste0(., collapse = "/")
 
     if (changed) {

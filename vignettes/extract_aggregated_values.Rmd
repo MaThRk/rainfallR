@@ -1,0 +1,90 @@
+---
+title: "Extract aggregated Values (time and space) of the rainfall data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{extract_aggregated_values}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+- A common tasks is the calculation of the mean rainfall pixel value in a certain time-period.
+
+- In this process you can aggregate for different time-periods (like months or years) and different spatial extents (slope-units, pixel-based...)
+
+- Questions could be like: 
+  
+  1. What is the mean cumulative pixel-value for all pixels in the province of South Tyrol between 1980 and 2018 (**pixel based**)
+  
+  2. What is the maximum monthly value for all months between 2015 and 2018 (**pixel based**)
+  
+  3. What is the mean annual Slope-unit rainfall for all slope units in the province of South Tyrol (**polygon-based**)
+
+
+```{r setup}
+library(rainfallR)
+library(stars)
+library(sf)
+```
+
+
+- So lets try to answer the very basic question (Question number 1 above) and get the cumulative annual pixel value for each pixel for the year 2015 and 2016
+
+- The rastes are stored in NetCDF which each hold the data for one month. In order to get the mean for each pixel in one year we need to sum up the values for the ~ 365 days and devide them by 365. The addition is the part that the function `aggregate_rainfall` can make. 
+
+- In the time dimension we want to sum up all values in one month for each pixel. So we set the `daily_fun` to `sum`
+
+- We also want to sum up all the months, so we set `monthly_fun` also to `sum`
+
+- And call the function like
+
+```{r setpath}
+
+os = ifelse(Sys.info()["sysname"] == "Windows", "w", "l")
+if(os == "l"){
+  path_ncdf = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/"
+} else{
+  path_ncdf = "\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"
+}
+
+yearly_sums = aggregate_rainfall(
+  path_ncdf = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/",
+  polygon = NULL,
+  years = 2015:2016,
+  by = "year", # we only want the computed values for each year
+  daily_fun = "sum",
+  monthly_fun = "sum"
+)
+```
+
+- what we get back is one stars object with a dimension called `years`
+
+- We can plot the results and it looks like this:
+
+```{r}
+plot(yearly_sums)
+```
+
+- We can now also calculate the mean of the two years:
+
+```{r}
+mean_2k15_2k16 = st_apply(yearly_sums, c("x", "y"), mean)
+```
+
+
+- and plot it
+
+```{r, fig.width=10, fig.height=8}
+plot(mean_2k15_2k16, main="Mean rainfall in the years 2015 and 2016")
+# get the shape for South Tyrol
+st = iffitoR::get_shape_southtyrol()
+plot(st[0], add=T, col="red", lty=19)
+```
+
+
