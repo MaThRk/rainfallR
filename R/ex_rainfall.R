@@ -89,8 +89,6 @@ ex_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PR
 
 
 
-
-
 # get the paths to the data -----------------------------------------------
 
   paths_to_data = get_nc_paths(data_path, day, days_back)
@@ -216,6 +214,8 @@ ex_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PR
 
   # calculate the evolution over time --------------------------------------
   res = make_cumsum(df_all, fun, days_back)
+  # add back the day of the landslide
+  res[["dol"]] = date
   res = merge(res, geom, by="id") %>% st_as_sf()
 
   return(res)
