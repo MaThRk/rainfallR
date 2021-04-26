@@ -50,29 +50,40 @@ get_nc_paths = function(data_path, day, days_back){
   # build the path
   path_day = paste0(data_path, y, "/", var, y, formatC(m, flag = 0, width = 2), ".nc")
 
-  # last day to extract
-  days_back = max(days_back)
+  # get all the firsts of the monthy the data is in
   max_day_back = min(day - days_back)
-  y_b = format(max_day_back, "%Y")
-  m_b = format(max_day_back, "%m")
-  d_b = format(max_day_back, "%d")
-  last_month_path = paste0(data_path, y_b, "/", var, y_b, formatC(m_b, flag = 0, width = 2), ".nc")
+  last_year = format(max_day_back, "%Y")
+  last_month = format(max_day_back, "%m")
+  last_day = format(max_day_back, "%d")
+
+  # get all the days
+  all_days = seq(max_day_back, day, by="day")
+
+  # get the unique year-month combinations
+  yearmonths = unique(format(all_days, "%Y%m"))
+
+  # build the paths
+  paths = vector(mode = "list", length = length(yearmonths))
+  names(paths) = yearmonths
+
+  # build the paths
+  paths = lapply(seq_along(paths), function(i){
+    yearmonth = names(paths)[[i]]
+    # get the year
+    y = format(as.Date(paste0(substr(yearmonth, 0, 4), "-01-01"), "%Y-%m-%d"), "%Y") %>% as.numeric()
+    # get the month
+    m = format(as.Date(paste0(y, "-", substr(yearmonth, 5, 6), "-01"), "%Y-%m-%d"), "%m") %>% as.numeric()
+    # build the path
+    p = paste0(data_path, y, "/", var, y, formatC(m, flag=0, width=2), ".nc")
+    p
+  })
 
   # if the current day has a different month than the last day back we need two paths
-  if(!m == m_b){
+  if(length(paths) != 1){
     warning("Your first day of extraction is in another month. Pray and hope this function works")
-    paths = list()
-    this_month = paste0(y,m)
-    last_month  = paste0(y_b, m_b)
-    paths[[this_month]] = path_day
-    paths[[last_month]] = last_month_path
-    return(paths)
-  }else{
-    paths = list()
-    this_month = paste0(y,m)
-    paths[[this_month]] = path_day
-    return(paths)
   }
+
+  return(paths)
 }
 
 
