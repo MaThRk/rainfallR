@@ -64,11 +64,10 @@ get_nc_paths = function(data_path, day, days_back){
 
   # build the paths
   paths = vector(mode = "list", length = length(yearmonths))
-  names(paths) = yearmonths
 
   # build the paths
   paths = lapply(seq_along(paths), function(i){
-    yearmonth = names(paths)[[i]]
+    yearmonth = yearmonths[[i]]
     # get the year
     y = format(as.Date(paste0(substr(yearmonth, 0, 4), "-01-01"), "%Y-%m-%d"), "%Y") %>% as.numeric()
     # get the month
@@ -77,6 +76,9 @@ get_nc_paths = function(data_path, day, days_back){
     p = paste0(data_path, y, "/", var, y, formatC(m, flag=0, width=2), ".nc")
     p
   })
+
+  # give the list names
+  names(paths) = yearmonths
 
   # if the current day has a different month than the last day back we need two paths
   if(length(paths) != 1){
