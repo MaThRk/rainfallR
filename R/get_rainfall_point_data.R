@@ -15,7 +15,7 @@ get_rainfall_point_data = function(point.data = NULL,
                                    parallel = TRUE,
                                    ncores = 8,
                                    last_event = FALSE,
-                                   save = T,
+                                   save = F,
                                    base_path = NULL,
                                    path_rainfall = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/") {
   if (is.null(point.data)) {
@@ -30,116 +30,136 @@ get_rainfall_point_data = function(point.data = NULL,
     stop("The rainfall directory does not exist")
   }
 
-
-  ######################################
-  # Get the rainfall data
-  ######################################
-
-  # list of the slides on the same day --------------------------------------
-  slides_same_day = rainfallR::iffi10_same_day(point.data)
-
-  # extract the rainfall data in parallel
-  if (parallel) {
-    # extract in parallel -----------------------------------------------------
-
-    registerDoParallel(ncores) # use doParallel package
-
-    res = foreach(
-      i = 1:length(slides_same_day),
-      .combine = rbind,
-      .packages = c("rainfallR",
-                    "magrittr",
-                    "stringr",
-                    "dplyr")
-    ) %dopar% {
-      # get the date of the slides
-      date = names(slides_same_day)[[i]] %>% as.Date(., "%Y%m%d")
-
-      # the spatial object. All slides from the same day in South Tyrol
-      # Like this we only need to load the NetCDF once into memory
-      spatial.obj = slides_same_day[[i]]
-
-      # this returns a dataframe
-      rf = rainfallR::ex_rainfall(
-        data_path = path_rainfall,
-        spatial.obj = spatial.obj,
-        fun = NULL,
-        # as we are using points
-        date = date,
-        days_back = days_back
-      )
-    }
-  }
-
-
-  # Reconstruct the rainfall events -----------------------------------------
-
-  # create a list for each landslide
-  slides_list = split(res, res$PIFF_ID)
-
-  # using the foreach approach with the future backend
-  registerDoParallel(ncores)
-  slides_with_rainfall_events = foreach(i = 1:length(slides_list)) %dopar% {
-    r = rainfallR::reconstruct_daily_rainfall_events(slides_list[[i]], n = n_dry, quiet = T)
-  }
-
-  # put the results back into one dataframe ---------------------------------
-  df_slides = data.table::rbindlist(slides_with_rainfall_events) %>% st_as_sf()
-
-  if (last_event) {
-    # E
-    df_rainfall = df_slides %>%
-      group_by(PIFF_ID) %>%
-      filter(event != is.na(event)) %>%
-      filter(event == last(event)) %>% # this will get the last event
-      mutate(
-        diff_rain_slide = last(date.y) - last(date.x),
-        diff_rain_slide = as.numeric(diff_rain_slide)
-      ) %>%
-      ungroup() %>%
-      group_by(PIFF_ID, second_level, area, diff_rain_slide) %>% # which columns to i want to keep? piff_id, second_level and area are all the same for each of the n days per slide
-      summarise(sum_rainfall = sum(precip))
-
-    # D
-    df_duration = df_slides %>%
-      group_by(PIFF_ID) %>%
-      filter(event != is.na(event)) %>%
-      filter(event == last(event)) %>% # this will get the last eventj
-      ungroup() %>%
-      group_by(PIFF_ID, second_level, area) %>%
-      summarise(duration = n(),
-                intensity = sum(precip) / n()) %>%
-      st_drop_geometry()
-
-    # merge the two
-    df_slides = merge(df_rainfall, df_duration, by = "PIFF_ID", all.y = F)
-  }
-
+  # when we want to save
   if (save) {
     if (is.null(base_path)) {
       stop("You want to save the data, but you need to provide a base path")
     }
+  }
 
-    # create the path to the data ---------------------------------------------
-    data_out = here(
-      paste0(
-        base_path,
-        "/days_back",
-        days_back,
-        "_daily_thresh",
-        daily_thresh,
-        "_n_dry",
-        n_dry,
-        ".Rdata"
-      )
+  # create the path to the data ---------------------------------------------
+  data_out = ifelse(!last_event, here(
+    paste0(
+      base_path,
+      "/days_back",
+      days_back,
+      "_daily_thresh",
+      daily_thresh,
+      "_n_dry",
+      n_dry,
+      ".Rdata"
     )
+  ),
+  here(
+    paste0(
+      base_path,
+      "/LASTEVENT_days_back",
+      days_back,
+      "_daily_thresh",
+      daily_thresh,
+      "_n_dry",
+      n_dry,
+      ".Rdata"
+    )
+  ))
 
-    if (!file.exists(data_out)) {
-      saveRDS(slides_df, data_out)
-    } else{
-      warning("The File aready exists. Reading from disk...")
-      df_slides = readRDS(data_out)
+  if (!file.exists(data_out)) {
+    ######################################
+    # Get the rainfall data
+    ######################################
+
+    # list of the slides on the same day --------------------------------------
+    slides_same_day = rainfallR::iffi10_same_day(point.data)
+
+    # extract the rainfall data in parallel
+    if (parallel) {
+      # extract in parallel -----------------------------------------------------
+
+      registerDoParallel(ncores) # use doParallel package
+
+      res = foreach(
+        i = 1:length(slides_same_day),
+        .combine = rbind,
+        .packages = c("rainfallR",
+                      "magrittr",
+                      "stringr",
+                      "dplyr")
+      ) %dopar% {
+        # get the date of the slides
+        date = names(slides_same_day)[[i]] %>% as.Date(., "%Y%m%d")
+
+        # the spatial object. All slides from the same day in South Tyrol
+        # Like this we only need to load the NetCDF once into memory
+        spatial.obj = slides_same_day[[i]]
+
+        # this returns a dataframe
+        rf = rainfallR::ex_rainfall(
+          data_path = path_rainfall,
+          spatial.obj = spatial.obj,
+          fun = NULL,
+          # as we are using points
+          date = date,
+          days_back = days_back
+        )
+      }
     }
+
+
+    # Reconstruct the rainfall events -----------------------------------------
+
+    # create a list for each landslide
+    slides_list = split(res, res$PIFF_ID)
+
+    # using the foreach approach with the future backend
+    registerDoParallel(ncores)
+    slides_with_rainfall_events = foreach(i = 1:length(slides_list)) %dopar% {
+      r = rainfallR::reconstruct_daily_rainfall_events(slides_list[[i]], n = n_dry, quiet = T)
+    }
+
+    # put the results back into one dataframe ---------------------------------
+    df_slides = data.table::rbindlist(slides_with_rainfall_events) %>% st_as_sf()
+
+    if (last_event) {
+      # E
+      df_rainfall = df_slides %>%
+        group_by(PIFF_ID) %>%
+        filter(event != is.na(event)) %>%
+        filter(event == last(event)) %>% # this will get the last event
+        mutate(
+          diff_rain_slide = last(date.y) - last(date.x),
+          diff_rain_slide = as.numeric(diff_rain_slide)
+        ) %>%
+        ungroup() %>%
+        group_by(PIFF_ID, second_level, area, diff_rain_slide) %>% # which columns to i want to keep? piff_id, second_level and area are all the same for each of the n days per slide
+        summarise(sum_rainfall = sum(precip))
+
+      # D
+      df_duration = df_slides %>%
+        group_by(PIFF_ID) %>%
+        filter(event != is.na(event)) %>%
+        filter(event == last(event)) %>% # this will get the last eventj
+        ungroup() %>%
+        group_by(PIFF_ID, second_level, area) %>%
+        summarise(duration = n(),
+                  intensity = sum(precip) / n()) %>%
+        st_drop_geometry()
+
+      # merge the two
+      df_slides = merge(df_rainfall,
+                        df_duration,
+                        by = "PIFF_ID",
+                        all.y = F)
+    }
+
+    # save it
+    if (save) {
+      cat("saving...")
+      saveRDS(df_slides, data_out)
+    }
+
+  } else{
+    warning("The File aready exists. Reading from disk...")
+    df_slides = readRDS(data_out)
   }
 
   # return the object
