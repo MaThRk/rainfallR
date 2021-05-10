@@ -4,22 +4,19 @@
 \alias{slide_dates_in_polygon}
 \title{Extracts the days of the slides for each polygon}
 \usage{
-slide_dates_in_polygon(
-  poly = NULL,
- 
-    iffi10 = "\\\\\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_1.shp",
-  epsg = 32632
-)
+slide_dates_in_polygon(poly = NULL, landsld = NULL, epsg = 32632)
 }
 \arguments{
-\item{poly}{A path to a polygon spatial object}
+\item{poly}{Path to the polygon shapefile}
 
-\item{iffi10}{Path to the iffi10 shapefile with already precomputed columns in english and the date information}
+\item{landsld}{Path to the landsld shapefile or object of class \code{sf}. Needs to have at least a column called \code{date_info}
+(as in the classic iffi-data from the \code{iffitoR}-package) or column called \code{date} with dates of class \code{date}. If both do not
+exist, the first column with the class \code{date} will be used to subset only the landslides with day-precise information}
+}
+\value{
+An object of class \code{sf} which is (probably) of geometry-type polygon with the additional columns.
 }
 \description{
-Returns a \code{sf}-dataframe. For each polygon it will count the number of slides per date. This mean
-that a polygon (its column \code{poly_id}) can potentially appear multiple times if on mulitple days slides happended in
-this polygon. The computed column \code{slides_per_poly_date} counts the number of slides per date in that polygon.
-This can then be fed into the function \code{get_rainfall_for_polygon} which is more or less a wrapper around the
-function \code{ex_rainfall}
+For each Polygon this function selects only the polygons that experienced a landsld. It also reports (in the column \code{slide_per_poly_date})
+the number of slides on that date in that polygon.shapefile
 }

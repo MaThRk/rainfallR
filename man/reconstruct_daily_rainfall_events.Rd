@@ -16,8 +16,12 @@ called \code{precip}}
 
 \item{quiet}{Show print messages or not}
 }
+\value{
+The same dataframe as inputted, just with the column \code{event} appended that shows the number of
+rainfall event before the slide happened
+}
 \description{
-This function will extract the rainfall events that happened before a landslide, based on a
-predefined length ,\code{n}, that can be dry days and still be part of a rainfall event , that can be dry
-days and still be part of a rainfall event
+Extracts the rainfall events that happened before a landslide, based on a predefined length ,
+\code{n}, that can be dry days and still be part of a rainfall event.  Input usually is the result of the
+function \code{ex_rainfall} for one slide with a unique `PIFF_ID`.
 }

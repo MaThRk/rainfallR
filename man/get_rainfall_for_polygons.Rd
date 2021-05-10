@@ -8,6 +8,7 @@ get_rainfall_for_polygons(
   landslidepoints_in_poly,
   days_back = 5,
   funs = c("mean"),
+  nc_var = "precipitation",
   parallel = T,
   ncores = NULL,
   data_path = "\\\\\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"
@@ -17,7 +18,7 @@ get_rainfall_for_polygons(
 \item{landslidepoints_in_poly}{Object of type \code{sf} as returned by \code{slide_dates_in_polygon}}
 }
 \description{
-This function build on the results of \code{slide_dates_in_polygon} which returns a df
+This function builds on the results of \code{slide_dates_in_polygon} which returns a df
 where each row is a polygon with a slide that is uniquely indentifiable by its \code{poly_id} and the
 \code{date}
 }

@@ -15,7 +15,7 @@
 iffi10_same_day = function(iffi10){
 
   # make sure there are only records with dates
-  iffi10 = iffi10 %>% filter(date_info == "day")
+  iffi10 = iffi10 %>% dplyr::filter(date_info == "day")
 
   if(! any(grepl("date", names(iffi10)))){
     stop("There is no column called `date` in your object")
