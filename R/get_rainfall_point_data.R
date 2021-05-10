@@ -38,10 +38,16 @@ get_rainfall_point_data = function(point.data = NULL,
   }
 
   # create the path to the data ---------------------------------------------
+
+  n = nrow(point.data)
+
   data_out = ifelse(!last_event, here(
     paste0(
       base_path,
-      "/days_back",
+      "/n",
+      n,
+      "_",
+      "days_back",
       days_back,
       "_daily_thresh",
       daily_thresh,
@@ -53,7 +59,10 @@ get_rainfall_point_data = function(point.data = NULL,
   here(
     paste0(
       base_path,
-      "/LASTEVENT_days_back",
+      "/LASTEVENT_n",
+      n,
+      "_",
+      "days_back",
       days_back,
       "_daily_thresh",
       daily_thresh,
