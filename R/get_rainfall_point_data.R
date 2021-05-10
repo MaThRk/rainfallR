@@ -6,6 +6,8 @@
 #' @importFrom data.table rbindlist
 #' @importFrom future plan
 #'
+#'
+#' @export
 get_rainfall_point_data = function(point.data = NULL,
                                    days_back = 10,
                                    daily_thresh = 0,
