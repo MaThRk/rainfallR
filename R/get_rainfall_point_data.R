@@ -5,7 +5,7 @@
 #'
 #' @importFrom data.table rbindlist
 #' @importFrom future plan
-#'
+#' @importFrom doSNOW registerDoSNOW
 #'
 #' @export
 get_rainfall_point_data = function(point.data = NULL,
@@ -84,7 +84,14 @@ get_rainfall_point_data = function(point.data = NULL,
     if (parallel) {
       # extract in parallel -----------------------------------------------------
 
-      registerDoParallel(ncores) # use doParallel package
+      # use snow backend
+      cl <- makeCluster(ncores)
+      registerDoSNOW(cl)
+
+      # progressbar
+      pb = txtProgressBar(max = iterations, style = 3)
+      progress = function(n) setTxtProgressBar(pb, n)
+      opts = list(progress = progress)
 
       res = foreach(
         i = 1:length(slides_same_day),
@@ -92,8 +99,12 @@ get_rainfall_point_data = function(point.data = NULL,
         .packages = c("rainfallR",
                       "magrittr",
                       "stringr",
-                      "dplyr")
+                      "dplyr"),
+        .options.snow = opts
       ) %dopar% {
+        # progressbar
+        # setTxtProgressBar(pb, i)
+
         # get the date of the slides
         date = names(slides_same_day)[[i]] %>% as.Date(., "%Y%m%d")
 
