@@ -89,7 +89,7 @@ get_rainfall_point_data = function(point.data = NULL,
       registerDoSNOW(cl)
 
       # progressbar
-      pb = txtProgressBar(max = iterations, style = 3)
+      pb = txtProgressBar(max = length(slides_same_day), style = 3)
       progress = function(n) setTxtProgressBar(pb, n)
       opts = list(progress = progress)
 
