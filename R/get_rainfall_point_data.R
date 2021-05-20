@@ -133,7 +133,10 @@ get_rainfall_point_data = function(point.data = NULL,
     # using the foreach approach with the future backend
     registerDoParallel(ncores)
     slides_with_rainfall_events = foreach(i = 1:length(slides_list)) %dopar% {
-      r = rainfallR::reconstruct_daily_rainfall_events(slides_list[[i]], n = n_dry, quiet = T)
+      r = rainfallR::reconstruct_daily_rainfall_events(slides_list[[i]],
+                                                       n = n_dry,
+                                                       daily_thresh = daily_thresh,
+                                                       quiet = T)
     }
 
     # put the results back into one dataframe ---------------------------------

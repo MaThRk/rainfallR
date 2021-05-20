@@ -10,3 +10,4 @@ todo
 *.rds
 plots/
 notes*
+manually_verify_data
