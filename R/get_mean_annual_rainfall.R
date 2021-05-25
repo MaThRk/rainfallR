@@ -26,7 +26,7 @@ get_mean_annual_rainfall = function(data = NULL,
   if (pt) {
     map = stars::read_stars(map_path)
 
-    ex = stars::st_extract(map, data) %>% st_drop_geometry()
+    ex = stars::st_extract(map, data) %>% st_drop_geometry() %>% pull()
     return(ex)
 
     # data[["map"]]  = ex
