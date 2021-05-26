@@ -6,6 +6,7 @@
 #' @importFrom data.table rbindlist
 #' @importFrom future plan
 #' @importFrom doSNOW registerDoSNOW
+#' @importFrom here here
 #'
 #' @export
 get_rainfall_point_data = function(point.data = NULL,
