@@ -4,7 +4,6 @@
 #' same day into a \code{data.frame} and put this dataframe into a list. Each
 #' element of the list thus can be considered to be a day. This requires that the input has a column called date
 #'
-#'
 #' @return A list where each element is a dataframe with all the slides from
 #' that day
 #'
