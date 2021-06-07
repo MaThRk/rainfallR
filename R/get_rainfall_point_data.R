@@ -6,6 +6,7 @@
 #' @importFrom data.table rbindlist
 #' @importFrom future plan
 #' @importFrom doSNOW registerDoSNOW
+#' @importFrom snow makeCluster
 #' @importFrom here here
 #'
 #' @export
