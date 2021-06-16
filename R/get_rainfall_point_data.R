@@ -20,6 +20,7 @@ get_rainfall_point_data = function(point.data = NULL,
                                    save = F,
                                    base_path = NULL,
                                    path_rainfall = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/") {
+
   if (is.null(point.data)) {
     stop("You need to provide some data")
   }
@@ -36,6 +37,10 @@ get_rainfall_point_data = function(point.data = NULL,
   if (save) {
     if (is.null(base_path)) {
       stop("You want to save the data, but you need to provide a base path")
+    }
+    if(!dir.exists(base_path)){
+      cat(paste0("Creating Directory: ", base_path))
+      dir.create(base_path, recursive = T)
     }
   }
 
