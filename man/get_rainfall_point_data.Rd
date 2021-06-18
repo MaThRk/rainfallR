@@ -12,6 +12,7 @@ get_rainfall_point_data(
   parallel = TRUE,
   ncores = 8,
   last_event = FALSE,
+  nle = FALSE,
   save = F,
   base_path = NULL,
   path_rainfall = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/"

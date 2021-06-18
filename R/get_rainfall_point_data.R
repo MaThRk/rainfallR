@@ -4,6 +4,7 @@
 #' the events for point-data for specific dates (e.g. dates of landslides)
 #'
 #' @importFrom data.table rbindlist
+#' @importFrom dplyr filter group_by
 #' @importFrom future plan
 #' @importFrom doSNOW registerDoSNOW
 #' @importFrom snow makeCluster
@@ -17,9 +18,15 @@ get_rainfall_point_data = function(point.data = NULL,
                                    parallel = TRUE,
                                    ncores = 8,
                                    last_event = FALSE,
+                                   nle = FALSE,
                                    save = F,
                                    base_path = NULL,
                                    path_rainfall = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/") {
+
+
+  # -------------------------------------------------------------------------
+  # Some input checks
+
 
   if (is.null(point.data)) {
     stop("You need to provide some data")
@@ -31,6 +38,16 @@ get_rainfall_point_data = function(point.data = NULL,
 
   if (!dir.exists(path_rainfall)) {
     stop("The rainfall directory does not exist")
+  }
+
+  # -------------------------------------------------------------------------
+  # cant have last_event and nle as last_event would imply only the last rainfall
+  # event before the slide
+  if (last_event & nle) {
+    stop(
+      red("Either you want the last rainfall-event before the landlside or all the
+triggering and non-triggering rainfall-events in the specified time-period"
+    ))
   }
 
   # when we want to save
@@ -48,36 +65,42 @@ get_rainfall_point_data = function(point.data = NULL,
 
   n = nrow(point.data)
 
-  data_out = ifelse(!last_event, here(
-    paste0(
-      base_path,
-      "/n",
-      n,
-      "_",
-      "days_back",
-      days_back,
-      "_daily_thresh",
-      daily_thresh,
-      "_n_dry",
-      n_dry,
-      ".Rdata"
-    )
-  ),
-  here(
-    paste0(
-      base_path,
-      "/LASTEVENT_n",
-      n,
-      "_",
-      "days_back",
-      days_back,
-      "_daily_thresh",
-      daily_thresh,
-      "_n_dry",
-      n_dry,
-      ".Rdata"
-    )
-  ))
+  if (save) {
+    data_out = ifelse(!last_event, here(
+      paste0(
+        base_path,
+        "/",
+        n,
+        "_",
+        "days_back",
+        days_back,
+        "_daily_thresh",
+        daily_thresh,
+        "_n_dry",
+        n_dry,
+        "_NLE_",
+        nle,
+        ".Rdata"
+      )
+    ),
+    here(
+      paste0(
+        base_path,
+        "/LASTEVENT_n",
+        n,
+        "_",
+        "days_back",
+        days_back,
+        "_daily_thresh",
+        daily_thresh,
+        "_n_dry",
+        n_dry,
+        "_NLE_",
+        nle,
+        ".Rdata"
+      )
+    ))
+  }
 
   if (!file.exists(data_out)) {
     ######################################
@@ -149,6 +172,10 @@ get_rainfall_point_data = function(point.data = NULL,
     # put the results back into one dataframe ---------------------------------
     df_slides = data.table::rbindlist(slides_with_rainfall_events) %>% st_as_sf()
 
+
+
+
+
     if (last_event) {
       # E
       df_rainfall = df_slides %>%
@@ -179,6 +206,17 @@ get_rainfall_point_data = function(point.data = NULL,
                         df_duration,
                         by = "PIFF_ID",
                         all.y = F)
+    }
+
+    if(nle){
+
+      df_slides = df_slides %>%
+        dplyr::filter(!is.na(event)) %>%
+        dplyr::group_by(PIFF_ID, event) %>%
+        mutate(
+          class = ifelse(any(date.x == dol), "trigger", "notrigger")
+        )
+
     }
 
     # save it
