@@ -65,42 +65,41 @@ triggering and non-triggering rainfall-events in the specified time-period"
 
   n = nrow(point.data)
 
-  if (save) {
-    data_out = ifelse(!last_event, here(
-      paste0(
-        base_path,
-        "/",
-        n,
-        "_",
-        "days_back",
-        days_back,
-        "_daily_thresh",
-        daily_thresh,
-        "_n_dry",
-        n_dry,
-        "_NLE_",
-        nle,
-        ".Rdata"
-      )
-    ),
-    here(
-      paste0(
-        base_path,
-        "/LASTEVENT_n",
-        n,
-        "_",
-        "days_back",
-        days_back,
-        "_daily_thresh",
-        daily_thresh,
-        "_n_dry",
-        n_dry,
-        "_NLE_",
-        nle,
-        ".Rdata"
-      )
-    ))
-  }
+  data_out = ifelse(!last_event, here(
+    paste0(
+      base_path,
+      "/",
+      n,
+      "_",
+      "days_back",
+      days_back,
+      "_daily_thresh",
+      daily_thresh,
+      "_n_dry",
+      n_dry,
+      "_NLE_",
+      nle,
+      ".Rdata"
+    )
+  ),
+  here(
+    paste0(
+      base_path,
+      "/LASTEVENT_n",
+      n,
+      "_",
+      "days_back",
+      days_back,
+      "_daily_thresh",
+      daily_thresh,
+      "_n_dry",
+      n_dry,
+      "_NLE_",
+      nle,
+      ".Rdata"
+    )
+  ))
+
 
   if (!file.exists(data_out)) {
     ######################################
