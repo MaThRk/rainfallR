@@ -5,8 +5,7 @@
 #'
 #' @importFrom tidyr pivot_longer
 #'
-#' @param
-#'
+#' @export
 
  make_cumsum = function(df_wide, fun, days_back){
 

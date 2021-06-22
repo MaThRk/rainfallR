@@ -19,7 +19,9 @@ Imports:
     ncdf4,
     ncdf4.helpers,
     assertthat,
-    magrittr
+    magrittr,
+    tidyr,
+    doSNOW
 Suggests: 
     knitr,
     rmarkdown
