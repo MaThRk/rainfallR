@@ -19,7 +19,7 @@
 #' @importFrom dplyr case_when summarise
 #' @importFrom tidyr pivot_longer
 #'
-#'
+#' @export
 
 make_qroc = function(model,
                      new_data,
