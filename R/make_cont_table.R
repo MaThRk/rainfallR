@@ -21,7 +21,7 @@
 #'
 #' @export
 
-make_qroc = function(model,
+make_cont_table = function(model,
                      new_data,
                      cm = TRUE,
                      x_var = "duration",
