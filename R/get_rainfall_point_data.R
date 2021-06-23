@@ -25,6 +25,7 @@ get_rainfall_point_data = function(point.data = NULL,
                                    last_event = FALSE,
                                    nle = FALSE,
                                    save = F,
+                                   force = FALSE,
                                    base_path = NULL,
                                    path_rainfall = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/") {
 
@@ -105,7 +106,7 @@ triggering and non-triggering rainfall-events in the specified time-period"
   ))
 
 
-  if (!file.exists(data_out)) {
+  if (!file.exists(data_out) | force) {
     ######################################
     # Get the rainfall data
     ######################################
@@ -217,8 +218,7 @@ triggering and non-triggering rainfall-events in the specified time-period"
         dplyr::filter(!is.na(event)) %>%
         dplyr::group_by(PIFF_ID, event) %>%
         mutate(
-          class_rain = ifelse(any(date.x == dol), "trigger", "notrigger")
-        ) %>%
+          class_rain = ifelse(any(date.x == dol), TRUE, FALSE)) %>%
         ungroup()
 
     }
