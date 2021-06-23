@@ -217,7 +217,7 @@ triggering and non-triggering rainfall-events in the specified time-period"
         dplyr::filter(!is.na(event)) %>%
         dplyr::group_by(PIFF_ID, event) %>%
         mutate(
-          class = ifelse(any(date.x == dol), "trigger", "notrigger")
+          class_rain = ifelse(any(date.x == dol), "trigger", "notrigger")
         ) %>%
         ungroup()
 
