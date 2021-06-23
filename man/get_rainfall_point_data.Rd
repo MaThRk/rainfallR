@@ -18,6 +18,13 @@ get_rainfall_point_data(
   path_rainfall = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/"
 )
 }
+\arguments{
+\item{last_event}{if True: Returns only the last event before the date of the landslide}
+
+\item{nle}{if True: Returns all events. This will create a new column called \code{class} that either
+stores \code{trigger} or \code{notrigger} depending on if there is any landslide correspondending in time
+and space with a rainfall-event. if NLE == TRUE, all dates without any event will be omitted}
+}
 \description{
 Wrapper-funtion to calculate the rainfall, the cumulated sum, and
 the events for point-data for specific dates (e.g. dates of landslides)
