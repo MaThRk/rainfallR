@@ -3,6 +3,11 @@
 #' @description Wrapper-funtion to calculate the rainfall, the cumulated sum, and
 #' the events for point-data for specific dates (e.g. dates of landslides)
 #'
+#' @param last_event if True: Returns only the last event before the date of the landslide
+#' @param nle if True: Returns all events. This will create a new column called \code{class} that either
+#' stores \code{trigger} or \code{notrigger} depending on if there is any landslide correspondending in time
+#' and space with a rainfall-event. if NLE == TRUE, all dates without any event will be omitted
+#'
 #' @importFrom data.table rbindlist
 #' @importFrom dplyr filter group_by
 #' @importFrom future plan
@@ -26,7 +31,6 @@ get_rainfall_point_data = function(point.data = NULL,
 
   # -------------------------------------------------------------------------
   # Some input checks
-
 
   if (is.null(point.data)) {
     stop("You need to provide some data")
@@ -214,7 +218,8 @@ triggering and non-triggering rainfall-events in the specified time-period"
         dplyr::group_by(PIFF_ID, event) %>%
         mutate(
           class = ifelse(any(date.x == dol), "trigger", "notrigger")
-        )
+        ) %>%
+        ungroup()
 
     }
 
