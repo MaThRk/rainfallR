@@ -24,8 +24,7 @@ get_mean_annual_rainfall = function(data = NULL,
   map = read_stars(map_path)
 
   # transform both manually
-  map = st_transform(map, crs=crs)
-  data = st_transform(data, crs=crs)
+  data = st_transform(data, crs=st_crs(map))
 
 
   # point or polygon?
