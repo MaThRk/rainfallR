@@ -23,18 +23,15 @@ get_mean_annual_rainfall = function(data = NULL,
 
   map = read_stars(map_path)
 
-  # reproject both ahhhh
-  dat = list(data, map)
-  for (i in seq_along(dat)) {
-    dat[[i]] = st_transform(dat[[i]], crs=crs)
-  }
+  # transform both manually
+  map = st_transform(map, crs=crs)
+  data = st_transform(data, crs=crs)
 
 
   # point or polygon?
   pt = ifelse(any(st_geometry_type(data) == "POINT"), TRUE, FALSE)
 
   if (pt) {
-    map = stars::read_stars(map_path)
 
     ex = stars::st_extract(map, data) %>% st_drop_geometry() %>% pull()
     return(ex)
