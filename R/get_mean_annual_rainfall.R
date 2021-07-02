@@ -14,11 +14,21 @@
 
 get_mean_annual_rainfall = function(data = NULL,
                                     map_path = "/mnt/CEPH_PROJECTS/Proslide/mean_annual_precipitation/map.tif",
-                                    fun = c("mean")) {
+                                    fun = c("mean"),
+                                    crs = 32632) {
 
   if(!inherits(data, "sf")) {
     stop("The data argument must be provided with an object of class sf")
   }
+
+  map = read_stars(map_path)
+
+  # reproject both ahhhh
+  dat = list(data, map)
+  for (i in seq_along(dat)) {
+    dat[[i]] = st_transform(dat[[i]], crs=crs)
+  }
+
 
   # point or polygon?
   pt = ifelse(any(st_geometry_type(data) == "POINT"), TRUE, FALSE)

@@ -141,7 +141,6 @@ triggering and non-triggering rainfall-events in the specified time-period"
 
         # get the date of the slides
         date = names(slides_same_day)[[i]] %>% as.Date(., "%Y%m%d")
-
         # the spatial object. All slides from the same day in South Tyrol
         # Like this we only need to load the NetCDF once into memory
         spatial.obj = slides_same_day[[i]]

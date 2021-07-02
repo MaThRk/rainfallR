@@ -7,7 +7,8 @@
 get_mean_annual_rainfall(
   data = NULL,
   map_path = "/mnt/CEPH_PROJECTS/Proslide/mean_annual_precipitation/map.tif",
-  fun = c("mean")
+  fun = c("mean"),
+  crs = 32632
 )
 }
 \arguments{
