@@ -166,7 +166,7 @@ triggering and non-triggering rainfall-events in the specified time-period"
     # will not work if there is no PIFF_ID
     if (!is.null(id_landslide)) {
       na = names(res)
-      idx =  grep(id_landslide, na)
+      idx =  grep(glue("^{id_landslide}$"), na)
       slides_list = split(res, res[[idx]])
     } else{
       slides_list = split(res, res$PIFF_ID)

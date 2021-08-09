@@ -94,7 +94,7 @@ ex_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PR
   paths_to_data = get_nc_paths(data_path, day, days_back)
 
 
-# create list of rasters --------------------------------------------------
+# create list of rasters --------------------------------c-----------------
   if (length(paths_to_data) == 1) {
     cat("\nGet the", days_back + 1, "rasters for ", as.character(day), "\n")
 
