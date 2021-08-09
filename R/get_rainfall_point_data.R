@@ -7,6 +7,7 @@
 #' @param nle if True: Returns all events. This will create a new column called \code{class} that either
 #' stores \code{trigger} or \code{notrigger} depending on if there is any landslide correspondending in time
 #' and space with a rainfall-event. if NLE == TRUE, all dates without any event will be omitted
+#' @param id_landslide The name of a column that uniquely identifies each landslide
 #'
 #' @importFrom data.table rbindlist
 #' @importFrom dplyr filter group_by
@@ -27,6 +28,7 @@ get_rainfall_point_data = function(point.data = NULL,
                                    save = F,
                                    force = FALSE,
                                    base_path = NULL,
+                                   id_landslide = NULL,
                                    path_rainfall = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/") {
 
 
@@ -161,7 +163,14 @@ triggering and non-triggering rainfall-events in the specified time-period"
     # Reconstruct the rainfall events -----------------------------------------
 
     # create a list for each landslide
-    slides_list = split(res, res$PIFF_ID)
+    # will not work if there is no PIFF_ID
+    if (!is.null(id_landslide)) {
+      na = names(res)
+      idx =  grep(id_landslide, na)
+      slides_list = split(res, res[[idx]])
+    } else{
+      slides_list = split(res, res$PIFF_ID)
+    }
 
     # using the foreach approach with the future backend
     registerDoParallel(ncores)
