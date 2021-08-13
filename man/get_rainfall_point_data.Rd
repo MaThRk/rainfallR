@@ -26,6 +26,8 @@ get_rainfall_point_data(
 \item{nle}{if True: Returns all events. This will create a new column called \code{class} that either
 stores \code{trigger} or \code{notrigger} depending on if there is any landslide correspondending in time
 and space with a rainfall-event. if NLE == TRUE, all dates without any event will be omitted}
+
+\item{id_landslide}{The name of a column that uniquely identifies each landslide}
 }
 \description{
 Wrapper-funtion to calculate the rainfall, the cumulated sum, and

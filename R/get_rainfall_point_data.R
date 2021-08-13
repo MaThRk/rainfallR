@@ -10,7 +10,7 @@
 #' @param id_landslide The name of a column that uniquely identifies each landslide
 #'
 #' @importFrom data.table rbindlist
-#' @importFrom dplyr filter group_by
+#' @importFrom dplyr filter group_by across
 #' @importFrom future plan
 #' @importFrom doSNOW registerDoSNOW
 #' @importFrom snow makeCluster
@@ -160,6 +160,7 @@ triggering and non-triggering rainfall-events in the specified time-period"
     }
 
 
+
     # Reconstruct the rainfall events -----------------------------------------
 
     # create a list for each landslide
@@ -172,6 +173,7 @@ triggering and non-triggering rainfall-events in the specified time-period"
       slides_list = split(res, res$PIFF_ID)
     }
 
+
     # using the foreach approach with the future backend
     registerDoParallel(ncores)
     slides_with_rainfall_events = foreach(i = 1:length(slides_list)) %dopar% {
@@ -180,6 +182,7 @@ triggering and non-triggering rainfall-events in the specified time-period"
                                                        daily_thresh = daily_thresh,
                                                        quiet = T)
     }
+
 
     # put the results back into one dataframe ---------------------------------
     df_slides = data.table::rbindlist(slides_with_rainfall_events) %>% st_as_sf()
@@ -222,14 +225,26 @@ triggering and non-triggering rainfall-events in the specified time-period"
 
     if(nle){
 
-      df_slides = df_slides %>%
-        dplyr::filter(!is.na(event)) %>%
-        dplyr::group_by(PIFF_ID, event) %>%
-        mutate(
-          class_rain = ifelse(any(date.x == dol), TRUE, FALSE)) %>%
-        ungroup()
+
+
+      if (!is.null(id_landslide)) {
+        df_slides = df_slides %>%
+          dplyr::filter(!is.na(event)) %>%
+          dplyr::group_by(across(c(id_landslide, event))) %>%
+          mutate(class_rain = ifelse(any(date.x == dol), TRUE, FALSE)) %>%
+          ungroup()
+
+      } else{
+        df_slides = df_slides %>%
+          dplyr::filter(!is.na(event)) %>%
+          dplyr::group_by(PIFF_ID, event) %>%
+          mutate(class_rain = ifelse(any(date.x == dol), TRUE, FALSE)) %>%
+          ungroup()
+      }
+
 
     }
+
 
     # save it
     if (save) {
