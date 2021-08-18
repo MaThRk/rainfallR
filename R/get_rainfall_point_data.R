@@ -29,6 +29,7 @@ get_rainfall_point_data = function(point.data = NULL,
                                    force = FALSE,
                                    base_path = NULL,
                                    id_landslide = NULL,
+                                   antecedent = FALSE,
                                    path_rainfall = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/") {
 
 
@@ -157,6 +158,16 @@ triggering and non-triggering rainfall-events in the specified time-period"
           days_back = days_back
         )
       }
+    }
+
+    if(antecedent){
+      # save it
+      if (save) {
+        cat("saving...")
+        saveRDS(res, data_out)
+      }
+
+      return(res)
     }
 
 
