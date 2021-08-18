@@ -17,6 +17,7 @@ get_rainfall_point_data(
   force = FALSE,
   base_path = NULL,
   id_landslide = NULL,
+  antecedent = FALSE,
   path_rainfall = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/"
 )
 }
