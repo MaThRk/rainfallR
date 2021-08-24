@@ -136,8 +136,9 @@
   save <span class="op">=</span> <span class="cn">T</span>,
   base_path <span class="op">=</span> <span class="st">"~/rainfalldata"</span>
 <span class="op">)</span>
-<span class="co">#&gt; Warning in get_rainfall_point_data(pts_st, days_back = 10, daily_thresh = 1.1, :</span>
-<span class="co">#&gt; The File aready exists. Reading from disk...</span></code></pre></div>
+<span class="co">#&gt; Error: Problem with `filter()` input `..1`.</span>
+<span class="co">#&gt; ℹ Input `..1` is `date_info == "day"`.</span>
+<span class="co">#&gt; x object 'date_info' not found</span></code></pre></div>
 <ul>
 <li><p>But uhhh, there is no column called <code>date_info</code>. So what does this super non-informative message mean?</p></li>
 <li><p>In the iffi-database (actually only in the already derived product) I put a column that informs about the maximum level of date availbale as only slides with day-information should be processed…</p></li>

@@ -76,7 +76,7 @@ day = as.Date("2009-01-20")
   
 3. **Extract the rainfall for those slides**
 
-  * Now you can iterate over each element in the list and exract the rainfall for that date for those points. In [this vignette](https://mathrk.github.io/rainfallR/articles/extract_rainfall_landslidePoints.html) one can find an approach to do this in parallel
+ * Now you can iterate over each element in the list and extract the rainfall for that date for those points. In [this vignette](https://mathrk.github.io/rainfallR/articles/extract_rainfall_landslidePoints.html) one can find an approach to do this in parallel
  
  
 #### <u> Polygon data </u>
