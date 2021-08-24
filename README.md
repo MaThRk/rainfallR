@@ -99,7 +99,7 @@ day = as.Date("2009-01-20")
 
 #### More help
 
-- See [this vignette for more info](https://robinkohrs.github.io/rainfallR/articles/extract_landslide_rainfall.html)
+- See [this vignette for more info](https://mathrk.github.io/rainfallR/articles/extract_landslide_rainfall.html)
 
 ***
 
