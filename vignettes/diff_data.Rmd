@@ -15,6 +15,9 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
+library(ggplot2)
+library(purrr)
+library(sf)
 library(rainfallR)
 ```
 

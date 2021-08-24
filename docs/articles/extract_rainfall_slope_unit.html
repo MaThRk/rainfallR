@@ -57,6 +57,9 @@
       <a href="../articles/ExamplePolygonExtraction.html">Example Extraction for one polygon</a>
     </li>
     <li>
+      <a href="../articles/diff_data.html">Use data that is not IFFI data</a>
+    </li>
+    <li>
       <a href="../articles/extract_aggregated_values.html">Extract aggregated Values (time and space) of the rainfall data</a>
     </li>
     <li>
@@ -142,9 +145,9 @@
 <code class="sourceCode R"><span class="co"># get vector of South Tyrol</span>
 <span class="va">st</span> <span class="op">=</span> <span class="fu">iffitoR</span><span class="fu">::</span><span class="fu">get_shape_southtyrol</span><span class="op">(</span><span class="op">)</span> 
 
-<span class="fu">ggplot</span><span class="op">(</span><span class="va">st</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">geom_sf</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">st</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="extract_rainfall_slope_unit_files/figure-html/plotst-1.png" width="700"></p>
 <ul>
 <li>Now we get the vector data for the slope units</li>
