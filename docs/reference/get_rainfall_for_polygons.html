@@ -40,7 +40,7 @@
 
 
 <meta property="og:title" content="Extract the rainfall for a data.frame of polygons — get_rainfall_for_polygons" />
-<meta property="og:description" content="This function build on the results of slide_dates_in_polygon which returns a df
+<meta property="og:description" content="This function builds on the results of slide_dates_in_polygon which returns a df
 where each row is a polygon with a slide that is uniquely indentifiable by its poly_id and the
 date" />
 
@@ -132,7 +132,7 @@ date" />
     </div>
 
     <div class="ref-description">
-    <p>This function build on the results of <code>slide_dates_in_polygon</code> which returns a df
+    <p>This function builds on the results of <code>slide_dates_in_polygon</code> which returns a df
 where each row is a polygon with a slide that is uniquely indentifiable by its <code>poly_id</code> and the
 <code>date</code></p>
     </div>
@@ -141,6 +141,7 @@ where each row is a polygon with a slide that is uniquely indentifiable by its <
   <span class='va'>landslidepoints_in_poly</span>,
   days_back <span class='op'>=</span> <span class='fl'>5</span>,
   funs <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"mean"</span><span class='op'>)</span>,
+  nc_var <span class='op'>=</span> <span class='st'>"precipitation"</span>,
   parallel <span class='op'>=</span> <span class='cn'>T</span>,
   ncores <span class='op'>=</span> <span class='cn'>NULL</span>,
   data_path <span class='op'>=</span> <span class='st'>"\\\\projectdata.eurac.edu/projects/Proslide/PREC_GRIDS_updated/"</span>

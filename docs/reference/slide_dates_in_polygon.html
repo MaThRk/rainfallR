@@ -40,11 +40,8 @@
 
 
 <meta property="og:title" content="Extracts the days of the slides for each polygon — slide_dates_in_polygon" />
-<meta property="og:description" content="Returns a sf-dataframe. For each polygon it will count the number of slides per date. This mean
-that a polygon (its column poly_id) can potentially appear multiple times if on mulitple days slides happended in
-this polygon. The computed column slides_per_poly_date counts the number of slides per date in that polygon.
-This can then be fed into the function get_rainfall_for_polygon which is more or less a wrapper around the
-function ex_rainfall" />
+<meta property="og:description" content="For each Polygon this function selects only the polygons that experienced a landsld. It also reports (in the column slide_per_poly_date)
+the number of slides on that date in that polygon.shapefile" />
 
 
 
@@ -134,33 +131,30 @@ function ex_rainfall" />
     </div>
 
     <div class="ref-description">
-    <p>Returns a <code>sf</code>-dataframe. For each polygon it will count the number of slides per date. This mean
-that a polygon (its column <code>poly_id</code>) can potentially appear multiple times if on mulitple days slides happended in
-this polygon. The computed column <code>slides_per_poly_date</code> counts the number of slides per date in that polygon.
-This can then be fed into the function <code>get_rainfall_for_polygon</code> which is more or less a wrapper around the
-function <code>ex_rainfall</code></p>
+    <p>For each Polygon this function selects only the polygons that experienced a landsld. It also reports (in the column <code>slide_per_poly_date</code>)
+the number of slides on that date in that polygon.shapefile</p>
     </div>
 
-    <pre class="usage"><span class='fu'>slide_dates_in_polygon</span><span class='op'>(</span>
-  poly <span class='op'>=</span> <span class='cn'>NULL</span>,
- 
-    iffi10 <span class='op'>=</span> <span class='st'>"\\\\projectdata.eurac.edu/projects/Proslide/Landslides/Iffi_db_xxxx_to_2018/exportperEurac2020/Shapefiles/IFFI10_1.shp"</span>,
-  epsg <span class='op'>=</span> <span class='fl'>32632</span>
-<span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>slide_dates_in_polygon</span><span class='op'>(</span>poly <span class='op'>=</span> <span class='cn'>NULL</span>, landsld <span class='op'>=</span> <span class='cn'>NULL</span>, epsg <span class='op'>=</span> <span class='fl'>32632</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>poly</th>
-      <td><p>A path to a polygon spatial object</p></td>
+      <td><p>Path to the polygon shapefile</p></td>
     </tr>
     <tr>
-      <th>iffi10</th>
-      <td><p>Path to the iffi10 shapefile with already precomputed columns in english and the date information</p></td>
+      <th>landsld</th>
+      <td><p>Path to the landsld shapefile or object of class <code>sf</code>. Needs to have at least a column called <code>date_info</code>
+(as in the classic iffi-data from the <code>iffitoR</code>-package) or column called <code>date</code> with dates of class <code>date</code>. If both do not
+exist, the first column with the class <code>date</code> will be used to subset only the landslides with day-precise information</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>An object of class <code>sf</code> which is (probably) of geometry-type polygon with the additional columns.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

@@ -1,0 +1,186 @@
+---
+title: "Use data that is not IFFI data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Use data that is not IFFI data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(rainfallR)
+```
+
+
+- Many times one wants to extract the rainfall for landslide locations (or non-landslide locations) that might not come from the IFFI database
+
+- The `rainfallR` pacakge was build only having the IFFI data in mind, so there are some quirks that I'll show here
+
+- First, lets create some data
+
+
+
+# Make the data
+
+```{r}
+# get the shape of ST
+st = iffitoR::get_shape_southtyrol() %>% st_transform(crs=32632)
+
+# Get some random points
+bb = st_bbox(st)
+xs = sample(seq(bb[[1]], bb[[3]], length.out=100), 50)
+ys = sample(seq(bb[[2]], bb[[4]], length.out=100), 50)
+
+pts = map2_df(xs, ys, ~data.frame(x = .x, y=.y)) %>% 
+  st_as_sf(coords = c("x", "y"), crs=32632)
+
+pts_st = pts[st, ]
+
+# make up some dates
+pts_st[["date"]] = sample(seq(as.Date("2000-01-01"), as.Date("2020-01-01"), by="day"), nrow(pts_st))
+```
+
+
+Now that we have some data, lets query the rainfall
+
+
+```{r, error=TRUE}
+
+r_data = get_rainfall_point_data(
+  pts_st,
+  days_back = 10,
+  daily_thresh = 1.1,
+  n_dry = 2,
+  ncores = 2,
+  save = T,
+  base_path = "~/rainfalldata"
+)
+
+```
+
+
+- But uhhh, there is no column called `date_info`. So what does this super non-informative message mean?
+
+- In the iffi-database (actually only in the already derived product) I put a column that informs about the maximum level of date availbale as only slides with day-information should be processed... 
+
+- So one (and the only for now;) solution is to add this column in the following way manually: 
+
+```{r}
+
+# as we have all day information in the synthetic dataset...
+pts_st[["date_info"]] = "day"
+
+```
+
+
+So lets try again to get the rainfall data
+
+```{r, error=T, results=F, cache=T}
+
+r_data = get_rainfall_point_data(
+  pts_st,
+  days_back = 10,
+  daily_thresh = 1.1,
+  n_dry = 2,
+  ncores = 2,
+  save = T,
+  base_path = "~/rainfalldata"
+)
+
+
+```
+
+- Ok still does not work....
+- The problem is a missing unique identifier.
+- Let's add a unique identifier to each slide
+
+```{r, error=T, results=F, cache=T}
+pts_st[["id"]] = 1:nrow(pts_st)
+
+r_data = get_rainfall_point_data(
+  pts_st,
+  days_back = 10,
+  daily_thresh = 1.1,
+  n_dry = 2,
+  ncores = 2,
+  save = T,
+  base_path = "~/rainfalldata",
+  id_landslide = "id"
+)
+
+```
+
+- Ok yet another error. Pfisshhh, what the fluck....
+
+- The problem is that the unique identifier should not contain the letters `I`and `D` subsequently in upper or lowercase as this is kind of hardcoded into the `PIFF_ID` variable... 
+- So lets give them another unique identifier
+
+```{r, results=F}
+pts_st[["lll"]] = 1:nrow(pts_st)
+
+r_data = get_rainfall_point_data(
+  pts_st,
+  days_back = 10,
+  daily_thresh = 1.1,
+  n_dry = 2,
+  ncores = 2,
+  save = T,
+  base_path = "~/rainfalldata",
+  id_landslide = "lll"
+)
+
+
+```
+
+What, no error...
+
+
+```{r}
+print(head(r_data))
+```
+
+
+So we can plot the precpitation for each of these synthetic slide locations
+
+
+```{r}
+ggplot(r_data) +
+  geom_path(
+    aes(
+      x = days_before_event,
+      y = precip,
+      group = id
+    )
+  ) +
+  scale_x_reverse() +
+  theme_void() +
+  labs(
+    x = "Days before landslide",
+    y = "Daily cumulated precipitation [ mm ]"
+  ) +
+  theme(
+    axis.title = element_text(color="#37323e", size=14, family="Times", face="italic"),
+    axis.title.y = element_text(color="#37323e", size=14, family="Times", face="italic", angle=90),
+    axis.line.y = element_line(color="#37323e", size=1),
+    axis.line.x = element_line(color="#37323e", size=1),
+    axis.ticks = element_line(color="black"),
+    axis.text = element_text(color="#37323e", family="Times", face="italic", margin = margin(rep(5, 4))),
+    plot.margin = unit(rep(2,4), "cm"))
+```
+
+
+
+
+
+
+
+
+
+

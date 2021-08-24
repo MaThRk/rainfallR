@@ -127,8 +127,9 @@ dim(su)
 
 ```{r slidessameday}
 landsld = landsld %>% filter(str_detect(second_level, "translational|rotational")) %>% slice(1:50)
+
 su_points_in_poly = rainfallR::slide_dates_in_polygon(poly = su_path
-                                                      ,iffi10 = landsld)
+                                                      ,landsld = landsld)
 ```
 
 - Now we have all the dates of all slides that happened within each polygon of su
@@ -183,7 +184,7 @@ Within the `get_rainfall_for_polygons`-function:
 ```{r verifyuniqueness}
 # verfiy that each slope unit has 6 entries for all the six days before the slide
 slopeunits_rainfall %>% 
-  group_by(poly_id, iffi_id) %>% 
+  group_by(poly_id, PIFF_ID) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
   count(n)
@@ -193,7 +194,7 @@ slopeunits_rainfall %>%
 
 ```{r, fig.width=10, echo=F, fig.height=8}
 g =slopeunits_rainfall %>% 
-  group_by(poly_id, iffi_id) %>% 
+  group_by(poly_id, PIFF_ID) %>% 
   mutate(unique_id = dplyr::cur_group_id()) %>% 
   ggplot() +
   geom_path(mapping = aes(x = days_before_event,

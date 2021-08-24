@@ -40,9 +40,9 @@
 
 
 <meta property="og:title" content="Extract rainfall Events per slide — reconstruct_daily_rainfall_events" />
-<meta property="og:description" content="This function will extract the rainfall events that happened before a landslide, based on a
-predefined length ,n, that can be dry days and still be part of a rainfall event , that can be dry
-days and still be part of a rainfall event" />
+<meta property="og:description" content="Extracts the rainfall events that happened before a landslide, based on a predefined length ,
+n, that can be dry days and still be part of a rainfall event.  Input usually is the result of the
+function ex_rainfall for one slide with a unique `PIFF_ID`." />
 
 
 
@@ -132,9 +132,9 @@ days and still be part of a rainfall event" />
     </div>
 
     <div class="ref-description">
-    <p>This function will extract the rainfall events that happened before a landslide, based on a
-predefined length ,<code>n</code>, that can be dry days and still be part of a rainfall event , that can be dry
-days and still be part of a rainfall event</p>
+    <p>Extracts the rainfall events that happened before a landslide, based on a predefined length ,
+<code>n</code>, that can be dry days and still be part of a rainfall event.  Input usually is the result of the
+function <code>ex_rainfall</code> for one slide with a unique `PIFF_ID`.</p>
     </div>
 
     <pre class="usage"><span class='fu'>reconstruct_daily_rainfall_events</span><span class='op'>(</span><span class='va'>d</span>, n <span class='op'>=</span> <span class='fl'>1</span>, daily_thresh <span class='op'>=</span> <span class='fl'>0.2</span>, quiet <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></pre>
@@ -161,6 +161,10 @@ called <code>precip</code></p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>The same dataframe as inputted, just with the column <code>event</code> appended that shows the number of
+rainfall event before the slide happened</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

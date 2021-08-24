@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • rainfallR</title>
+<title>Create Contigency Values — make_cont_table • rainfallR</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,9 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Create Contigency Values — make_cont_table" />
+<meta property="og:description" content="Provide a model, newdata and some other values and this function hopefully
+creates a contigency matrix like dataframe" />
 
 
 
@@ -58,7 +60,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -121,150 +123,75 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Create Contigency Values</h1>
+    
+    <div class="hidden name"><code>make_cont_table.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>Provide a model, newdata and some other values and this function hopefully
+creates a contigency matrix like dataframe</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>make_cont_table</span><span class='op'>(</span>
+  <span class='va'>model</span>,
+  <span class='va'>new_data</span>,
+  cm <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  x_var <span class='op'>=</span> <span class='st'>"duration"</span>,
+  y_var <span class='op'>=</span> <span class='st'>"sum_rain"</span>,
+  true_class <span class='op'>=</span> <span class='st'>"class"</span>,
+  trigger <span class='op'>=</span> <span class='st'>"trigger"</span>,
+  notrigger <span class='op'>=</span> <span class='st'>"notrigger"</span>,
+  quantiles <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, by <span class='op'>=</span> <span class='fl'>0.01</span><span class='op'>)</span>
+<span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="aggregate_rainfall.html">aggregate_rainfall()</a></code> </p>
-        </td>
-        <td><p>Get the summed yearly rainfall</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="bozen.html">bozen</a></code> </p>
-        </td>
-        <td><p>Spatial object of the city of bozen</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="check_spatial_input.html">check_spatial_input()</a></code> </p>
-        </td>
-        <td><p>verify the input of the polyogn</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="dates_of_slides_in_poly.html">dates_of_slides_in_poly()</a></code> </p>
-        </td>
-        <td><p>For each polygon with slide it keeps one row per date</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="ex_rainfall.html">ex_rainfall()</a></code> </p>
-        </td>
-        <td><p>Extract rainfall data</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_dates_ncdf.html">get_dates_ncdf()</a></code> </p>
-        </td>
-        <td><p>Some helper functions</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_mean_annual_rainfall.html">get_mean_annual_rainfall()</a></code> </p>
-        </td>
-        <td><p>Mean Annual precipitation per point</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_monthly_paths.html">get_monthly_paths()</a></code> </p>
-        </td>
-        <td><p>Get the paths to the monthly NetCDFS</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_nc_paths.html">get_nc_paths()</a></code> </p>
-        </td>
-        <td><p>get the paths to the nc file</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_rainfall_for_polygons.html">get_rainfall_for_polygons()</a></code> </p>
-        </td>
-        <td><p>Extract the rainfall for a <code>data.frame</code> of polygons</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_rainfall_point_data.html">get_rainfall_point_data()</a></code> </p>
-        </td>
-        <td><p>Get the rainfall-(events) for point data</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="hello.html">hello()</a></code> </p>
-        </td>
-        <td><p>Hello, World!</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="iffi10_same_day.html">iffi10_same_day()</a></code> </p>
-        </td>
-        <td><p>What slides happened on the same day?</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="make_aggregated_table.html">make_aggregated_table()</a></code> </p>
-        </td>
-        <td><p>Calulate the the aggregated values for each polygon</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="make_cont_table.html">make_cont_table()</a></code> </p>
-        </td>
-        <td><p>Create Contigency Values</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="make_cumsum.html">make_cumsum()</a></code> </p>
-        </td>
-        <td><p>Will calculate the cumulative sum of the measurements over time</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="make_rasters.html">make_rasters()</a></code> </p>
-        </td>
-        <td><p>Calulate the aggregated Rasters</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="reconstruct_daily_rainfall_events.html">reconstruct_daily_rainfall_events()</a></code> </p>
-        </td>
-        <td><p>Extract rainfall Events per slide</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="slide_dates_in_polygon.html">slide_dates_in_polygon()</a></code> </p>
-        </td>
-        <td><p>Extracts the days of the slides for each polygon</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>model</th>
+      <td><p>The Model</p></td>
+    </tr>
+    <tr>
+      <th>new_data</th>
+      <td><p>A dataframe with the newdata to apply the model (must have the predictors from the model)
+as columns. Otherwise will hopefully throw an error</p></td>
+    </tr>
+    <tr>
+      <th>cm</th>
+      <td><p>If <code>TRUE</code> will output a "short" daatframe and only contain the count of the contigency values.
+If <code>FALSE</code> will add to each obsevation the contigency value</p></td>
+    </tr>
+    <tr>
+      <th>x_var</th>
+      <td><p>The name of the column of the Predictor in our model</p></td>
+    </tr>
+    <tr>
+      <th>y_var</th>
+      <td><p>The name of the column of the dependent variables (cumulated rainfall, intensity)</p></td>
+    </tr>
+    <tr>
+      <th>true_class</th>
+      <td><p>Name of the column that hold the binary "true" values</p></td>
+    </tr>
+    <tr>
+      <th>trigger</th>
+      <td><p>The representation of the true (postive) value in the <code>true_class</code> column</p></td>
+    </tr>
+    <tr>
+      <th>notrigger</th>
+      <td><p>The representation of the false (negative) value in the <code>true_class</code> column</p></td>
+    </tr>
+    <tr>
+      <th>quantiles</th>
+      <td><p>...</p></td>
+    </tr>
     </table>
-  </div>
 
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>

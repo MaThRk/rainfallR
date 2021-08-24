@@ -152,7 +152,7 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">su_orig</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">su_path</span><span class="op">)</span>
 <span class="co">#&gt; Reading layer `su_16_TAA' from data source `/mnt/CEPH_PROJECTS/Proslide/Envir_data/SlopeUnits/su_opt_16_TAA/su_16_TAA.shp' using driver `ESRI Shapefile'</span>
-<span class="co">#&gt; Simple feature collection with 14543 features and 4 fields</span>
+<span class="co">#&gt; Simple feature collection with 14543 features and 5 fields</span>
 <span class="co">#&gt; geometry type:  POLYGON</span>
 <span class="co">#&gt; dimension:      XY</span>
 <span class="co">#&gt; bbox:           xmin: 4350211 ymin: 2507176 xmax: 4510701 ymax: 2666725</span>
@@ -186,9 +186,9 @@
 </ul>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/dimensions.html">dim</a></span><span class="op">(</span><span class="va">su_orig</span><span class="op">)</span> <span class="co"># how many were there</span>
-<span class="co">#&gt; [1] 14543     5</span>
+<span class="co">#&gt; [1] 14543     6</span>
 <span class="fu"><a href="https://rdrr.io/pkg/raster/man/dimensions.html">dim</a></span><span class="op">(</span><span class="va">su</span><span class="op">)</span>
-<span class="co">#&gt; [1] 9632    5</span></code></pre></div>
+<span class="co">#&gt; [1] 9632    6</span></code></pre></div>
 </div>
 </div>
 <div id="get-the-rainfall-for-the-slope-units" class="section level1">
@@ -205,11 +205,12 @@
 </ul>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">landsld</span> <span class="op">=</span> <span class="va">landsld</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">second_level</span>, <span class="st">"translational|rotational"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">slice</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">50</span><span class="op">)</span>
+
 <span class="va">su_points_in_poly</span> <span class="op">=</span> <span class="fu">rainfallR</span><span class="fu">::</span><span class="fu"><a href="../reference/slide_dates_in_polygon.html">slide_dates_in_polygon</a></span><span class="op">(</span>poly <span class="op">=</span> <span class="va">su_path</span>
-                                                      ,iffi10 <span class="op">=</span> <span class="va">landsld</span><span class="op">)</span>
+                                                      ,landsld <span class="op">=</span> <span class="va">landsld</span><span class="op">)</span>
 <span class="co">#&gt; [1] "using an sf-object as input to the iffi-argument"</span>
 <span class="co">#&gt; Reading layer `su_16_TAA' from data source `/mnt/CEPH_PROJECTS/Proslide/Envir_data/SlopeUnits/su_opt_16_TAA/su_16_TAA.shp' using driver `ESRI Shapefile'</span>
-<span class="co">#&gt; Simple feature collection with 14543 features and 4 fields</span>
+<span class="co">#&gt; Simple feature collection with 14543 features and 5 fields</span>
 <span class="co">#&gt; geometry type:  POLYGON</span>
 <span class="co">#&gt; dimension:      XY</span>
 <span class="co">#&gt; bbox:           xmin: 4350211 ymin: 2507176 xmax: 4510701 ymax: 2666725</span>
@@ -230,15 +231,15 @@
 <span class="co">#&gt; dimension:      XY</span>
 <span class="co">#&gt; bbox:           xmin: 716861.3 ymin: 5204596 xmax: 735880.9 ymax: 5214580</span>
 <span class="co">#&gt; projected CRS:  WGS 84 / UTM zone 32N</span>
-<span class="co">#&gt; # A tibble: 6 x 6</span>
-<span class="co">#&gt;   poly_id date       month.int second_level slides_per_poly…</span>
-<span class="co">#&gt;     &lt;int&gt; &lt;date&gt;         &lt;int&gt; &lt;chr&gt;                   &lt;int&gt;</span>
-<span class="co">#&gt; 1      36 1998-04-08         4 rotational …                1</span>
-<span class="co">#&gt; 2      63 1998-02-20         2 translation…                1</span>
-<span class="co">#&gt; 3      72 2018-05-07         5 rotational …                1</span>
-<span class="co">#&gt; 4      96 1993-04-30         4 translation…                1</span>
-<span class="co">#&gt; 5     154 1997-06-30         6 rotational …                1</span>
-<span class="co">#&gt; 6     199 1998-02-16         2 translation…                1</span>
+<span class="co">#&gt; # A tibble: 6 × 6</span>
+<span class="co">#&gt;   poly_id date       month.int second_level        slides_per_poly_date</span>
+<span class="co">#&gt;     &lt;int&gt; &lt;date&gt;         &lt;int&gt; &lt;chr&gt;                              &lt;int&gt;</span>
+<span class="co">#&gt; 1      36 1998-04-08         4 rotational slide                       1</span>
+<span class="co">#&gt; 2      63 1998-02-20         2 translational slide                    1</span>
+<span class="co">#&gt; 3      72 2018-05-07         5 rotational slide                       1</span>
+<span class="co">#&gt; 4      96 1993-04-30         4 translational slide                    1</span>
+<span class="co">#&gt; 5     154 1997-06-30         6 rotational slide                       1</span>
+<span class="co">#&gt; 6     199 1998-02-16         2 translational slide                    1</span>
 <span class="co">#&gt; # … with 1 more variable: geometry &lt;POLYGON [m]&gt;</span></code></pre></div>
 </div>
 <div id="extract-the-rainfall-data-for-each-su-with-landslides-for-each-day" class="section level1">
@@ -292,7 +293,7 @@
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># verfiy that each slope unit has 6 entries for all the six days before the slide</span>
 <span class="va">slopeunits_rainfall</span> <span class="op">%&gt;%</span> 
-  <span class="fu">group_by</span><span class="op">(</span><span class="va">poly_id</span>, <span class="va">iffi_id</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">group_by</span><span class="op">(</span><span class="va">poly_id</span>, <span class="va">PIFF_ID</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/tidyverse.html">summarise</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fu">n</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">count</span><span class="op">(</span><span class="va">n</span><span class="op">)</span>
@@ -304,7 +305,7 @@
 <span class="co">#&gt; dimension:      XY</span>
 <span class="co">#&gt; bbox:           xmin: 670084.8 ymin: 5123189 xmax: 735880.9 ymax: 5214580</span>
 <span class="co">#&gt; CRS:            +proj=utm +zone=32 +ellps=WGS84 +units=m +no_defs</span>
-<span class="co">#&gt; # A tibble: 1 x 3</span>
+<span class="co">#&gt; # A tibble: 1 × 3</span>
 <span class="co">#&gt;       n    nn                                                           geometry</span>
 <span class="co">#&gt; * &lt;int&gt; &lt;int&gt;                                                 &lt;MULTIPOLYGON [m]&gt;</span>
 <span class="co">#&gt; 1    15    24 (((671156.3 5123433, 671331.1 5123435, 671331.4 5123410, 671381.3…</span></code></pre></div>

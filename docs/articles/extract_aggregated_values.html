@@ -174,7 +174,10 @@
 <li>and plot it</li>
 </ul>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/stars/reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mean_2k15_2k16</span>, main<span class="op">=</span><span class="st">"Mean rainfall in the years 2015 and 2016"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/stars/reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mean_2k15_2k16</span>, main<span class="op">=</span><span class="st">"Mean rainfall in the years 2015 and 2016"</span><span class="op">)</span>
+<span class="co"># get the shape for South Tyrol</span>
+<span class="va">st</span> <span class="op">=</span> <span class="fu">iffitoR</span><span class="fu">::</span><span class="fu">get_shape_southtyrol</span><span class="op">(</span><span class="op">)</span>
+<span class="fu"><a href="https://r-spatial.github.io/stars/reference/plot.html">plot</a></span><span class="op">(</span><span class="va">st</span><span class="op">[</span><span class="fl">0</span><span class="op">]</span>, add<span class="op">=</span><span class="cn">T</span>, col<span class="op">=</span><span class="st">"red"</span>, lty<span class="op">=</span><span class="fl">19</span><span class="op">)</span></code></pre></div>
 <p><img src="extract_aggregated_values_files/figure-html/unnamed-chunk-4-1.png" width="960"></p>
   </div>
 
