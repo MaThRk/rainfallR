@@ -29,7 +29,8 @@ Imports:
     foreach,
     parallel,
     stars,
-    doSNOW
+    doSNOW,
+    usethis
 Suggests: 
     knitr,
     rmarkdown
