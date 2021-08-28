@@ -22,7 +22,8 @@ Imports:
     magrittr,
     tidyr,
     doSNOW,
-    data.table 
+    data.table,
+    exactextractr
 Suggests: 
     knitr,
     rmarkdown
