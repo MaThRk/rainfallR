@@ -21,7 +21,8 @@ Imports:
     assertthat,
     magrittr,
     tidyr,
-    doSNOW
+    doSNOW,
+    data.table 
 Suggests: 
     knitr,
     rmarkdown
