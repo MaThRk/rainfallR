@@ -23,7 +23,8 @@ Imports:
     tidyr,
     doSNOW,
     data.table,
-    exactextractr
+    exactextractr,
+    future 
 Suggests: 
     knitr,
     rmarkdown
