@@ -24,7 +24,12 @@ Imports:
     doSNOW,
     data.table,
     exactextractr,
-    future 
+    future,
+    here,
+    foreach,
+    parallel,
+    stars,
+    doSNOW
 Suggests: 
     knitr,
     rmarkdown
