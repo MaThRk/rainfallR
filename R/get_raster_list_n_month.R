@@ -1,5 +1,5 @@
 #' @export
-get_raster_list_n_month = function(paths_to_data, day, days_back){
+get_raster_list_n_month = function(paths_to_data, day, days_back, data_path){
 
   # get the max day back
   min_day = (day - days_back)
@@ -33,8 +33,9 @@ get_raster_list_n_month = function(paths_to_data, day, days_back){
     # check based on the month
     # make this a character string not a list
     # grep the more securely!!
-    years_in_dates = substr(names(paths_to_data), start=5, stop=7)
-    right_path = paths_to_data[grep(m, years_in_dates)][[1]]
+    # years_in_dates = substr(names(paths_to_data), start=5, stop=7)
+    # right_path = paths_to_data[grep(m, years_in_dates)][[1]]
+    right_path = paths_to_data[grep(pattern = paste0(y,m),names(paths_to_data))][[1]]
 
     # open the connection
     ncin = ncdf4::nc_open(right_path[[1]])
