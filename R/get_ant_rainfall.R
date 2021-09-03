@@ -54,7 +54,7 @@ get_ant_rainfall = function(
   max_var = max(vars)
 
   # for each day get the rainfall of max days back
-  if (parallel) {p
+  if (parallel) {
 
     future::plan(multisession)
 
