@@ -1,5 +1,5 @@
 #' @export
-get_raster_list_n_month = function(paths_to_data, day, days_back, data_path){
+get_raster_list_n_month = function(paths_to_data, day, days_back, quiet=F){
 
   # get the max day back
   min_day = (day - days_back)
@@ -24,11 +24,20 @@ get_raster_list_n_month = function(paths_to_data, day, days_back, data_path){
 
 
     # print a super informative message
-    n = length(dates_to_extract)
-    str = paste0(i, "/", n)
-    dashes = paste0(replicate(20, "-"), collapse = "")
-    cat(paste("------------", str, "(", as.Date(name, "%Y%m%d"), ")", dashes,"\n"))
-
+    if (!quiet) {
+      n = length(dates_to_extract)
+      str = paste0(i, "/", n)
+      dashes = paste0(replicate(20, "-"), collapse = "")
+      cat(paste(
+        "------------",
+        str,
+        "(",
+        as.Date(name, "%Y%m%d"),
+        ")",
+        dashes,
+        "\n"
+      ))
+    }
 
     # check based on the month
     # make this a character string not a list
@@ -57,7 +66,9 @@ get_raster_list_n_month = function(paths_to_data, day, days_back, data_path){
       # right path must be a character string, otherwise it would take much longer
       raster_brick = raster::brick(right_path)
       n_raster = dim(raster_brick)[[3]]
-      print(paste0("read ", n_raster, " rasters into brick for ", m, " ", y, " ('", right_path_abb, "')"))
+      if(!quiet){
+        print(paste0("read ", n_raster, " rasters into brick for ", m, " ", y, " ('", right_path_abb, "')"))
+      }
     }
 
     # look up one fron to see if the month of the next one is the same as the current one
@@ -71,11 +82,15 @@ get_raster_list_n_month = function(paths_to_data, day, days_back, data_path){
         changed = TRUE
       }
     } else{
-      message("Reached last day")
+      if (!quiet) {
+        message("Reached last day")
+      }
     }
 
     # print message for raster extraction
-    message(paste0("   Getting the raster for date: "), c(y,m,d))
+    if (!quiet) {
+      message(paste0("   Getting the raster for date: "), c(y, m, d))
+    }
 
     # extract the date
     ras = raster_brick[[idx]]

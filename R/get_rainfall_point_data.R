@@ -9,7 +9,6 @@
 #' and space with a rainfall-event. if NLE == TRUE, all dates without any event will be omitted
 #' @param id_landslide The name of a column that uniquely identifies each landslide
 #'
-#' @importFrom data.table rbindlist
 #' @importFrom dplyr filter group_by across
 #' @importFrom future plan
 #' @importFrom doSNOW registerDoSNOW

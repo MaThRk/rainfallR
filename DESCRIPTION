@@ -25,6 +25,7 @@ Imports:
     data.table,
     exactextractr,
     future,
+    future.apply,
     here,
     foreach,
     parallel,

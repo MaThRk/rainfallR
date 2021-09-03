@@ -111,7 +111,7 @@ ex_rainfall = function(data_path="\\\\projectdata.eurac.edu/projects/Proslide/PR
     cat("Read data from at least two month for", days_back + 1, "days", "\n\n")
 
     # get the rasters from different months
-    raster_list = get_raster_list_n_month(paths_to_data, day, days_back, data_path = data_path)
+    raster_list = get_raster_list_n_month(paths_to_data, day, days_back)
   }
 
 
