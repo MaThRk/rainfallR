@@ -182,7 +182,7 @@ get_ant_rainfall = function(
   }
 
   # bind them all together
-  ret = rbindlist(list_of_vars, idcol = "date")
+  ret = data.table::rbindlist(list_of_vars, idcol = "date")
   ret[[d]] = as.Date(ret[[d]], format = "%Y%m%d")
 
   return(ret)
