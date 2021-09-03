@@ -58,7 +58,7 @@ get_ant_rainfall = function(
 
     future::plan(multisession)
 
-    LIST_OF_VARS = future.apply::future_lapply(dates_for_vars, function(x) {
+    list_of_vars = future.apply::future_lapply(dates_for_vars, function(x) {
 
       cat(paste0("Getting the variables for: ", x, " ...\n"))
 
