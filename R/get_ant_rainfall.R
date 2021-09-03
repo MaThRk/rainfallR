@@ -54,11 +54,11 @@ get_ant_rainfall = function(
   max_var = max(vars)
 
   # for each day get the rainfall of max days back
-  if (parallel) {
+  if (parallel) {p
 
     future::plan(multisession)
 
-    list_of_vars = future.apply::future_lapply(dates_for_vars, function(x) {
+    LIST_OF_VARS = future.apply::future_lapply(dates_for_vars, function(x) {
 
       cat(paste0("Getting the variables for: ", x, " ...\n"))
 
