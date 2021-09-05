@@ -1,0 +1,76 @@
+---
+title: "Get antecedent rainfall"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Extract Antecedent rainfall}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(rainfallR)
+library(tidyverse)
+```
+
+
+
+```{r}
+path = "~/Desktop/dopt_fin.Rda"
+load(path) # will create a variable called dopt
+
+dopt[["eidee"]] = 1:nrow(dopt)
+
+# find year with most date inforamtion
+dopt %>%
+  filter(!is.na(date)) %>%
+  mutate(
+    y = lubridate::year(date)
+  ) %>%
+  group_by(y) %>%
+  summarise(n = n()) %>%
+  arrange(desc(n))
+
+dopt=st_as_sf(dopt, coords=c("x", "y"), crs=32632)
+```
+
+```{r nopar, warning=F, message=F}
+start = Sys.time()
+res = get_ant_rainfall(
+  dopt,
+  id = "eidee",
+  date_landslide = "date",
+  vars = c(1,2,3),
+  parallel = F,
+  dates_for_vars = seq(as.Date("2020-01-01"), as.Date("2020-01-03"), by="day")
+)
+end = Sys.time()
+took1 = (end - start) / 60 # minutes
+```
+
+```{r}
+start = Sys.time()
+res = get_ant_rainfall(
+  dopt,
+  id = "eidee",
+  date_landslide = "date",
+  vars = c(1,2,3),
+  parallel = T,
+  dates_for_vars = seq(as.Date("2020-01-01"), as.Date("2020-01-05"), by="day")
+)
+end = Sys.time()
+took2 = (end - start) / 60 # minutes
+```
+
+
+```{r}
+data.frame("no_parrallel" = took1,
+           "parrallel" = took2)
+```
+

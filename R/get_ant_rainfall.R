@@ -59,7 +59,6 @@ get_ant_rainfall = function(
     future::plan(multisession)
 
     list_of_vars = future.apply::future_lapply(dates_for_vars, function(x) {
-
       cat(paste0("Getting the variables for: ", x, " ...\n"))
 
       # get the paths to the data
@@ -86,7 +85,7 @@ get_ant_rainfall = function(
       idx_ids = grep(id, names(res_df))
       idx_ids_remove = idx_ids[2:length(idx_ids)]
       idx_id_rename = idx_ids[[1]]
-      res_df_clean = res_df[,-idx_ids_remove] %>%
+      res_df_clean = res_df[, -idx_ids_remove] %>%
         as_tibble() %>% # why is the tibble important here??
         rename("{id}" := {
           {
@@ -109,8 +108,22 @@ get_ant_rainfall = function(
           summarise("p_{v}" := sum(rain[1:v]))
       })
 
-    })
-  } else{
+      # bind them together
+      res_vars_df = suppressMessages(bind_cols(res_vars))
+
+      idx_ids = grep(id, names(res_vars_df))
+      idx_ids_remove = idx_ids[2:length(idx_ids)]
+      idx_id_rename = idx_ids[[1]]
+      res_vars_clean = res_vars_df[,-idx_ids_remove] %>%
+        as_tibble() %>% # why is the tibble important here??
+        rename("{id}" := {
+          {
+            idx_id_rename
+          }
+        })
+
+
+    })} else{
     list_of_vars = lapply(dates_for_vars, function(x) {
       cat(paste0("Getting the variables for: ", x, " ...\n"))
 
@@ -138,7 +151,7 @@ get_ant_rainfall = function(
       idx_ids = grep(id, names(res_df))
       idx_ids_remove = idx_ids[2:length(idx_ids)]
       idx_id_rename = idx_ids[[1]]
-      res_df_clean = res_df[,-idx_ids_remove] %>%
+      res_df_clean = res_df[, -idx_ids_remove] %>%
         as_tibble() %>% # why is the tibble important here??
         rename("{id}" := {
           {
@@ -161,31 +174,32 @@ get_ant_rainfall = function(
           summarise("p_{v}" := sum(rain[1:v]))
       })
 
-    }
-    )
+      # bind them together
+      res_vars_df = suppressMessages(bind_cols(res_vars))
 
+      idx_ids = grep(id, names(res_vars_df))
+      idx_ids_remove = idx_ids[2:length(idx_ids)]
+      idx_id_rename = idx_ids[[1]]
+      res_vars_clean = res_vars_df[,-idx_ids_remove] %>%
+        as_tibble() %>% # why is the tibble important here??
+        rename("{id}" := {
+          {
+            idx_id_rename
+          }
+        })
 
-    # bind them together
-    res_vars_df = suppressMessages(bind_cols(res_vars))
-
-    idx_ids = grep(id, names(res_vars_df))
-    idx_ids_remove = idx_ids[2:length(idx_ids)]
-    idx_id_rename = idx_ids[[1]]
-    res_vars_clean = res_vars_df[, -idx_ids_remove] %>%
-      as_tibble() %>% # why is the tibble important here??
-      rename("{id}" := {
-        {
-          idx_id_rename
-        }
-      })
-
+    })
   }
 
-  # bind them all together
-  ret = data.table::rbindlist(list_of_vars, idcol = "date")
-  ret[[d]] = as.Date(ret[[d]], format = "%Y%m%d")
 
-  return(ret)
+
+    # bind them all together
+    ret = data.table::rbindlist(list_of_vars, idcol = "date_var")
+    ret[["date_var"]] = as.Date(ret[["date_var"]], format = "%Y%m%d")
+
+    # bind them to the old data
+    # all = left_join(ret, data, by=id)
+    return(ret)
 }
 
 
