@@ -17,6 +17,9 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(rainfallR)
 library(tidyverse)
+library(sf)
+library(glue)
+library(future)
 ```
 
 
@@ -40,7 +43,7 @@ dopt %>%
 dopt=st_as_sf(dopt, coords=c("x", "y"), crs=32632)
 ```
 
-```{r nopar, warning=F, message=F}
+```{r nopar, warning=F, message=F, results='hide'}
 start = Sys.time()
 res = get_ant_rainfall(
   dopt,
@@ -48,13 +51,13 @@ res = get_ant_rainfall(
   date_landslide = "date",
   vars = c(1,2,3),
   parallel = F,
-  dates_for_vars = seq(as.Date("2020-01-01"), as.Date("2020-01-03"), by="day")
+  dates_for_vars = seq(as.Date("2008-01-01"), as.Date("2008-12-31"), by="day")
 )
 end = Sys.time()
-took1 = (end - start) / 60 # minutes
+took1 = (end - start) 
 ```
 
-```{r}
+```{r, message=F, warning=F, results='hide'}
 start = Sys.time()
 res = get_ant_rainfall(
   dopt,
@@ -62,10 +65,10 @@ res = get_ant_rainfall(
   date_landslide = "date",
   vars = c(1,2,3),
   parallel = T,
-  dates_for_vars = seq(as.Date("2020-01-01"), as.Date("2020-01-05"), by="day")
+  dates_for_vars = seq(as.Date("2008-01-01"), as.Date("2008-12-31"), by="day")
 )
 end = Sys.time()
-took2 = (end - start) / 60 # minutes
+took2 = (end - start)
 ```
 
 
@@ -73,4 +76,44 @@ took2 = (end - start) / 60 # minutes
 data.frame("no_parrallel" = took1,
            "parrallel" = took2)
 ```
+
+
+```{r}
+
+dopt_no_sf = dopt %>% st_drop_geometry()
+dat = merge(res, dopt_no_sf) %>% 
+  select(date_var, eidee, matches("p_.*"), PIFF_ID, date) 
+
+# filters those dates where the date of the start of the variable extraction period
+# is equal to the date of the landslide
+dat %>% 
+  mutate(
+    trigger = case_when(date_var == date ~ TRUE,
+                        TRUE ~ FALSE)
+  ) %>% 
+  pivot_longer(cols = matches("p_.*"), names_to="var", values_to="vals") -> df
+
+df %>% 
+  group_by(var, trigger) %>% 
+  summarise(
+    n = n()
+  ) -> df_ann
+
+ggplot(df) +
+  geom_boxplot(aes(x = vals, y = var, fill = trigger)) +
+  geom_label(
+    data = df_ann,
+    aes(
+      x =  max(df$vals - 10),
+      y = var,
+      # group = var,
+      fill = trigger,
+      label = paste0("n: ", n)
+    ),
+    position = ggstance::position_dodgev(height=.75)
+  )
+
+```
+
+
 

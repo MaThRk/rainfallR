@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Get the summed yearly rainfall — aggregate_rainfall • rainfallR</title>
+<title>Extract antecedent rainfall variables — get_ant_rainfall • rainfallR</title>
 
 
 <!-- jquery -->
@@ -39,9 +39,8 @@
 
 
 
-<meta property="og:title" content="Get the summed yearly rainfall — aggregate_rainfall" />
-<meta property="og:description" content="This function takes either a polygon, or nothing (than it's pixel based) and calculates the sum of rainfall for each polygon
-(each pixel) for each year" />
+<meta property="og:title" content="Extract antecedent rainfall variables — get_ant_rainfall" />
+<meta property="og:description" content="Extract antecedent rainfall variables" />
 
 
 
@@ -131,44 +130,32 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Get the summed yearly rainfall</h1>
+    <h1>Extract antecedent rainfall variables</h1>
     
-    <div class="hidden name"><code>aggregate_rainfall.Rd</code></div>
+    <div class="hidden name"><code>get_ant_rainfall.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This function takes either a polygon, or nothing (than it's pixel based) and calculates the sum of rainfall for each polygon
-(each pixel) for each year</p>
+    <p>Extract antecedent rainfall variables</p>
     </div>
 
-    <pre class="usage"><span class='fu'>aggregate_rainfall</span><span class='op'>(</span>
-  path_ncdf <span class='op'>=</span> <span class='st'>"/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/"</span>,
-  polygon <span class='op'>=</span> <span class='cn'>NULL</span>,
-  years <span class='op'>=</span> <span class='fl'>1980</span><span class='op'>:</span><span class='fl'>2018</span>,
-  by <span class='op'>=</span> <span class='st'>"year"</span>,
-  daily_fun <span class='op'>=</span> <span class='cn'>NULL</span>,
-  monthly_fun <span class='op'>=</span> <span class='cn'>NULL</span>,
-  return.list <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  aggre_fun <span class='op'>=</span> <span class='st'>"mean"</span>
+    <pre class="usage"><span class='fu'>get_ant_rainfall</span><span class='op'>(</span>
+  data <span class='op'>=</span> <span class='cn'>NULL</span>,
+  id <span class='op'>=</span> <span class='st'>"eidee"</span>,
+  date_landslide <span class='op'>=</span> <span class='st'>"date"</span>,
+  vars <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span>, <span class='fl'>3</span>, <span class='fl'>5</span><span class='op'>)</span>,
+  dates_for_vars <span class='op'>=</span> <span class='cn'>NULL</span>,
+  parallel <span class='op'>=</span> <span class='cn'>T</span>,
+  rainfall_path <span class='op'>=</span> <span class='st'>"/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/"</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>return.list</th>
-      <td><p>if <code>True</code> it will return a list of stars oject. If <code>false</code> will return one stars object (if <code>by</code> = <code>year</code>),
-and a list of stars-objects if <code>by = 'month'</code></p></td>
-    </tr>
-    <tr>
-      <th>aggre_fun</th>
-      <td><p>If you pass a polygon, the values need to be aggregated somehow</p></td>
-    </tr>
-    <tr>
-      <th>fun</th>
-      <td><p>How to combine the individual values. E.G. the mean for each pixel for the years 1980, 1981 and 1982 requires the
-the fun to be "mean". The maximum value for each month in the years 80,81,82 requires the <code>by</code>-parameter to be <code>month</code>
-and the <code>fun</code>-parameter to be <code>max</code></p></td>
+      <th>date_landslide</th>
+      <td><p>The name of the column with date information about the landslides.
+Cells can either be NA or of class Date</p></td>
     </tr>
     </table>
 
