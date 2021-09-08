@@ -125,13 +125,14 @@ get_ant_rainfall = function(
 
     })} else{
     list_of_vars = lapply(dates_for_vars, function(x) {
+
       cat(paste0("Getting the variables for: ", x, " ...\n"))
 
       # get the paths to the data
-      paths_to_data = get_nc_paths(rainfall_path, x, max_var)
+      paths_to_data = rainfallR::get_nc_paths(rainfall_path, x, max_var)
 
       # get the raster for the days back
-      ras = suppressWarnings(get_raster_list_n_month(paths_to_data, x, max_var, quiet =
+      ras = suppressWarnings(rainfallR::get_raster_list_n_month(paths_to_data, x, max_var, quiet =
                                                        T))
 
       # extract the the rainfall for each point for eachd day
@@ -187,7 +188,6 @@ get_ant_rainfall = function(
             idx_id_rename
           }
         })
-
     })
   }
 
