@@ -27,7 +27,7 @@ get_ant_rainfall = function(
     stop("The name of the date column doesnt seem to exist")
   } else{
     # get the index
-    idx_date_col = which(grepl(date_landslide, col_names))
+    idx_date_col = which(grepl(paste0("\\b" ,date_landslide, "\\b"), col_names))
     col = st_drop_geometry(data[, idx_date_col])
     vals = col[, 1, drop = T]
     # vals = vals[!is.na(vals)]

@@ -4,7 +4,7 @@
 \alias{iffi10_same_day}
 \title{What slides happened on the same day?}
 \usage{
-iffi10_same_day(iffi10)
+iffi10_same_day(iffi10, date_col = "date")
 }
 \arguments{
 \item{iffi10}{An object of type \code{sf} which has a column called date!!}

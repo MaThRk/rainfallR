@@ -11,17 +11,24 @@
 #'
 #' @export
 
-iffi10_same_day = function(iffi10){
+iffi10_same_day = function(iffi10, date_col = "date"){
 
   # make sure there are only records with dates
   iffi10 = iffi10 %>% dplyr::filter(date_info == "day")
 
-  if(! any(grepl("date", names(iffi10)))){
-    stop("There is no column called `date` in your object")
+  # if(! any(grepl("date", names(iffi10)))){
+  #   stop("There is no column called `date` in your object")
+  # }
+
+  idx_date =  grep(paste0("\\b", date_col, "\\b"), names(iffi10))
+  if(!length(idx_date) == 1){
+    stop("The name of the date column must be present and unique")
   }
 
+
+
   # the slide dates for all slides
-  dates_of_slides = iffi10$date
+  dates_of_slides = iffi10[[date_col]]
 
   # turn them into a character
   dates_of_slides = as.character(dates_of_slides) %>% str_replace_all(., "-", "")
@@ -42,7 +49,7 @@ iffi10_same_day = function(iffi10){
     # get the slide itself
     slide = iffi10[i,]
 
-    # put it into the list
+  # put it into the list
     slides_same_day[[date_of_slide]] = rbind(slides_same_day[[date_of_slide]], slide)
 
   }
