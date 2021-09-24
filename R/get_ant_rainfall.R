@@ -14,6 +14,7 @@ get_ant_rainfall = function(
                             vars = c(0, 1, 3, 5),
                             dates_for_vars = NULL,
                             parallel = T,
+                            workers = 2,
                             rainfall_path = "/mnt/CEPH_PROJECTS/Proslide/PREC_GRIDS_updated/") {
 
   # check if the object is an object of type sf
@@ -56,7 +57,7 @@ get_ant_rainfall = function(
   # for each day get the rainfall of max days back
   if (parallel) {
 
-    future::plan(multisession)
+    future::plan(multisession, workers = workers)
 
     list_of_vars = future.apply::future_lapply(dates_for_vars, function(x) {
       cat(paste0("Getting the variables for: ", x, " ...\n"))
@@ -136,14 +137,15 @@ get_ant_rainfall = function(
                                                        T))
 
       # extract the the rainfall for each point for eachd day
+      gc()
       res = lapply(ras, function(y) {
         # this extract the rainfall value
         vals = raster::extract(y, data, sp = T)
         vals = as.data.frame(vals)
         idx = grep(glue("{id}|X.*"), names(vals))
         vals_df = vals[, idx]
-
       })
+      gc()
 
       # get the variables for each entry
       res_df = suppressMessages(bind_cols(res))
