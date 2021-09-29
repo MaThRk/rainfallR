@@ -27,6 +27,8 @@
 /home/rkohrs@eurac.edu/eurac/R/rainfallR/filter_slides/filter_slides_3_15.R="D100AC65"
 /home/rkohrs@eurac.edu/eurac/R/rainfallR/local/last_event_Dist.R="AC9D20BC"
 /home/rkohrs@eurac.edu/eurac/R/rainfallR/local/stefan_test.R="22AA28B2"
+/home/rkohrs@eurac.edu/eurac/R/rainfallR/local/stefan_test_per_year.R="1C16AB70"
+/home/rkohrs@eurac.edu/eurac/R/rainfallR/local/test_mem_usage/test_get_ant_rainfall.R="8DE8110F"
 /home/rkohrs@eurac.edu/eurac/R/rainfallR/manually_verify_data/verify_rainfall_from_package.R="0107466D"
 /home/rkohrs@eurac.edu/eurac/R/rainfallR/vignettes/ExamplePolygonExtraction.Rmd="603AFDBB"
 /home/rkohrs@eurac.edu/eurac/R/rainfallR/vignettes/ant_rainfall.Rmd="5E0F4129"

@@ -5,6 +5,8 @@
 #' @importFrom dplyr bind_cols
 #' @param date_landslide The name of the column with date information about the landslides.
 #'  Cells can either be NA or of class Date
+#'  @param vars 0 -> only rainfall on date of landslide; 1 -> rainfall on day and day before (so 2 in total); 2 ->
+#'  on day of landslide and two days before (so 3 in total)
 
 #' @export
 get_ant_rainfall = function(
@@ -137,7 +139,6 @@ get_ant_rainfall = function(
                                                        T))
 
       # extract the the rainfall for each point for eachd day
-      gc()
       res = lapply(ras, function(y) {
         # this extract the rainfall value
         vals = raster::extract(y, data, sp = T)
@@ -145,7 +146,6 @@ get_ant_rainfall = function(
         idx = grep(glue("{id}|X.*"), names(vals))
         vals_df = vals[, idx]
       })
-      gc()
 
       # get the variables for each entry
       res_df = suppressMessages(bind_cols(res))
